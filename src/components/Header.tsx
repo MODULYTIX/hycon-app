@@ -1,3 +1,5 @@
+import HyconLogo from '../assets/images/logo_hycon.webp';
+
 import { useState } from 'react';
 
 export default function Header() {
@@ -17,9 +19,16 @@ export default function Header() {
     <div className="m-0 flex flex-col w-full">
       <div className="sticky top-0 z-50 flex justify-between bg-primary h-[84px] items-center px-[40px]">
         {/* logo aun no definido */}
-        <div className="h-8 w-24 bg-white/30 rounded" />
-
-        <button className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[20px] self-center text-white font-medium">
+        <div className='outline-2 outline-white'>
+          <img
+            src={HyconLogo}
+            alt=""
+            className=" p-2  w-30 "
+            draggable="false"
+          />
+        </div>
+        {/* Puede ser poner esto debajo animate-bounce */}
+        <button className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[20px] self-center text-white font-medium ">
           Contactanos
         </button>
       </div>
@@ -33,8 +42,7 @@ export default function Header() {
                 onClick={() => setActive(item)}
                 className={`cursor-pointer transition-colors ${
                   active === item ? 'text-primary' : 'text-g-80'
-                }`}
-              >
+                }`}>
                 {item}
               </li>
             ))}

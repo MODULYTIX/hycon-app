@@ -6,7 +6,7 @@ import QS from '../assets/images/QS.png';
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col ">
       <Header />
 
       <main className="flex-1">
@@ -16,7 +16,7 @@ export default function HomePage() {
 
         <section
           id="quienes_somos"
-          className="h-screen w-full flex items-center justify-center border border-black">
+          className="h-screen w-full flex items-center justify-center">
           {/* Padre: horizontal + padding interno 200px */}
           <div className="w-full max-w-[1520px] flex items-center justify-between gap-10">
             {/* Columna IZQUIERDA: título + texto (vertical) */}
