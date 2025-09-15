@@ -1,1 +1,65 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+
+@theme {
+  /* colores globales */
+  --color-primary: #0057a3;
+  --color-secondary: #ff9e1b;
+
+  /* colores grises */
+  --color-g-5: #fafafa;
+  --color-g-10: #f5f5f5;
+  --color-g-20: #e5e5e5;
+  --color-g-30: #d4d4d4;
+  --color-g-40: #a3a3a3;
+  --color-g-50: #737373;
+  --color-g-60: #525252;
+  --color-g-70: #404040;
+  --color-g-80: #262626;
+  --color-g-90: #171717;
+
+  /* Colores BC */
+  --color-bc-5: #f2f7fa;
+  --color-bc-10: #e6eef6;
+  --color-bc-20: #ccdded;
+  --color-bc-30: #b2cde3;
+  --color-bc-40: #99bcda;
+  --color-bc-50: #80abd1;
+  --color-bc-60: #669ac8;
+  --color-bc-70: #4d89bf;
+  --color-bc-80: #3379b5;
+  --color-bc-90: #1968ac;
+
+  /* Colores Yellow */
+  --color-y-5: #FEFCE8;
+  --color-y-10: #FEF9C3;
+  --color-y-20: #FEF08A;
+  --color-y-30: #FDE047;
+  --color-y-40: #FACC15;
+  --color-y-50: #EAB308;
+  --color-y-60: #CA8A04;
+  --color-y-70: #A16207;
+  --color-y-80: #854D0E;
+  --color-y-90: #713F12;
+
+}
+
+
+
+/* Por ahora */
+/* Aplica a todo el documento */
+html, body {
+  height: 100%;
+  margin: 0;
+
+  /* Firefox */
+  scrollbar-width: none;
+
+  /* IE y Edge antiguos */
+  -ms-overflow-style: none;
+}
+
+/* Chrome, Safari y Edge Chromium */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
