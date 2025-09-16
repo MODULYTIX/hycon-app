@@ -2,6 +2,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import QuienesSomos from '../components/QuienesSomos';
+import Servicios from '../components/Servicios';
 
 export default function HomePage() {
   return (
@@ -21,7 +22,7 @@ export default function HomePage() {
         <section
           id="servicios"
           className="h-screen w-full flex items-center justify-center">
-          <h2 className="text-3xl font-bold">Servicios</h2>
+          <Servicios />
         </section>
 
         <section
