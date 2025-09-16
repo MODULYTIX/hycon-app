@@ -41,6 +41,20 @@
   --color-y-80: #854D0E;
   --color-y-90: #713F12;
 
+
+  /* Fonts */
+  --font-BostNoBillsColombo: BostNoBillsColombo;
+}
+
+
+/* Fuentes */
+
+@font-face {
+  font-family: BostNoBillsColombo;
+  font-style: extrabold;
+  font-weight: 800; 
+  font-display: swap;
+  src: url("./assets/fonts/PostNoBillsColombo-ExtraBold.ttf") format("truetype");
 }
 
 

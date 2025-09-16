@@ -47,6 +47,7 @@ export default function HomePage() {
               src={QS}
               alt="Quiénes somos"
               className="w-[540px] h-[600px] object-cover rounded-[22px]"
+              draggable='false'
             />
           </div>
         </section>
