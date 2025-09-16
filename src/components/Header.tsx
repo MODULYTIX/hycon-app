@@ -16,10 +16,10 @@ export default function Header() {
   ];
 
   return (
-    <div className="m-0 flex flex-col w-full">
+    <div className=" flex flex-col w-full">
       <div className="sticky top-0 z-50 flex justify-between bg-primary h-[84px] items-center px-[40px]">
         {/* logo aun no definido */}
-        <div className='outline-2 outline-white'>
+        <div className="outline-2 outline-white">
           <img
             src={HyconLogo}
             alt=""

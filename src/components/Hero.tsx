@@ -3,11 +3,11 @@ import HeroPersona from '../assets/images/hero-persona.webp';
 
 export default function Hero() {
   return (
-    <div className="relative h-full w-full">
+    <div className=" h-full w-full">
       <img
         src={HeroBackground}
         alt="Hero Background"
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 w-full object-cover h-screen"
         draggable={false}
       />
       <div className="absolute inset-0 bg-black/40" />
@@ -25,12 +25,12 @@ export default function Hero() {
             Contactanos
           </button>
         </div>
-        <div>
+        <div className='max-w-[400px]'>
           <img
             src={HeroPersona}
             alt="Persona"
             draggable={false}
-            className="overflow-hidden object-cover"
+            className=" w-full h-auto object-contain"
           />
         </div>
       </div>
