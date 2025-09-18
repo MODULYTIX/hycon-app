@@ -5,9 +5,10 @@ import Header from './Header';
 export default function Hero() {
   return (
     <div className="relative w-full min-h-screen">
-      <div>
+      <div className="relative z-20">
         <Header />
       </div>
+
       <img
         src={HeroBackground}
         alt="Hero Background"
@@ -15,9 +16,12 @@ export default function Hero() {
         draggable={false}
       />
       <div className="absolute inset-0 bg-black/40" />
-      <div className="relative z-10 flex items-center justify-around min-h-screen text-white " >
+
+      <div className="relative z-10 flex items-center justify-around min-h-screen text-white">
         <div className="w-[554px] space-y-4">
-          <h1 className="text-white text-8xl font-BostNoBillsColombo">HYCON AREQUIPA</h1>
+          <h1 className="text-white text-8xl font-BostNoBillsColombo">
+            HYCON AREQUIPA
+          </h1>
           <p className="text-white text-justify">
             Brindamos servicio Courier y contamos con una plataforma web y
             aplicativo móvil que permitirán a nuestros repartidores actualizar
@@ -29,6 +33,7 @@ export default function Hero() {
             Contactanos
           </button>
         </div>
+
         <div className="max-w-[400px]">
           <img
             src={HeroPersona}

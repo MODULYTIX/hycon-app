@@ -29,13 +29,12 @@ export default function Header() {
     if (!id) return;
     const el = document.getElementById(id);
     if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - 100;
-    window.scrollTo({ top: y, behavior: 'smooth' });
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
     <div className="flex flex-col w-full">
-      <div className=" z-10 flex justify-between bg-primary h-[64px] items-center px-[40px]">
+      <div className="flex justify-between bg-primary h-[64px] items-center px-[40px]">
         <div className="outline-2 outline-white">
           <img src={HyconLogo} alt="" className="p-2 w-22" draggable="false" />
         </div>
@@ -44,12 +43,13 @@ export default function Header() {
             setActive('Contactanos');
             goTo('Contactanos');
           }}
-          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium">
+          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium"
+        >
           Contactanos
         </button>
       </div>
 
-      <div className="w-fit z-10">
+      <div className="w-fit">
         <nav className="bg-g-10 text-[17px] px-3 py-2 rounded-br-2xl font-medium">
           <ul className="flex gap-4">
             {items.map((item) => (
@@ -61,7 +61,8 @@ export default function Header() {
                 }}
                 className={`cursor-pointer transition-colors ${
                   active === item ? 'text-primary' : 'text-g-80'
-                }`}>
+                }`}
+              >
                 {item}
               </li>
             ))}
