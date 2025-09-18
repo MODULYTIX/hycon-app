@@ -2,6 +2,7 @@ import Footer from '../components/Footer';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import PlataformaAsociada from '../components/PlataformaAsociada';
+import PorqueElegirnos from '../components/PorqueElegirnos';
 import QuienesSomos from '../components/QuienesSomos';
 import Servicios from '../components/Servicios';
 
@@ -34,8 +35,8 @@ export default function HomePage() {
 
         <section
           id="porque_elegirnos"
-          className="h-screen w-full flex items-center justify-center">
-          <h2 className="text-3xl font-bold">Porque Elegirnos</h2>
+          className="h-full w-full flex items-center justify-center">
+          <PorqueElegirnos />
         </section>
 
         <section
