@@ -1,6 +1,7 @@
 import Footer from '../components/Footer';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
+import PlataformaAsociada from '../components/PlataformaAsociada';
 import QuienesSomos from '../components/QuienesSomos';
 import Servicios from '../components/Servicios';
 
@@ -27,8 +28,8 @@ export default function HomePage() {
 
         <section
           id="plataforma_asociada"
-          className="h-screen w-full flex items-center justify-center">
-          <h2 className="text-3xl font-bold">Plataforma Asociada</h2>
+          className="h-screen w-screen flex items-center justify-center">
+          <PlataformaAsociada />
         </section>
 
         <section
