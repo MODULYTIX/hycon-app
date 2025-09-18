@@ -19,7 +19,7 @@ export default function Header() {
     'Nuestros Servicios': 'servicios',
     'Plataforma Asociada': 'plataforma_asociada',
     '¿Por qué Elegimos?': 'porque_elegirnos',
-    'Nuestros Clientes': 'clientes',
+    'Nuestros Clientes': 'NuestrosClientes',
     Testimonios: 'testimonios',
     Contactanos: 'contactanos',
   };
@@ -43,8 +43,7 @@ export default function Header() {
             setActive('Contactanos');
             goTo('Contactanos');
           }}
-          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium"
-        >
+          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium">
           Contactanos
         </button>
       </div>
@@ -61,8 +60,7 @@ export default function Header() {
                 }}
                 className={`cursor-pointer transition-colors ${
                   active === item ? 'text-primary' : 'text-g-80'
-                }`}
-              >
+                }`}>
                 {item}
               </li>
             ))}

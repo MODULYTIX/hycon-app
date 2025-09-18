@@ -1,5 +1,7 @@
+import Alcance from '../components/ALcance';
 import Footer from '../components/Footer';
 import Hero from '../components/Hero';
+import NuestrosClientes from '../components/NuestrosClientes';
 import PlataformaAsociada from '../components/PlataformaAsociada';
 import PorqueElegirnos from '../components/PorqueElegirnos';
 import QuienesSomos from '../components/QuienesSomos';
@@ -45,7 +47,14 @@ export default function HomePage() {
           id="Alcance"
           className="min-h-screen w-screen flex items-center justify-center"
         >
-          <h2 className="text-3xl font-bold">Alcance</h2>
+          <Alcance />
+        </section>
+
+        <section
+          id="NuestrosClientes"
+          className=" w-screen flex items-center justify-center bg-g-10"
+        >
+          <NuestrosClientes />
         </section>
 
         <section
