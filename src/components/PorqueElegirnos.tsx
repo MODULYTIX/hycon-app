@@ -41,7 +41,7 @@ const cards = [
 
 export default function PorqueElegirnos() {
   return (
-    <div className="relative h-auto w-[1520px] mt-20">
+    <div className="relative w-full max-w-[1340px]  mx-auto mt-20 px-6 md:px-12">
       <header>
         <Tittle>¿Por qué elegirnos?</Tittle>
       </header>
@@ -50,20 +50,22 @@ export default function PorqueElegirnos() {
         {cards.map((c, idx) => (
           <div
             key={idx}
-            className={`flex items-center   ${
-              idx % 2 === 1 ? 'flex-row-reverse' : ''
-            }`}>
+            className={`flex flex-col md:flex-row items-center ${
+              idx % 2 === 1 ? 'md:flex-row-reverse' : ''
+            }`}
+          >
             <img
               src={c.image}
               alt={c.title}
-              className="w-[480px] h-[220px] object-cover rounded-xl"
+              className="w-full md:w-[480px] h-auto md:h-[220px] object-cover rounded-xl"
             />
             <div
-              className={`bg-g-10 p-8 w-[1040px] h-[140px] space-y-2 text-justify ${
+              className={`bg-g-10 p-6 md:p-8 w-full md:max-w-[1040px] min-h-[140px] space-y-2 text-justify flex flex-col justify-center ${
                 idx % 2 === 1 ? 'rounded-l-lg' : 'rounded-r-lg'
-              }`}>
-              <p className="text-primary font-bold text-[24px]">{c.title}</p>
-              <p className="text-g-50 text-[19px] w-[940px]">{c.description}</p>
+              }`}
+            >
+              <p className="text-primary font-bold text-[20px] md:text-[22px]">{c.title}</p>
+              <p className="text-g-50 text-[17px] md:text-[17px]">{c.description}</p>
             </div>
           </div>
         ))}

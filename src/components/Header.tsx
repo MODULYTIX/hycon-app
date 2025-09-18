@@ -1,5 +1,4 @@
 import HyconLogo from '../assets/images/logo_hycon.webp';
-
 import { useState } from 'react';
 
 export default function Header() {
@@ -15,31 +14,51 @@ export default function Header() {
     'Contactanos',
   ];
 
+  const idMap: Record<string, string> = {
+    'Quienes Somos': 'quienes_somos',
+    'Nuestros Servicios': 'servicios',
+    'Plataforma Asociada': 'plataforma_asociada',
+    '¿Por qué Elegimos?': 'porque_elegirnos',
+    'Nuestros Clientes': 'clientes',
+    Testimonios: 'testimonios',
+    Contactanos: 'contactanos',
+  };
+
+  const goTo = (key: string) => {
+    const id = idMap[key];
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 100;
+    window.scrollTo({ top: y, behavior: 'smooth' });
+  };
+
   return (
-    <div className=" flex flex-col w-full">
-      <div className="sticky top-0 z-50 flex justify-between bg-primary h-[84px] items-center px-[40px]">
-        {/* logo aun no definido */}
+    <div className="flex flex-col w-full">
+      <div className=" z-10 flex justify-between bg-primary h-[64px] items-center px-[40px]">
         <div className="outline-2 outline-white">
-          <img
-            src={HyconLogo}
-            alt=""
-            className=" p-2  w-30 "
-            draggable="false"
-          />
+          <img src={HyconLogo} alt="" className="p-2 w-22" draggable="false" />
         </div>
-        {/* Puede ser poner esto debajo animate-bounce */}
-        <button className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[20px] self-center text-white font-medium ">
+        <button
+          onClick={() => {
+            setActive('Contactanos');
+            goTo('Contactanos');
+          }}
+          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium">
           Contactanos
         </button>
       </div>
 
       <div className="w-fit z-10">
-        <nav className="bg-g-10 text-[20px] px-3 py-2 rounded-br-2xl font-medium">
+        <nav className="bg-g-10 text-[17px] px-3 py-2 rounded-br-2xl font-medium">
           <ul className="flex gap-4">
             {items.map((item) => (
               <li
                 key={item}
-                onClick={() => setActive(item)}
+                onClick={() => {
+                  setActive(item);
+                  goTo(item);
+                }}
                 className={`cursor-pointer transition-colors ${
                   active === item ? 'text-primary' : 'text-g-80'
                 }`}>
