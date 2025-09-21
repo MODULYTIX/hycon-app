@@ -1,4 +1,5 @@
 import Alcance from '../components/ALcance';
+import Contactanos from '../components/Contactanos';
 import Footer from '../components/Footer';
 import Hero from '../components/Hero';
 import NuestrosClientes from '../components/NuestrosClientes';
@@ -59,9 +60,9 @@ export default function HomePage() {
 
         <section
           id="contactanos"
-          className="min-h-screen w-screen flex items-center justify-center"
+          className=" w-screen flex items-center justify-center"
         >
-          <h2 className="text-3xl font-bold">Contactanos</h2>
+          <Contactanos />
         </section>
       </main>
 
