@@ -118,7 +118,7 @@ export default function Contactanos() {
           <img
             src={ContactanosPeople}
             alt="Contactanos"
-            className="w-[700px] h-[565px] object-cover rounded-2xl"
+            className="w-[700px] h-[568px] object-cover rounded-2xl"
           />
         </div>
         <div className="w-full max-w-lg bg-white rounded-2xl">
