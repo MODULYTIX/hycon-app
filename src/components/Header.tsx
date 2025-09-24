@@ -6,11 +6,17 @@ export default function Header() {
 
   const items = [
     'Quienes Somos',
+    '|',
     'Nuestros Servicios',
+    '|',
     'Plataforma Asociada',
+    '|',
     '¿Por qué Elegimos?',
+    '|',
     'Nuestros Clientes',
+    '|',
     'Testimonios',
+    '|',
     'Contactanos',
   ];
 
@@ -34,7 +40,7 @@ export default function Header() {
 
   return (
     <div className="flex flex-col w-full">
-      <div className="flex justify-between bg-primary h-[64px] items-center px-[40px]">
+      <div className="flex justify-between bg-primary h-[74px] items-center px-[40px]">
         <div className="outline-2 outline-white">
           <img src={HyconLogo} alt="" className="p-2 w-22" draggable="false" />
         </div>
@@ -43,24 +49,24 @@ export default function Header() {
             setActive('Contactanos');
             goTo('Contactanos');
           }}
-          className="bg-g-70 px-3 py-2 rounded-xl h-fit text-[16px] self-center text-white font-medium">
+          className="bg-g-70 px-6 py-2 rounded-full h-fit text-[16px] self-center text-white font-medium">
           Contactanos
         </button>
       </div>
 
       <div className="w-fit">
-        <nav className="bg-g-10 text-[17px] px-3 py-2 rounded-br-2xl font-medium">
-          <ul className="flex gap-4">
-            {items.map((item) => (
+        <nav className="bg-g-10 text-[17px] px-10 py-2.5 rounded-br-2xl font-medium">
+          <ul className="flex gap-0.5">
+            {items.map((item, index) => (
               <li
-                key={item}
+                key={index}
                 onClick={() => {
                   setActive(item);
                   goTo(item);
                 }}
-                className={`cursor-pointer transition-colors ${
-                  active === item ? 'text-primary' : 'text-g-80'
-                }`}>
+                className={`px-4  cursor-pointer transition-colors ${active === item ? 'text-primary font-bold' : 'text-g-50 font-semibold'
+                  }`}
+              >
                 {item}
               </li>
             ))}
