@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type ChangeEvent } from 'react';
 import Tittle from '../shared/components/Tittle';
 import ContactanosPeople from '../assets/images/contacanos_people.webp';
 import { Icon } from '@iconify/react';
+import type { HyconPayload } from '../services/hycon/enviarCorreo.type';
+import { enviarCorreo } from '../services/hycon/enviarCorreo.api';
 
 type Field = {
   key: string;
@@ -102,9 +104,106 @@ const formFields: FormStructure = {
 export default function Contactanos() {
   const [activeTab, setActiveTab] = useState<Tab>('ECOMMERCE');
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  // 👇 estados controlados (no cambia el diseño)
+  const [ecom, setEcom] = useState({
+    empresa: '',
+    solicitante: '',
+    telefono: '',
+    ciudad: '',
+    email: '',
+  });
+
+  const [rep, setRep] = useState({
+    nombre: '',
+    dni: '',
+    telefono: '',
+    email: '',
+    unidad: '', // valores del select: 'moto' | 'auto' | 'camioneta'
+    placa: '',
+  });
+
+  const [sending, setSending] = useState(false);
+
+  const handleChangeEcom = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEcom((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangeRep = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setRep((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Formulario enviado');
+    if (sending) return;
+    setSending(true);
+
+    try {
+      let payload: HyconPayload;
+
+      if (activeTab === 'ECOMMERCE') {
+        payload = {
+          rol: 'ECOMMERCE',
+          empresa: ecom.empresa,
+          solicitante: ecom.solicitante,
+          telefono: ecom.telefono,
+          ciudad: ecom.ciudad,
+          email: ecom.email,
+        };
+      } else {
+        // mapea unidad del select a enum esperado por el backend
+        const unidadMap: Record<string, 'Moto' | 'Auto' | 'Otro'> = {
+          moto: 'Moto',
+          auto: 'Auto',
+          camioneta: 'Auto', // puedes cambiar a 'Otro' si prefieres
+        };
+
+        payload = {
+          rol: 'REPARTIDOR',
+          nombreCompleto: rep.nombre,
+          dni: rep.dni,
+          telefono: rep.telefono,
+          email: rep.email,
+          unidad: unidadMap[rep.unidad] ?? 'Otro',
+          placa: rep.placa || undefined,
+        };
+      }
+
+      const res = await enviarCorreo(payload);
+      if (!res.ok) {
+        console.error(res.error || 'Error al enviar');
+        alert(res.error || 'Error al enviar'); // sin cambiar diseño
+      } else {
+        alert('¡Datos enviados correctamente!');
+        // limpia solo el tab activo
+        if (activeTab === 'ECOMMERCE') {
+          setEcom({
+            empresa: '',
+            solicitante: '',
+            telefono: '',
+            ciudad: '',
+            email: '',
+          });
+        } else {
+          setRep({
+            nombre: '',
+            dni: '',
+            telefono: '',
+            email: '',
+            unidad: '',
+            placa: '',
+          });
+        }
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Error inesperado');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -164,7 +263,11 @@ export default function Contactanos() {
                           {rf.label}
                         </label>
                         {rf.type === 'select' ? (
-                          <select className="w-full border p-2 rounded-lg border-g-40 text-g-40">
+                          <select
+                            name={rf.key} // 👈 importante para state
+                            value={rep.unidad}
+                            onChange={handleChangeRep}
+                            className="w-full border p-2 rounded-lg border-g-40 text-g-40">
                             <option value="">Seleccione unidad</option>
                             <option value="moto">Moto</option>
                             <option value="auto">Auto</option>
@@ -172,8 +275,25 @@ export default function Contactanos() {
                           </select>
                         ) : (
                           <input
+                            name={rf.key} // 👈 importante para state
                             type={rf.type}
                             placeholder={rf.placeholder}
+                            value={
+                              activeTab === 'ECOMMERCE'
+                                ? // estos rf solo existen en REPARTIDOR o ECOMMERCE según tab
+                                  // pero este bloque es 'row', aquí puede ser tel/ciudad (ecom) o dni/tel (rep)
+                                  rf.key in ecom
+                                  ? (ecom as any)[rf.key] ?? ''
+                                  : (rep as any)[rf.key] ?? ''
+                                : rf.key in rep
+                                ? (rep as any)[rf.key] ?? ''
+                                : (ecom as any)[rf.key] ?? ''
+                            }
+                            onChange={
+                              activeTab === 'ECOMMERCE'
+                                ? handleChangeEcom
+                                : handleChangeRep
+                            }
                             className="w-full border p-2 rounded-lg border-g-40"
                           />
                         )}
@@ -188,8 +308,19 @@ export default function Contactanos() {
                       {field.label}
                     </label>
                     <input
+                      name={field.key} // 👈 importante para state
                       type={field.type}
                       placeholder={field.placeholder}
+                      value={
+                        activeTab === 'ECOMMERCE'
+                          ? (ecom as any)[field.key] ?? ''
+                          : (rep as any)[field.key] ?? ''
+                      }
+                      onChange={
+                        activeTab === 'ECOMMERCE'
+                          ? handleChangeEcom
+                          : handleChangeRep
+                      }
                       className="w-full border p-2 rounded-lg border-g-40"
                     />
                   </div>
@@ -200,8 +331,9 @@ export default function Contactanos() {
               {activeTab === 'ECOMMERCE' && (
                 <button
                   type="submit"
+                  disabled={sending}
                   className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 flex gap-2 items-center justify-center transition-colors duration-300 mt-11">
-                  <p>Enviar datos </p>
+                  <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>
               )}
@@ -209,8 +341,9 @@ export default function Contactanos() {
               {activeTab === 'REPARTIDOR' && (
                 <button
                   type="submit"
+                  disabled={sending}
                   className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 flex gap-2 items-center justify-center transition-colors duration-300">
-                  <p>Enviar datos </p>
+                  <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>
               )}
