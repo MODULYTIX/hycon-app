@@ -14,8 +14,8 @@ export default function Header() {
     '¿Por qué Elegimos?',
     '|',
     'Nuestros Clientes',
-    '|',
-    'Testimonios',
+    // '|',
+    // 'Testimonios',
     '|',
     'Contactanos',
   ];
@@ -49,13 +49,15 @@ export default function Header() {
             setActive('Contactanos');
             goTo('Contactanos');
           }}
-          className="bg-g-70 px-6 py-2 rounded-full h-fit text-[16px] self-center text-white font-medium">
+          className="bg-g-70 px-6 py-2 rounded-full h-fit text-[16px] self-center text-white font-medium"
+        >
           Contactanos
         </button>
       </div>
 
-      <div className="w-fit">
-        <nav className="bg-g-10 text-[17px] px-10 py-2.5 rounded-br-2xl font-medium">
+      {/* En móvil/tablet: scroll horizontal. En laptop/pc: ancho del contenido */}
+      <div className="w-full lg:w-fit overflow-x-auto lg:overflow-visible whitespace-nowrap">
+        <nav className="inline-block bg-g-10 text-[17px] px-10 py-2.5 rounded-br-2xl font-medium">
           <ul className="flex gap-0.5">
             {items.map((item, index) => (
               <li
@@ -64,8 +66,11 @@ export default function Header() {
                   setActive(item);
                   goTo(item);
                 }}
-                className={`px-4  cursor-pointer transition-colors ${active === item ? 'text-primary font-bold' : 'text-g-50 font-semibold'
-                  }`}
+                className={`px-4 cursor-pointer transition-colors ${
+                  active === item
+                    ? 'text-primary font-bold'
+                    : 'text-g-50 font-semibold'
+                }`}
               >
                 {item}
               </li>

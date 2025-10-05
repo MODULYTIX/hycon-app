@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 
+
 @theme {
   /* colores globales */
   --color-primary: #0057a3;
@@ -30,40 +31,38 @@
   --color-bc-90: #1968ac;
 
   /* Colores Yellow */
-  --color-y-5: #FEFCE8;
-  --color-y-10: #FEF9C3;
-  --color-y-20: #FEF08A;
-  --color-y-30: #FDE047;
-  --color-y-40: #FACC15;
-  --color-y-50: #EAB308;
-  --color-y-60: #CA8A04;
-  --color-y-70: #A16207;
-  --color-y-80: #854D0E;
-  --color-y-90: #713F12;
-
+  --color-y-5: #fefce8;
+  --color-y-10: #fef9c3;
+  --color-y-20: #fef08a;
+  --color-y-30: #fde047;
+  --color-y-40: #facc15;
+  --color-y-50: #eab308;
+  --color-y-60: #ca8a04;
+  --color-y-70: #a16207;
+  --color-y-80: #854d0e;
+  --color-y-90: #713f12;
 
   /* Fonts */
   --font-BostNoBillsColombo: BostNoBillsColombo;
 }
-
 
 /* Fuentes */
 
 @font-face {
   font-family: BostNoBillsColombo;
   font-style: extrabold;
-  font-weight: 800; 
+  font-weight: 800;
   font-display: swap;
-  src: url("./assets/fonts/PostNoBillsColombo-ExtraBold.ttf") format("truetype");
+  src: url('./assets/fonts/PostNoBillsColombo-ExtraBold.ttf') format('truetype');
 }
-
-
 
 /* Por ahora */
 /* Aplica a todo el documento */
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
+
 
   /* Firefox */
   scrollbar-width: none;

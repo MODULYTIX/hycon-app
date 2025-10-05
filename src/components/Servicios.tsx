@@ -28,37 +28,37 @@ export default function Servicios() {
   ];
 
   return (
-    <div className="flex flex-col w-full max-w-[1340px] mx-auto px-6 md:px-12">
+    <div className="flex flex-col w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-12">
       <header>
         <Tittle>Nuestros Servicios</Tittle>
       </header>
 
-      <main className="flex flex-col gap-[8px]">
+      <main className="flex flex-col gap-6">
         {services.map((s, idx) => (
           <React.Fragment key={s.id}>
-            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 ">
-              <p className="text-[80px] md:text-[130px] text-g-50 shrink-0">
+            {/* Columna en móvil/tablet; fila sólo en desktop (lg) */}
+            <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+              <p className="text-[72px] sm:text-[80px] lg:text-[130px] leading-none text-g-50 shrink-0">
                 {s.id}
               </p>
 
-              <div className="w-full max-w-[800px] items-center">
-                <Icon
-                  icon={s.icon}
-                  width="26"
-                  height="26"
-                  className="text-primary"
-                />
-                <p className="font-bold text-g-70 text-[22px] md:text-[30px]">
-                  {s.title}
-                </p>
-                <p className="text-g-50 text-[14px] md:text-[16px]">
+              <div className="w-full lg:max-w-[800px]">
+                <div className="flex items-center gap-2 lg:gap-3">
+                  <Icon icon={s.icon} width="22" height="22" className="text-primary lg:w-[26px] lg:h-[26px]" />
+                  <p className="font-bold text-g-70 text-[20px] sm:text-[22px] lg:text-[30px]">
+                    {s.title}
+                  </p>
+                </div>
+
+                <p className="mt-2 text-g-50 text-[14px] sm:text-[15px] lg:text-[16px] leading-relaxed">
                   {s.description}
                 </p>
               </div>
             </div>
 
+            {/* Separador: full en móvil/tablet; alineado al bloque derecho en desktop */}
             {idx < services.length - 1 && (
-              <div className="block w-full max-w-[800px] h-px bg-g-70  self-end" />
+              <div className="block w-full lg:max-w-[800px] h-px bg-g-70 lg:self-end my-2 lg:my-4" />
             )}
           </React.Fragment>
         ))}

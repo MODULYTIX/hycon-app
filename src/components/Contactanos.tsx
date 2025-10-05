@@ -104,7 +104,6 @@ const formFields: FormStructure = {
 export default function Contactanos() {
   const [activeTab, setActiveTab] = useState<Tab>('ECOMMERCE');
 
-  // 👇 estados controlados (no cambia el diseño)
   const [ecom, setEcom] = useState({
     empresa: '',
     solicitante: '',
@@ -118,7 +117,7 @@ export default function Contactanos() {
     dni: '',
     telefono: '',
     email: '',
-    unidad: '', // valores del select: 'moto' | 'auto' | 'camioneta'
+    unidad: '',
     placa: '',
   });
 
@@ -154,11 +153,10 @@ export default function Contactanos() {
           email: ecom.email,
         };
       } else {
-        // mapea unidad del select a enum esperado por el backend
         const unidadMap: Record<string, 'Moto' | 'Auto' | 'Otro'> = {
           moto: 'Moto',
           auto: 'Auto',
-          camioneta: 'Auto', // puedes cambiar a 'Otro' si prefieres
+          camioneta: 'Auto',
         };
 
         payload = {
@@ -175,10 +173,9 @@ export default function Contactanos() {
       const res = await enviarCorreo(payload);
       if (!res.ok) {
         console.error(res.error || 'Error al enviar');
-        alert(res.error || 'Error al enviar'); // sin cambiar diseño
+        alert(res.error || 'Error al enviar');
       } else {
         alert('¡Datos enviados correctamente!');
-        // limpia solo el tab activo
         if (activeTab === 'ECOMMERCE') {
           setEcom({
             empresa: '',
@@ -212,15 +209,19 @@ export default function Contactanos() {
         <Tittle>Contactanos</Tittle>
       </header>
 
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-12 my-6">
-        <div className="flex-shrink-0">
+      {/* Layout principal */}
+      <div className="flex flex-col lg:flex-row items-center justify-center lg:items-start gap-12 my-6">
+        {/* Imagen solo visible en PC/Laptop */}
+        <div className="flex-shrink-0 hidden lg:block">
           <img
             src={ContactanosPeople}
             alt="Contactanos"
             className="w-[700px] h-[568px] object-cover rounded-2xl"
           />
         </div>
-        <div className="w-full max-w-lg bg-white rounded-2xl">
+
+        {/* Formulario centrado en tablet/móvil */}
+        <div className="w-full max-w-lg bg-white rounded-2xl mx-auto">
           <p className="mb-3 text-[28px] font-medium text-g-70">
             Envíenos sus datos como:
           </p>
@@ -249,7 +250,6 @@ export default function Contactanos() {
               : 'Rellene los siguiente campos para poder contactarnos con ustedes.  Ojo: Solo para Arequipa'}
           </p>
 
-          {/* Animación con key para forzar transición al cambiar de tab */}
           <div
             key={activeTab}
             className="transition-opacity duration-500 ease-in-out opacity-100 animate-fadeIn">
@@ -264,7 +264,7 @@ export default function Contactanos() {
                         </label>
                         {rf.type === 'select' ? (
                           <select
-                            name={rf.key} // 👈 importante para state
+                            name={rf.key}
                             value={rep.unidad}
                             onChange={handleChangeRep}
                             className="w-full border p-2 rounded-lg border-g-40 text-g-40">
@@ -275,14 +275,12 @@ export default function Contactanos() {
                           </select>
                         ) : (
                           <input
-                            name={rf.key} // 👈 importante para state
+                            name={rf.key}
                             type={rf.type}
                             placeholder={rf.placeholder}
                             value={
                               activeTab === 'ECOMMERCE'
-                                ? // estos rf solo existen en REPARTIDOR o ECOMMERCE según tab
-                                  // pero este bloque es 'row', aquí puede ser tel/ciudad (ecom) o dni/tel (rep)
-                                  rf.key in ecom
+                                ? rf.key in ecom
                                   ? (ecom as any)[rf.key] ?? ''
                                   : (rep as any)[rf.key] ?? ''
                                 : rf.key in rep
@@ -308,7 +306,7 @@ export default function Contactanos() {
                       {field.label}
                     </label>
                     <input
-                      name={field.key} // 👈 importante para state
+                      name={field.key}
                       type={field.type}
                       placeholder={field.placeholder}
                       value={
@@ -327,7 +325,6 @@ export default function Contactanos() {
                 )
               )}
 
-              {/* Botón separado según el tab */}
               {activeTab === 'ECOMMERCE' && (
                 <button
                   type="submit"
