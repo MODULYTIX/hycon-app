@@ -4,7 +4,7 @@ import QS from '../assets/images/QS.png';
 export default function QuienesSomos() {
   return (
     <div className="w-full">
-      <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 md:px-12 my-4">
+      <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-6 md:px-12 my-4 ">
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 lg:gap-10">
           
           {/* Texto */}
