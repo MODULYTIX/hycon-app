@@ -3,7 +3,7 @@ import AlcanceMapa from '../assets/images/alcance_mapa.webp';
 
 export default function Alcance() {
   return (
-    <div className="w-full max-w-[1340px] mx-auto px-6 md:px-12 space-y-8">
+    <div className="w-full max-w-[1340px] mx-auto px-6 md:px-12 space-y-8 my-4">
       <header className="text-center">
         <Tittle>Alcance en Arequipa</Tittle>
       </header>
