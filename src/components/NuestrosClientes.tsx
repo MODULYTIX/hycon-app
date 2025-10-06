@@ -22,7 +22,7 @@ export default function NuestrosClientes() {
   ];
 
   return (
-    <div className="w-full max-w-[1340px] mx-auto px-6 md:px-12 md:py-12 space-y-8">
+    <div className="w-full max-w-[1340px] mx-auto px-6 md:px-12 md:py-12 space-y-8 my-4">
       <header className="text-center">
         <Tittle>Nuestros Clientes</Tittle>
       </header>

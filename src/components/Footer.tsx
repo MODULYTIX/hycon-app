@@ -33,20 +33,22 @@ export default function Footer() {
         </div>
 
         {/* Redes sociales */}
-        <div className="flex flex-col items-center text-center lg:items-start">
-          <div className="font-semibold lg:flex lg:items-center lg:text-center lg:justify-center">
+        <div className="flex flex-col items-center text-center lg:items-center">
+          <div className="font-semibold lg:flex lg:items-center lg:text-center lg:justify-center items-center sm:items-center  md:items-center">
             <p>Nuestras redes</p>
           </div>
           <div className="flex gap-4 mt-1 flex-wrap justify-center lg:justify-start">
-            <p className="flex items-center gap-1">
-              <Icon icon="ic:baseline-facebook" width="16" height="16" />
-              Facebook
-            </p>
-            <p className="flex items-center gap-1">
+              <a
+                href="https://www.facebook.com/profile.php?id=100063509954652"
+                className="flex items-center gap-0.5" target='_blank'>
+                <Icon icon="ic:baseline-facebook" width="16" height="16" />
+                Facebook
+              </a>
+            <p className="flex items-center gap-0.5">
               <Icon icon="lets-icons:insta-fill" width="16" height="16" />
               Instagram
             </p>
-            <p className="flex items-center gap-1">
+            <p className="flex items-center gap-0.5">
               <Icon icon="mingcute:linkedin-fill" width="16" height="16" />
               LinkedIn
             </p>
