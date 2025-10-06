@@ -28,7 +28,7 @@ export default function Servicios() {
   ];
 
   return (
-    <div className="flex flex-col w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-12 my-4">
+    <div className="flex flex-col w-full max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-12 my-8">
       <header>
         <Tittle>Nuestros Servicios</Tittle>
       </header>
