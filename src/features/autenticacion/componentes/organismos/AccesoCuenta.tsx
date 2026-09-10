@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Icon } from '@iconify/react';
+import { Link } from 'react-router-dom';
 import MenuUsuario from '@/features/autenticacion/componentes/organismos/MenuUsuario';
 import ModalAcceso from '@/features/autenticacion/componentes/organismos/ModalAcceso';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
@@ -18,13 +19,13 @@ export default function AccesoCuenta() {
   if (usuario) {
     return (
       <div className="flex items-center gap-3">
-        <a
-          href="/carrito"
+        <Link
+          to="/carrito"
           aria-label="Ver carrito"
           className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white text-white transition-colors hover:bg-white/10 sm:flex"
         >
           <Icon icon="solar:cart-large-2-linear" width="22" height="22" />
-        </a>
+        </Link>
 
         <MenuUsuario usuario={usuario} />
       </div>

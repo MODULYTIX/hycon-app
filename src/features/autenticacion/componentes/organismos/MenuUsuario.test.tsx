@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MemoryRouter } from 'react-router-dom';
 import MenuUsuario from './MenuUsuario';
 import { AutenticacionContexto } from '@/features/autenticacion/contexto/AutenticacionContexto';
 import type { Usuario } from '@/features/autenticacion/tipos/autenticacion.tipos';
@@ -21,7 +22,8 @@ const cerrarSesion = vi.fn();
 const renderizar = (rol: string) => {
   const usuario = crearUsuario(rol);
   return render(
-    <AutenticacionContexto.Provider
+    <MemoryRouter>
+      <AutenticacionContexto.Provider
       value={{
         usuario,
         cargando: false,
@@ -31,8 +33,9 @@ const renderizar = (rol: string) => {
         cerrarSesion,
       }}
     >
-      <MenuUsuario usuario={usuario} />
-    </AutenticacionContexto.Provider>
+        <MenuUsuario usuario={usuario} />
+      </AutenticacionContexto.Provider>
+    </MemoryRouter>
   );
 };
 

@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { Link } from 'react-router-dom';
 import type { OpcionCuenta } from '@/features/autenticacion/tipos/autenticacion.tipos';
 
 interface Props {
@@ -11,9 +12,9 @@ interface Props {
 export default function ItemMenuCuenta({ opcion, onSeleccionar }: Props) {
   return (
     <li role="none">
-      <a
+      <Link
         role="menuitem"
-        href={opcion.href}
+        to={opcion.href}
         onClick={onSeleccionar}
         className="flex items-center gap-3 px-4 py-2.5 text-[15px] text-g-70 transition-colors hover:bg-bc-5 hover:text-primary"
       >
@@ -24,7 +25,7 @@ export default function ItemMenuCuenta({ opcion, onSeleccionar }: Props) {
             ADMIN
           </span>
         )}
-      </a>
+      </Link>
     </li>
   );
 }

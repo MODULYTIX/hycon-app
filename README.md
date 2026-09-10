@@ -46,7 +46,19 @@ src/
   app/                      Arranque de la aplicacion
     App.tsx
     proveedores/            Proveedores de contexto globales
+    rutas/                  Enrutado (react-router) y guarda de rol
   features/
+    administracion/         Panel de administracion (solo ADMIN)
+      componentes/
+        atomos/             EtiquetaEstado, EstadoVacio
+        moleculas/          ItemSeccion, CabeceraSeccion, FilaProducto, FilaCurso
+        organismos/         BarraLateral, ListaProductos, ListaCursos,
+                            ModalProducto, ModalCurso y sus formularios
+        plantillas/         PlantillaPanel (encabezado + barra lateral + Outlet)
+      paginas/              PaginaProductos, PaginaCursos
+      servicios/            Llamadas a /api/v1/catalog
+      tipos/                Producto, Curso y sus formularios
+      utilidades/           Validaciones, formato y secciones del panel
     autenticacion/          Inicio de sesion, registro y menu de cuenta
       componentes/
         atomos/             AvatarUsuario, AlertaFormulario, IndicadorFuerza
@@ -85,7 +97,30 @@ obliga a reescribir rutas relativas.
   configuracion** solo aparece para el rol `ADMIN`. El rol proviene del token que
   firma el backend, nunca de una preferencia guardada en el navegador.
 
-Los enlaces del menu (`/perfil`, `/historial-de-compras`, `/panel-de-configuracion`,
+## Rutas
+
+| Ruta | Contenido |
+| --- | --- |
+| `/` | Landing publica |
+| `/panel-de-configuracion` | Redirige a la seccion de productos |
+| `/panel-de-configuracion/productos` | Alta y listado de productos (solo ADMIN) |
+| `/panel-de-configuracion/cursos` | Alta y listado de cursos (solo ADMIN) |
+| cualquier otra | Landing, igual que antes del router |
+
+`PlantillaPanel` es una **ruta de layout**: se monta una sola vez y las secciones
+se intercambian dentro de su `Outlet`. Al cambiar de seccion no se rehacen ni el
+encabezado ni la barra lateral, solo el contenido.
+
+El alta de productos y cursos ocurre en un **modal**; el listado es una lista de
+filas con miniatura, datos, stock, estado y precio.
+
+`RutaSoloAdmin` protege el panel en el cliente, pero eso es solo comodidad de
+interfaz: la autorizacion real la aplica el backend, que exige rol `ADMIN` en
+`POST /api/v1/catalog/products` y `POST /api/v1/catalog/courses`.
+
+El resto de enlaces del menu de cuenta (`/perfil`, `/historial-de-compras`,
 `/panel-de-cursos`, `/software-ergonomico`, `/carrito`) todavia no tienen pagina
-asociada: la app no monta un router. `vercel.json` reescribe cualquier ruta a `/`,
-asi que hoy devuelven la landing en lugar de un 404.
+propia y caen en la landing.
+
+La seccion **ARTICULOS** de la barra lateral aparece desactivada porque no existe
+una tabla que la respalde en `schema.prisma`, asi que no hay endpoint al que llamar.

@@ -1,10 +1,10 @@
 import ProveedoresApp from '@/app/proveedores/ProveedoresApp';
-import PaginaInicio from '@/features/landing/paginas/PaginaInicio';
+import RutasApp from '@/app/rutas/RutasApp';
 
 function App() {
   return (
     <ProveedoresApp>
-      <PaginaInicio />
+      <RutasApp />
     </ProveedoresApp>
   );
 }
