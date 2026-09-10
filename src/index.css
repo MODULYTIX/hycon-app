@@ -44,6 +44,55 @@
 
   /* Fonts */
   --font-BostNoBillsColombo: BostNoBillsColombo;
+
+  /* Animaciones */
+  --animate-fadeIn: fadeIn 0.25s ease-out;
+  --animate-modalIn: modalIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-menuIn: menuIn 0.18s ease-out;
+}
+
+/* Animaciones */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes menuIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Respeta a quien pide menos movimiento en el sistema */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* Fuentes */

@@ -1,0 +1,4 @@
+# Dependencias autorizadas a ejecutar scripts de instalacion
+allowBuilds:
+  esbuild: true
+  '@swc/core': true
