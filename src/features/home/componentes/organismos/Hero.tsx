@@ -1,15 +1,11 @@
+import { Link } from 'react-router-dom';
+import { RUTAS } from '@/app/rutas/rutas';
 import HeroBackground from '@/assets/images/hero-background.webp';
 import HeroPersona from '@/assets/images/hero-persona.webp';
-import Encabezado from '@/shared/ui/organismos/Encabezado';
 
 export default function Hero() {
   return (
     <div className="relative w-full min-h-screen">
-      {/* Header encima del hero */}
-      <div className="relative z-20">
-        <Encabezado />
-      </div>
-
       {/* Fondo + overlay */}
       <img
         src={HeroBackground}
@@ -46,9 +42,12 @@ export default function Hero() {
           </p>
 
           <div className="flex md:block">
-            <button className="mx-auto md:mx-0 px-3 py-2 bg-primary text-white font-medium rounded-lg">
+            <Link
+              to={RUTAS.contactanos}
+              className="mx-auto md:mx-0 px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors hover:bg-blue-700"
+            >
               Contactanos
-            </button>
+            </Link>
           </div>
         </div>
 

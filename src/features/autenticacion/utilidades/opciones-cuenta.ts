@@ -1,4 +1,5 @@
 import { ROLES, type OpcionCuenta } from '@/features/autenticacion/tipos/autenticacion.tipos';
+import { RUTAS } from '@/app/rutas/rutas';
 
 // Opciones del menu que se despliega al pulsar el perfil.
 // "rolesPermitidos" ausente significa que la opcion es visible para cualquier sesion.
@@ -7,19 +8,19 @@ export const OPCIONES_CUENTA: OpcionCuenta[] = [
     id: 'perfil',
     etiqueta: 'Perfil',
     icono: 'solar:user-rounded-bold',
-    href: '/perfil',
+    href: RUTAS.perfil,
   },
   {
     id: 'historial',
     etiqueta: 'Historial de compras',
     icono: 'solar:bag-check-bold',
-    href: '/historial-de-compras',
+    href: RUTAS.historial,
   },
   {
     id: 'panel-configuracion',
     etiqueta: 'Panel de configuracion',
     icono: 'solar:settings-bold',
-    href: '/panel-de-configuracion',
+    href: RUTAS.panel,
     rolesPermitidos: [ROLES.ADMIN],
     destacada: true,
   },
@@ -27,13 +28,13 @@ export const OPCIONES_CUENTA: OpcionCuenta[] = [
     id: 'panel-cursos',
     etiqueta: 'Panel de cursos',
     icono: 'solar:diploma-bold',
-    href: '/panel-de-cursos',
+    href: RUTAS.panelCursos,
   },
   {
     id: 'software-ergonomico',
     etiqueta: 'Software de ergonomico',
     icono: 'solar:monitor-smartphone-bold',
-    href: '/software-ergonomico',
+    href: RUTAS.softwareErgonomico,
   },
 ];
 

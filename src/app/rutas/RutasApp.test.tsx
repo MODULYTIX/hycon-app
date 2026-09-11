@@ -3,13 +3,15 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Navigate, Route, Routes } from 'react-router-dom';
 import PlantillaPanel from '@/features/administracion/componentes/plantillas/PlantillaPanel';
-import PaginaProductos from '@/features/administracion/paginas/PaginaProductos';
-import PaginaCursos from '@/features/administracion/paginas/PaginaCursos';
+import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
+import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
 import { AutenticacionContexto } from '@/features/autenticacion/contexto/AutenticacionContexto';
-import * as api from '@/features/administracion/servicios/catalogo.api';
+import * as apiProductos from '@/features/productos/servicios/productos.api';
+import * as apiCursos from '@/features/cursos/servicios/cursos.api';
 import type { Usuario } from '@/features/autenticacion/tipos/autenticacion.tipos';
 
-vi.mock('@/features/administracion/servicios/catalogo.api');
+vi.mock('@/features/productos/servicios/productos.api');
+vi.mock('@/features/cursos/servicios/cursos.api');
 
 const admin: Usuario = {
   userId: 4,
@@ -39,8 +41,8 @@ const renderizar = () =>
         <Routes>
           <Route path="/panel-de-configuracion" element={<PlantillaPanel />}>
             <Route index element={<Navigate to="productos" replace />} />
-            <Route path="productos" element={<PaginaProductos />} />
-            <Route path="cursos" element={<PaginaCursos />} />
+            <Route path="productos" element={<PaginaPanelProductos />} />
+            <Route path="cursos" element={<PaginaPanelCursos />} />
           </Route>
         </Routes>
       </MemoryRouter>
@@ -50,8 +52,8 @@ const renderizar = () =>
 describe('rutas del panel', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.mocked(api.listarProductosApi).mockResolvedValue([]);
-    vi.mocked(api.listarCursosApi).mockResolvedValue([]);
+    vi.mocked(apiProductos.listarProductosApi).mockResolvedValue([]);
+    vi.mocked(apiCursos.listarCursosApi).mockResolvedValue([]);
   });
 
   it('la ruta base redirige a la seccion de productos', async () => {
@@ -94,14 +96,14 @@ describe('rutas del panel', () => {
     renderizar();
     await screen.findByRole('heading', { name: 'Productos' });
 
-    expect(api.listarProductosApi).toHaveBeenCalledTimes(1);
-    expect(api.listarCursosApi).not.toHaveBeenCalled();
+    expect(apiProductos.listarProductosApi).toHaveBeenCalledTimes(1);
+    expect(apiCursos.listarCursosApi).not.toHaveBeenCalled();
 
     await usuario.click(screen.getByRole('link', { name: 'CURSOS' }));
     await screen.findByRole('heading', { name: 'Cursos' });
 
-    await waitFor(() => expect(api.listarCursosApi).toHaveBeenCalledTimes(1));
-    expect(api.listarProductosApi).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(apiCursos.listarCursosApi).toHaveBeenCalledTimes(1));
+    expect(apiProductos.listarProductosApi).toHaveBeenCalledTimes(1);
   });
 
   it('marca en la barra lateral la seccion abierta', async () => {

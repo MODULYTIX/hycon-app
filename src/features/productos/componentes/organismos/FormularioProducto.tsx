@@ -4,18 +4,15 @@ import CampoFormulario from '@/shared/ui/moleculas/CampoFormulario';
 import CampoArea from '@/shared/ui/moleculas/CampoArea';
 import CampoSeleccion from '@/shared/ui/moleculas/CampoSeleccion';
 import Cargador from '@/shared/ui/atomos/Cargador';
-import AlertaFormulario from '@/features/autenticacion/componentes/atomos/AlertaFormulario';
-import { crearProductoApi } from '@/features/administracion/servicios/catalogo.api';
-import {
-  sinErroresCatalogo,
-  validarProducto,
-  type ErroresProducto,
-} from '@/features/administracion/utilidades/validaciones-catalogo';
+import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
+import { crearProductoApi } from '@/features/productos/servicios/productos.api';
+import { validarProducto, type ErroresProducto } from '@/features/productos/utilidades/validaciones-producto';
+import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
 import {
   PRODUCTO_VACIO,
   type FormularioProducto as DatosProducto,
   type Producto,
-} from '@/features/administracion/tipos/catalogo.tipos';
+} from '@/features/productos/tipos/producto.tipos';
 
 const ESTADOS = [
   { valor: 'active', etiqueta: 'Activo' },

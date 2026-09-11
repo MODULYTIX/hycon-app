@@ -1,6 +1,6 @@
-import EstadoVacio from '@/features/administracion/componentes/atomos/EstadoVacio';
-import FilaCurso from '@/features/administracion/componentes/moleculas/FilaCurso';
-import type { Curso } from '@/features/administracion/tipos/catalogo.tipos';
+import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
+import FilaCurso from '@/features/cursos/componentes/moleculas/FilaCurso';
+import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 interface Props {
   cursos: Curso[];

@@ -1,6 +1,6 @@
 import Modal from '@/shared/ui/organismos/Modal';
-import FormularioProducto from '@/features/administracion/componentes/organismos/FormularioProducto';
-import type { Producto } from '@/features/administracion/tipos/catalogo.tipos';
+import FormularioProducto from '@/features/productos/componentes/organismos/FormularioProducto';
+import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 const ID_TITULO = 'titulo-modal-producto';
 

@@ -2,12 +2,12 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import PaginaCursos from './PaginaCursos';
+import PaginaPanelCursos from './PaginaPanelCursos';
 import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
-import * as api from '@/features/administracion/servicios/catalogo.api';
-import type { Curso } from '@/features/administracion/tipos/catalogo.tipos';
+import * as api from '@/features/cursos/servicios/cursos.api';
+import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
-vi.mock('@/features/administracion/servicios/catalogo.api');
+vi.mock('@/features/cursos/servicios/cursos.api');
 
 const cursoExistente: Curso = {
   courseId: 1,
@@ -39,7 +39,7 @@ const renderizar = () =>
   render(
     <AutenticacionProveedor>
       <MemoryRouter>
-        <PaginaCursos />
+        <PaginaPanelCursos />
       </MemoryRouter>
     </AutenticacionProveedor>
   );
@@ -51,7 +51,7 @@ const abrirModal = async (usuario: ReturnType<typeof userEvent.setup>) => {
   return screen.findByRole('dialog');
 };
 
-describe('PaginaCursos', () => {
+describe('PaginaPanelCursos', () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.mocked(api.listarCursosApi).mockResolvedValue([cursoExistente]);

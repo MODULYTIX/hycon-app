@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Icon } from '@iconify/react';
 import CampoFormulario from '@/shared/ui/moleculas/CampoFormulario';
 import Cargador from '@/shared/ui/atomos/Cargador';
-import AlertaFormulario from '@/features/autenticacion/componentes/atomos/AlertaFormulario';
+import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
 import CampoContrasena from '@/features/autenticacion/componentes/moleculas/CampoContrasena';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import {

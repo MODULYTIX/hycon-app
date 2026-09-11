@@ -1,21 +1,50 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import PaginaInicio from '@/features/landing/paginas/PaginaInicio';
-import PlantillaPanel from '@/features/administracion/componentes/plantillas/PlantillaPanel';
-import PaginaProductos from '@/features/administracion/paginas/PaginaProductos';
-import PaginaCursos from '@/features/administracion/paginas/PaginaCursos';
+import DesplazarAlInicio from '@/app/rutas/DesplazarAlInicio';
 import RutaSoloAdmin from '@/app/rutas/RutaSoloAdmin';
-import { RUTA_PANEL } from '@/features/administracion/utilidades/opciones-panel';
+import PaginaEnConstruccion from '@/app/rutas/PaginaEnConstruccion';
+import PaginaNoEncontrada from '@/app/rutas/PaginaNoEncontrada';
+import { RUTAS } from '@/app/rutas/rutas';
+
+import PlantillaPublica from '@/shared/ui/plantillas/PlantillaPublica';
+import PlantillaPanel from '@/features/administracion/componentes/plantillas/PlantillaPanel';
+
+import PaginaHome from '@/features/home/paginas/PaginaHome';
+import PaginaProductos from '@/features/productos/paginas/PaginaProductos';
+import PaginaCursos from '@/features/cursos/paginas/PaginaCursos';
+import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
+import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
+import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
+import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
+import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
 
 export default function RutasApp() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<PaginaInicio />} />
+      <DesplazarAlInicio />
 
-        {/* Ruta de layout: PlantillaPanel se monta una vez y las secciones
-            se intercambian dentro de su Outlet, sin rehacer encabezado ni barra lateral */}
+      <Routes>
+        {/* Sitio publico: encabezado, navegacion y pie compartidos por todas las paginas */}
+        <Route element={<PlantillaPublica />}>
+          <Route path={RUTAS.home} element={<PaginaHome />} />
+          <Route path={RUTAS.productos} element={<PaginaProductos />} />
+          <Route path={RUTAS.cursos} element={<PaginaCursos />} />
+          <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
+          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
+          <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
+
+          {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
+          <Route path={RUTAS.carrito} element={<PaginaEnConstruccion />} />
+          <Route path={RUTAS.perfil} element={<PaginaEnConstruccion />} />
+          <Route path={RUTAS.historial} element={<PaginaEnConstruccion />} />
+          <Route path={RUTAS.panelCursos} element={<PaginaEnConstruccion />} />
+          <Route path={RUTAS.softwareErgonomico} element={<PaginaEnConstruccion />} />
+
+          <Route path="*" element={<PaginaNoEncontrada />} />
+        </Route>
+
+        {/* Panel de administracion: layout propio con barra lateral */}
         <Route
-          path={RUTA_PANEL}
+          path={RUTAS.panel}
           element={
             <RutaSoloAdmin>
               <PlantillaPanel />
@@ -23,13 +52,9 @@ export default function RutasApp() {
           }
         >
           <Route index element={<Navigate to="productos" replace />} />
-          <Route path="productos" element={<PaginaProductos />} />
-          <Route path="cursos" element={<PaginaCursos />} />
+          <Route path="productos" element={<PaginaPanelProductos />} />
+          <Route path="cursos" element={<PaginaPanelCursos />} />
         </Route>
-
-        {/* Las rutas del menu que aun no tienen pagina siguen mostrando la landing,
-            que es el comportamiento que ya daba el rewrite de Vercel */}
-        <Route path="*" element={<PaginaInicio />} />
       </Routes>
     </BrowserRouter>
   );

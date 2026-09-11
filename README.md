@@ -1,6 +1,7 @@
 # Hycon App
 
-Landing y area de cuenta de Hycon. React 19 + Vite 7 + Tailwind 4 + TypeScript.
+Sitio de Hycon: catalogo publico, area de cuenta y panel de administracion.
+React 19 + Vite 7 + Tailwind 4 + React Router 7 + TypeScript.
 
 ## Puesta en marcha
 
@@ -36,57 +37,93 @@ Para levantar el backend y la base de datos ver `hycon-backend` y `hycon-db`.
 
 ## Arquitectura
 
-El codigo sigue **screaming architecture**: las carpetas de primer nivel dentro de
-`src/features` nombran el dominio del negocio, no la tecnologia. Dentro de cada
-dominio los componentes se organizan por **atomic design** (atomos, moleculas,
-organismos).
+El codigo sigue **screaming architecture**: cada carpeta dentro de `src/features`
+nombra un dominio del negocio, no una tecnologia, y coincide con lo que el
+visitante ve en el menu. Dentro de cada dominio los componentes se organizan por
+**atomic design** (atomos, moleculas, organismos, plantillas, paginas).
 
 ```
 src/
-  app/                      Arranque de la aplicacion
+  app/                        Arranque de la aplicacion
     App.tsx
-    proveedores/            Proveedores de contexto globales
-    rutas/                  Enrutado (react-router) y guarda de rol
+    proveedores/              Proveedores de contexto globales
+    rutas/                    rutas.ts (catalogo de URLs), arbol de rutas,
+                              guarda de rol y paginas de 404 / en construccion
   features/
-    administracion/         Panel de administracion (solo ADMIN)
+    home/                     Portada: Hero, Servicios, Plataforma Asociada, Clientes
+    productos/                Dominio producto, publico y de panel
       componentes/
-        atomos/             EtiquetaEstado, EstadoVacio
-        moleculas/          ItemSeccion, CabeceraSeccion, FilaProducto, FilaCurso
-        organismos/         BarraLateral, ListaProductos, ListaCursos,
-                            ModalProducto, ModalCurso y sus formularios
-        plantillas/         PlantillaPanel (encabezado + barra lateral + Outlet)
-      paginas/              PaginaProductos, PaginaCursos
-      servicios/            Llamadas a /api/v1/catalog
-      tipos/                Producto, Curso y sus formularios
-      utilidades/           Validaciones, formato y secciones del panel
-    autenticacion/          Inicio de sesion, registro y menu de cuenta
-      componentes/
-        atomos/             AvatarUsuario, AlertaFormulario, IndicadorFuerza
-        moleculas/          CampoContrasena, PestanasAcceso, ItemMenuCuenta
-        organismos/         ModalAcceso, FormularioLogin, FormularioRegistro,
-                            MenuUsuario, AccesoCuenta
-      contexto/             Estado de sesion compartido
-      hooks/                useAutenticacion
-      servicios/            Llamadas a /api/v1/auth
-      tipos/                Usuario, Sesion, Rol, OpcionCuenta
-      utilidades/           Validaciones y opciones del menu por rol
-    contacto/               Formulario publico de contacto
-    landing/                Secciones de la pagina de inicio
-      componentes/organismos/
-      paginas/PaginaInicio.tsx
+        moleculas/            TarjetaProducto (publico), FilaProducto (panel)
+        organismos/           RejillaProductos, ListaProductos,
+                              FormularioProducto, ModalProducto
+      paginas/                PaginaProductos (catalogo publico)
+      servicios/              Llamadas a /api/v1/catalog/products
+      tipos/                  Producto y su formulario
+      utilidades/             Validaciones del formulario
+    cursos/                   Mismo reparto que productos
+    publicaciones/            Seccion sin backend todavia
+    acerca-de/                Quienes somos, Por que elegirnos, Alcance
+    contacto/                 Formulario publico y boton de WhatsApp
+    autenticacion/            Login, registro, sesion y menu de cuenta
+    administracion/           Panel: barra lateral, layout y paginas de gestion
   shared/
     ui/
-      atomos/               Titulo, EntradaTexto, Etiqueta, TextoError, Cargador
-      moleculas/            CampoFormulario
-      organismos/           Encabezado, PiePagina, Modal
-    configuracion/          Lectura de variables de entorno (URL del backend)
-    utilidades/             Cliente HTTP y almacenamiento del token
-  assets/                   Imagenes y fuentes
-  pruebas/                  Configuracion de Vitest
+      atomos/                 Titulo, EntradaTexto, Etiqueta, TextoError,
+                              Cargador, EtiquetaEstado, EstadoVacio
+      moleculas/              CampoFormulario, CampoArea, CampoSeleccion,
+                              AlertaFormulario
+      organismos/             Encabezado, NavegacionPrincipal, PiePagina, Modal
+      plantillas/             PlantillaPublica, PlantillaSeccion, CabeceraPagina,
+                              PaginaMensaje
+    hooks/                    useListaRemota
+    configuracion/            Lectura de variables de entorno
+    utilidades/               Cliente HTTP, token, formato y validaciones comunes
+  assets/                     Imagenes y fuentes
+  pruebas/                    Configuracion de Vitest
 ```
 
 Los imports usan el alias `@` apuntando a `src`, de modo que mover una carpeta no
 obliga a reescribir rutas relativas.
+
+Un dominio no importa de otro salvo por lo que sea genuinamente compartido, que
+vive en `shared`. Si dos features necesitan lo mismo, sube a `shared`; no se
+importa de `features/x` desde `features/y`.
+
+## Rutas
+
+| Ruta | Contenido |
+| --- | --- |
+| `/` | Portada |
+| `/productos` | Catalogo publico de productos |
+| `/cursos` | Catalogo publico de cursos |
+| `/publicaciones` | Seccion en preparacion (sin backend) |
+| `/acerca-de` | Quienes somos, por que elegirnos y alcance |
+| `/contactanos` | Formulario de contacto |
+| `/carrito`, `/perfil`, `/historial-de-compras`, `/panel-de-cursos`, `/software-ergonomico` | Pantallas en construccion |
+| `/panel-de-configuracion/productos` | Alta y listado de productos (solo ADMIN) |
+| `/panel-de-configuracion/cursos` | Alta y listado de cursos (solo ADMIN) |
+| cualquier otra | Pagina de no encontrada |
+
+Todas las URLs salen de `src/app/rutas/rutas.ts`: renombrar una seccion es un
+cambio en un solo archivo.
+
+Hay dos **rutas de layout**, `PlantillaPublica` y `PlantillaPanel`. Cada una se
+monta una sola vez y las paginas se intercambian dentro de su `Outlet`, asi que al
+cambiar de seccion no se rehacen el encabezado, la navegacion ni el pie: solo el
+contenido.
+
+`RutaSoloAdmin` protege el panel en el cliente, pero eso es comodidad de interfaz:
+la autorizacion real la aplica el backend, que exige rol `ADMIN` en
+`POST /api/v1/catalog/products` y `POST /api/v1/catalog/courses`.
+
+## Catalogo publico y panel
+
+El backend solo publica lo que esta en estado `active`. El panel pide
+`?estado=todos` para poder ver y gestionar tambien lo dado de baja, de modo que un
+producto marcado como inactivo desaparece de `/productos` pero sigue en el panel.
+
+El alta de productos y cursos ocurre en un modal; el listado del panel es una
+lista de filas y el del sitio publico una rejilla de tarjetas.
 
 ## Sesion y roles
 
@@ -96,31 +133,3 @@ obliga a reescribir rutas relativas.
 - El menu de la cuenta se arma con `filtrarOpcionesPorRol`: **Panel de
   configuracion** solo aparece para el rol `ADMIN`. El rol proviene del token que
   firma el backend, nunca de una preferencia guardada en el navegador.
-
-## Rutas
-
-| Ruta | Contenido |
-| --- | --- |
-| `/` | Landing publica |
-| `/panel-de-configuracion` | Redirige a la seccion de productos |
-| `/panel-de-configuracion/productos` | Alta y listado de productos (solo ADMIN) |
-| `/panel-de-configuracion/cursos` | Alta y listado de cursos (solo ADMIN) |
-| cualquier otra | Landing, igual que antes del router |
-
-`PlantillaPanel` es una **ruta de layout**: se monta una sola vez y las secciones
-se intercambian dentro de su `Outlet`. Al cambiar de seccion no se rehacen ni el
-encabezado ni la barra lateral, solo el contenido.
-
-El alta de productos y cursos ocurre en un **modal**; el listado es una lista de
-filas con miniatura, datos, stock, estado y precio.
-
-`RutaSoloAdmin` protege el panel en el cliente, pero eso es solo comodidad de
-interfaz: la autorizacion real la aplica el backend, que exige rol `ADMIN` en
-`POST /api/v1/catalog/products` y `POST /api/v1/catalog/courses`.
-
-El resto de enlaces del menu de cuenta (`/perfil`, `/historial-de-compras`,
-`/panel-de-cursos`, `/software-ergonomico`, `/carrito`) todavia no tienen pagina
-propia y caen en la landing.
-
-La seccion **ARTICULOS** de la barra lateral aparece desactivada porque no existe
-una tabla que la respalde en `schema.prisma`, asi que no hay endpoint al que llamar.

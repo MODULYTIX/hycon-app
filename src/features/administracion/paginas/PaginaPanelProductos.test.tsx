@@ -2,13 +2,13 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import PaginaProductos from './PaginaProductos';
+import PaginaPanelProductos from './PaginaPanelProductos';
 import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
-import * as api from '@/features/administracion/servicios/catalogo.api';
-import type { Producto } from '@/features/administracion/tipos/catalogo.tipos';
+import * as api from '@/features/productos/servicios/productos.api';
+import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 // Las pruebas no hablan con el backend: se sustituye la capa de servicios
-vi.mock('@/features/administracion/servicios/catalogo.api');
+vi.mock('@/features/productos/servicios/productos.api');
 
 const productoExistente: Producto = {
   productId: 1,
@@ -42,7 +42,7 @@ const renderizar = () =>
   render(
     <AutenticacionProveedor>
       <MemoryRouter>
-        <PaginaProductos />
+        <PaginaPanelProductos />
       </MemoryRouter>
     </AutenticacionProveedor>
   );
@@ -65,7 +65,7 @@ const rellenarMinimo = async (
 const enviar = (usuario: ReturnType<typeof userEvent.setup>, dialogo: HTMLElement) =>
   usuario.click(within(dialogo).getByRole('button', { name: /agregar producto/i }));
 
-describe('PaginaProductos', () => {
+describe('PaginaPanelProductos', () => {
   beforeEach(() => {
     window.localStorage.clear();
     vi.mocked(api.listarProductosApi).mockResolvedValue([productoExistente]);

@@ -1,11 +1,11 @@
 import { Icon } from '@iconify/react';
-import EtiquetaEstado from '@/features/administracion/componentes/atomos/EtiquetaEstado';
+import EtiquetaEstado from '@/shared/ui/atomos/EtiquetaEstado';
 import {
   formatearDuracion,
   formatearFecha,
   formatearPrecio,
-} from '@/features/administracion/utilidades/formato';
-import type { Curso } from '@/features/administracion/tipos/catalogo.tipos';
+} from '@/shared/utilidades/formato';
+import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 export default function FilaCurso({ curso }: { curso: Curso }) {
   const enOferta = curso.discountPrice !== null;

@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react';
-import EtiquetaEstado from '@/features/administracion/componentes/atomos/EtiquetaEstado';
-import { formatearFecha, formatearPrecio } from '@/features/administracion/utilidades/formato';
-import type { Producto } from '@/features/administracion/tipos/catalogo.tipos';
+import EtiquetaEstado from '@/shared/ui/atomos/EtiquetaEstado';
+import { formatearFecha, formatearPrecio } from '@/shared/utilidades/formato';
+import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 export default function FilaProducto({ producto }: { producto: Producto }) {
   const enOferta = producto.discountPrice !== null;

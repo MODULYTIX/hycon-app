@@ -1,6 +1,6 @@
 import Modal from '@/shared/ui/organismos/Modal';
-import FormularioCurso from '@/features/administracion/componentes/organismos/FormularioCurso';
-import type { Curso } from '@/features/administracion/tipos/catalogo.tipos';
+import FormularioCurso from '@/features/cursos/componentes/organismos/FormularioCurso';
+import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 const ID_TITULO = 'titulo-modal-curso';
 

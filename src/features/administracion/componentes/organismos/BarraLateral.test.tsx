@@ -16,7 +16,7 @@ describe('BarraLateral', () => {
 
     expect(screen.getByText('PRODUCTOS')).toBeInTheDocument();
     expect(screen.getByText('CURSOS')).toBeInTheDocument();
-    expect(screen.getByText('ARTICULOS')).toBeInTheDocument();
+    expect(screen.getByText('PUBLICACIONES')).toBeInTheDocument();
   });
 
   it('productos y cursos son enlaces navegables', () => {
@@ -32,11 +32,12 @@ describe('BarraLateral', () => {
     );
   });
 
-  it('articulos aparece desactivada y sin enlace', () => {
+  it('publicaciones aparece desactivada y sin enlace', () => {
+    // No hay tabla de publicaciones en el backend, asi que no debe navegar
     renderizar();
 
-    expect(screen.queryByRole('link', { name: 'ARTICULOS' })).not.toBeInTheDocument();
-    expect(screen.getByText('ARTICULOS')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.queryByRole('link', { name: 'PUBLICACIONES' })).not.toBeInTheDocument();
+    expect(screen.getByText('PUBLICACIONES')).toHaveAttribute('aria-disabled', 'true');
   });
 
   it('marca como actual la seccion en la que estas', () => {

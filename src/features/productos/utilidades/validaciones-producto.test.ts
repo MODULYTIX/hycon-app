@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import {
-  sinErroresCatalogo,
-  validarCurso,
-  validarProducto,
-} from './validaciones-catalogo';
-import { CURSO_VACIO, PRODUCTO_VACIO } from '@/features/administracion/tipos/catalogo.tipos';
+import { validarProducto } from './validaciones-producto';
+import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
+import { PRODUCTO_VACIO } from '@/features/productos/tipos/producto.tipos';
 
 const producto = { ...PRODUCTO_VACIO, name: 'Caja de carton', price: '25.90', stock: '10' };
-const curso = { ...CURSO_VACIO, name: 'Logistica basica', price: '120' };
 
 describe('validarProducto', () => {
   it('acepta un producto con lo minimo obligatorio', () => {
@@ -54,16 +50,12 @@ describe('validarProducto', () => {
 
   it('rechaza stock negativo o decimal', () => {
     expect(validarProducto({ ...producto, stock: '-1' }).stock).toBeDefined();
-    expect(validarProducto({ ...producto, stock: '2.5' }).stock).toBe(
-      'Debe ser un numero entero'
-    );
+    expect(validarProducto({ ...producto, stock: '2.5' }).stock).toBe('Debe ser un numero entero');
   });
 
   it('rechaza URLs de imagen invalidas y protocolos no http', () => {
     expect(validarProducto({ ...producto, imageUrl: 'imagen.png' }).imageUrl).toBeDefined();
-    expect(
-      validarProducto({ ...producto, imageUrl: 'javascript:alert(1)' }).imageUrl
-    ).toBeDefined();
+    expect(validarProducto({ ...producto, imageUrl: 'javascript:alert(1)' }).imageUrl).toBeDefined();
     expect(
       validarProducto({ ...producto, imageUrl: 'https://cdn.hycon.lat/a.webp' }).imageUrl
     ).toBeUndefined();
@@ -73,40 +65,5 @@ describe('validarProducto', () => {
     expect(validarProducto({ ...producto, name: 'A' }).name).toBe(
       'Debe tener al menos 2 caracteres'
     );
-  });
-});
-
-describe('validarCurso', () => {
-  it('acepta un curso con lo minimo obligatorio', () => {
-    expect(sinErroresCatalogo(validarCurso(curso))).toBe(true);
-  });
-
-  it('exige nombre y precio', () => {
-    const errores = validarCurso(CURSO_VACIO);
-    expect(errores.name).toBeDefined();
-    expect(errores.price).toBeDefined();
-  });
-
-  it('rechaza duracion de cero, negativa o decimal', () => {
-    expect(validarCurso({ ...curso, durationMinutes: '0' }).durationMinutes).toBeDefined();
-    expect(validarCurso({ ...curso, durationMinutes: '-5' }).durationMinutes).toBeDefined();
-    expect(validarCurso({ ...curso, durationMinutes: '9.5' }).durationMinutes).toBe(
-      'Debe ser un numero entero'
-    );
-    expect(validarCurso({ ...curso, durationMinutes: '90' }).durationMinutes).toBeUndefined();
-  });
-
-  it('valida las URLs de video y miniatura', () => {
-    expect(validarCurso({ ...curso, videoUrl: 'youtube' }).videoUrl).toBeDefined();
-    expect(validarCurso({ ...curso, thumbnailUrl: 'foto' }).thumbnailUrl).toBeDefined();
-    expect(validarCurso({ ...curso, videoUrl: 'https://youtu.be/abc' }).videoUrl).toBeUndefined();
-  });
-
-  it('deja pasar los opcionales vacios', () => {
-    expect(
-      sinErroresCatalogo(
-        validarCurso({ ...curso, durationMinutes: '', discountPrice: '', videoUrl: '' })
-      )
-    ).toBe(true);
   });
 });

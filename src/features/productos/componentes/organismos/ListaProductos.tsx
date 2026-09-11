@@ -1,6 +1,6 @@
-import EstadoVacio from '@/features/administracion/componentes/atomos/EstadoVacio';
-import FilaProducto from '@/features/administracion/componentes/moleculas/FilaProducto';
-import type { Producto } from '@/features/administracion/tipos/catalogo.tipos';
+import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
+import FilaProducto from '@/features/productos/componentes/moleculas/FilaProducto';
+import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 interface Props {
   productos: Producto[];

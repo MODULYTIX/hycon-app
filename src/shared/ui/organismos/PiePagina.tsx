@@ -1,4 +1,6 @@
 import { Icon } from '@iconify/react';
+import { Link } from 'react-router-dom';
+import { RUTAS } from '@/app/rutas/rutas';
 import LOGOHYCON from '@/assets/images/logo_hycon.webp';
 
 export default function PiePagina() {
@@ -25,9 +27,16 @@ export default function PiePagina() {
               <p>Política de privacidad</p>
               <p>Libro de reclamaciones</p>
             </div>
-            <div>
-              <p>Contactanos</p>
-              <p>Ayuda</p>
+            <div className="flex flex-col gap-1">
+              <Link to={RUTAS.contactanos} className="hover:underline">
+                Contactanos
+              </Link>
+              <Link to={RUTAS.acercaDe} className="hover:underline">
+                Acerca de
+              </Link>
+              <Link to={RUTAS.cursos} className="hover:underline">
+                Cursos
+              </Link>
             </div>
           </div>
         </div>
