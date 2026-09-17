@@ -8,7 +8,7 @@ export default function Etiqueta({
   children: ReactNode;
 }) {
   return (
-    <label htmlFor={htmlFor} className="block mb-1 text-sm font-medium text-primary">
+    <label htmlFor={htmlFor} className="mb-1.5 block text-[13px] font-semibold text-g-80">
       {children}
     </label>
   );

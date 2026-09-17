@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
-import { Icon } from '@iconify/react';
 import CampoFormulario from '@/shared/ui/moleculas/CampoFormulario';
-import Cargador from '@/shared/ui/atomos/Cargador';
 import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
+import Boton from '@/shared/ui/atomos/Boton';
 import IndicadorFuerza from '@/features/autenticacion/componentes/atomos/IndicadorFuerza';
 import CampoContrasena from '@/features/autenticacion/componentes/moleculas/CampoContrasena';
+import CasillaRecordar from '@/features/autenticacion/componentes/moleculas/CasillaRecordar';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import {
   sinErrores,
@@ -13,7 +13,9 @@ import {
 } from '@/features/autenticacion/utilidades/validaciones';
 import type { DatosRegistro, Usuario } from '@/features/autenticacion/tipos/autenticacion.tipos';
 
-const VALORES_INICIALES: DatosRegistro = {
+type CampoTexto = 'name' | 'lastname' | 'email' | 'password' | 'phone';
+
+const VALORES_INICIALES: Record<CampoTexto, string> = {
   name: '',
   lastname: '',
   email: '',
@@ -21,19 +23,16 @@ const VALORES_INICIALES: DatosRegistro = {
   phone: '',
 };
 
-export default function FormularioRegistro({
-  onExito,
-}: {
-  onExito: (usuario: Usuario) => void;
-}) {
+export default function FormularioRegistro({ onExito }: { onExito: (usuario: Usuario) => void }) {
   const { registrar } = useAutenticacion();
 
-  const [valores, setValores] = useState<DatosRegistro>(VALORES_INICIALES);
+  const [valores, setValores] = useState(VALORES_INICIALES);
+  const [recordar, setRecordar] = useState(false);
   const [errores, setErrores] = useState<ErroresRegistro>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  const cambiar = (campo: keyof DatosRegistro, valor: string) => {
+  const cambiar = (campo: CampoTexto, valor: string) => {
     setValores((previo) => ({ ...previo, [campo]: valor }));
     // Al escribir se limpia el error del campo; la validacion completa corre al enviar
     setErrores((previo) => ({ ...previo, [campo]: undefined }));
@@ -43,22 +42,23 @@ export default function FormularioRegistro({
     evento.preventDefault();
     if (enviando) return;
 
-    const encontrados = validarRegistro(valores);
+    const datos: DatosRegistro = {
+      name: valores.name.trim(),
+      lastname: valores.lastname.trim(),
+      email: valores.email.trim().toLowerCase(),
+      password: valores.password,
+      phone: valores.phone.trim() || undefined,
+      recordar,
+    };
+
+    const encontrados = validarRegistro(datos);
     setErrores(encontrados);
     setErrorGeneral(null);
-
     if (!sinErrores(encontrados)) return;
 
     setEnviando(true);
     try {
-      const usuario = await registrar({
-        name: valores.name.trim(),
-        lastname: valores.lastname.trim(),
-        email: valores.email.trim().toLowerCase(),
-        password: valores.password,
-        phone: valores.phone?.trim() || undefined,
-      });
-      onExito(usuario);
+      onExito(await registrar(datos));
     } catch (error) {
       setErrorGeneral(error instanceof Error ? error.message : 'No se pudo crear la cuenta');
     } finally {
@@ -70,39 +70,35 @@ export default function FormularioRegistro({
     <form className="space-y-4" onSubmit={enviar} noValidate>
       <AlertaFormulario mensaje={errorGeneral} />
 
-      <div className="flex gap-4">
-        <div className="w-1/2">
-          <CampoFormulario
-            id="registro-name"
-            etiqueta="Nombre"
-            icono="solar:user-bold"
-            autoComplete="given-name"
-            placeholder="Nombre"
-            value={valores.name}
-            error={errores.name}
-            onChange={(evento) => cambiar('name', evento.target.value)}
-          />
-        </div>
-        <div className="w-1/2">
-          <CampoFormulario
-            id="registro-lastname"
-            etiqueta="Apellido"
-            icono="solar:user-bold"
-            autoComplete="family-name"
-            placeholder="Apellido"
-            value={valores.lastname}
-            error={errores.lastname}
-            onChange={(evento) => cambiar('lastname', evento.target.value)}
-          />
-        </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <CampoFormulario
+          id="registro-name"
+          etiqueta="Nombre"
+          autoComplete="given-name"
+          placeholder="Ana"
+          value={valores.name}
+          error={errores.name}
+          onChange={(evento) => cambiar('name', evento.target.value)}
+        />
+        <CampoFormulario
+          id="registro-lastname"
+          etiqueta="Apellido"
+          autoComplete="family-name"
+          placeholder="Quispe"
+          value={valores.lastname}
+          error={errores.lastname}
+          onChange={(evento) => cambiar('lastname', evento.target.value)}
+        />
       </div>
 
       <CampoFormulario
         id="registro-email"
-        etiqueta="Correo electronico"
-        icono="solar:letter-bold"
+        etiqueta="Correo electrónico"
+        icono="solar:letter-linear"
         type="email"
         autoComplete="email"
+        autoCapitalize="none"
+        spellCheck={false}
         placeholder="tucorreo@empresa.com"
         value={valores.email}
         error={errores.email}
@@ -111,8 +107,9 @@ export default function FormularioRegistro({
 
       <CampoFormulario
         id="registro-phone"
-        etiqueta="Telefono (opcional)"
-        icono="solar:phone-bold"
+        etiqueta="Teléfono (opcional)"
+        icono="solar:phone-linear"
+        type="tel"
         autoComplete="tel"
         placeholder="999 888 777"
         value={valores.phone}
@@ -121,32 +118,20 @@ export default function FormularioRegistro({
 
       <CampoContrasena
         id="registro-password"
-        etiqueta="Contrasena"
+        etiqueta="Contraseña"
         autoComplete="new-password"
-        placeholder="Minimo 8 caracteres"
+        placeholder="Una frase que recuerdes"
         value={valores.password}
         error={errores.password}
         onChange={(evento) => cambiar('password', evento.target.value)}
-        ayuda={<IndicadorFuerza valor={valores.password} />}
+        ayuda={<IndicadorFuerza valor={valores.password} datos={valores} />}
       />
 
-      <button
-        type="submit"
-        disabled={enviando}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-      >
-        {enviando ? (
-          <>
-            <Cargador etiqueta="Creando cuenta" />
-            <span>Creando cuenta...</span>
-          </>
-        ) : (
-          <>
-            <span>Crear cuenta</span>
-            <Icon icon="solar:user-plus-bold" width="18" height="18" />
-          </>
-        )}
-      </button>
+      <CasillaRecordar id="registro-recordar" marcada={recordar} onCambiar={setRecordar} />
+
+      <Boton type="submit" cargando={enviando} icono="solar:user-plus-bold" className="h-12 w-full text-[15px]">
+        {enviando ? 'Creando cuenta...' : 'Crear cuenta'}
+      </Boton>
     </form>
   );
 }

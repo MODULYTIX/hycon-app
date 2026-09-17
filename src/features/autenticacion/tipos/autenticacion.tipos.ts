@@ -18,14 +18,19 @@ export interface Usuario {
   rol: string;
 }
 
+// El token de acceso dura minutos y vive en memoria; la sesion larga viaja
+// en una cookie httpOnly que JavaScript no puede leer
 export interface Sesion {
   token: string;
+  expiraEn: number;
   usuario: Usuario;
 }
 
 export interface CredencialesLogin {
   email: string;
   password: string;
+  // Mantener la sesion 30 dias; si no, termina al cerrar el navegador
+  recordar?: boolean;
 }
 
 export interface DatosRegistro {
@@ -34,6 +39,7 @@ export interface DatosRegistro {
   email: string;
   password: string;
   phone?: string;
+  recordar?: boolean;
 }
 
 // Cada entrada del menu que se despliega al hacer clic en el perfil
