@@ -4,11 +4,12 @@ import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 interface Props {
   cursos: Curso[];
+  onVerAvance: (curso: Curso) => void;
   cargando: boolean;
   error: string | null;
 }
 
-export default function RejillaCursos({ cursos, cargando, error }: Props) {
+export default function RejillaCursos({ cursos, cargando, error, onVerAvance }: Props) {
   if (cargando) {
     return (
       <ul aria-label="Cargando cursos" className="grid gap-6 md:grid-cols-2 lg:gap-8">
@@ -48,7 +49,7 @@ export default function RejillaCursos({ cursos, cargando, error }: Props) {
   return (
     <ul aria-label="Catalogo de cursos" className="grid gap-6 md:grid-cols-2 lg:gap-8">
       {cursos.map((curso) => (
-        <TarjetaCurso key={curso.courseId} curso={curso} />
+        <TarjetaCurso key={curso.courseId} curso={curso} onVerAvance={onVerAvance} />
       ))}
     </ul>
   );

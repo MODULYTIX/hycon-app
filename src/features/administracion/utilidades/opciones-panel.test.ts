@@ -11,13 +11,12 @@ describe('SECCIONES_PANEL', () => {
     ]);
   });
 
-  it('marca publicaciones como no disponible porque no existe en el backend', () => {
-    const articulos = SECCIONES_PANEL.find((seccion) => seccion.id === 'publicaciones');
-    expect(articulos?.disponible).toBe(false);
-  });
-
-  it('solo productos y cursos tienen respaldo en el backend', () => {
-    expect(seccionesDisponibles().map((seccion) => seccion.id)).toEqual(['productos', 'cursos']);
+  it('las tres secciones tienen respaldo en el backend', () => {
+    expect(seccionesDisponibles().map((seccion) => seccion.id)).toEqual([
+      'productos',
+      'cursos',
+      'publicaciones',
+    ]);
   });
 
   it('todas las rutas cuelgan del panel de configuracion', () => {

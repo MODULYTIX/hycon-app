@@ -8,3 +8,16 @@ import { cleanup } from '@testing-library/react';
 afterEach(() => {
   cleanup();
 });
+
+// El editor de texto (ProseMirror) mide la posicion del cursor en pantalla.
+// jsdom no dibuja nada y no trae estas APIs: se simulan con medidas vacias.
+if (!Range.prototype.getBoundingClientRect) {
+  Range.prototype.getBoundingClientRect = () => new DOMRect();
+}
+if (!Range.prototype.getClientRects) {
+  Range.prototype.getClientRects = () =>
+    ({ length: 0, item: () => null, [Symbol.iterator]: [][Symbol.iterator] }) as unknown as DOMRectList;
+}
+if (!document.elementFromPoint) {
+  document.elementFromPoint = () => null;
+}

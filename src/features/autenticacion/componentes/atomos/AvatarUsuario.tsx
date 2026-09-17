@@ -24,7 +24,7 @@ export default function AvatarUsuario({ usuario, tamano = 'md' }: Props) {
   return (
     <span
       aria-hidden
-      className={`${medidas} flex shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white font-bold text-primary`}
+      className={`${medidas} flex shrink-0 items-center justify-center rounded-full border-2 border-white/80 bg-white font-bold text-encabezado`}
     >
       {obtenerIniciales(usuario.name, usuario.lastname)}
     </span>

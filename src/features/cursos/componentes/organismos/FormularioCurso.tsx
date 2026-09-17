@@ -1,168 +1,167 @@
-import { useState, type FormEvent } from 'react';
-import { Icon } from '@iconify/react';
-import CampoFormulario from '@/shared/ui/moleculas/CampoFormulario';
-import CampoArea from '@/shared/ui/moleculas/CampoArea';
-import CampoSeleccion from '@/shared/ui/moleculas/CampoSeleccion';
-import Cargador from '@/shared/ui/atomos/Cargador';
+import { useEffect, useState, type FormEvent } from 'react';
+import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
+import CampoTextoLargo from '@/shared/ui/moleculas/CampoTextoLargo';
+import SelectorEstado from '@/shared/ui/moleculas/SelectorEstado';
 import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
-import { crearCursoApi } from '@/features/cursos/servicios/cursos.api';
+import PieFormulario from '@/shared/ui/moleculas/PieFormulario';
+import ZonaImagen from '@/shared/ui/organismos/ZonaImagen';
+import { useImagenFormulario } from '@/shared/hooks/useImagenFormulario';
+import { actualizarCursoApi, crearCursoApi } from '@/features/cursos/servicios/cursos.api';
 import { validarCurso, type ErroresCurso } from '@/features/cursos/utilidades/validaciones-curso';
-import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
 import {
   CURSO_VACIO,
+  cursoAFormulario,
   type Curso,
-  type FormularioCurso as DatosCurso,
+  type FormularioCurso as ValoresCurso,
 } from '@/features/cursos/tipos/curso.tipos';
 
-const ESTADOS = [
-  { valor: 'active', etiqueta: 'Activo' },
-  { valor: 'inactive', etiqueta: 'Inactivo' },
-];
+type CampoTextual = Exclude<keyof ValoresCurso, 'status'>;
+
+interface Props {
+  curso: Curso | null;
+  onGuardado: (curso: Curso) => void;
+  onCancelar: () => void;
+  onCambiosPendientes: (hayCambios: boolean) => void;
+}
 
 export default function FormularioCurso({
-  onCreado,
+  curso,
+  onGuardado,
   onCancelar,
-}: {
-  onCreado: (curso: Curso) => void;
-  onCancelar: () => void;
-}) {
-  const [valores, setValores] = useState<DatosCurso>(CURSO_VACIO);
+  onCambiosPendientes,
+}: Props) {
+  const [inicial] = useState<ValoresCurso>(() => (curso ? cursoAFormulario(curso) : CURSO_VACIO));
+  const [valores, setValores] = useState<ValoresCurso>(inicial);
   const [errores, setErrores] = useState<ErroresCurso>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  const cambiar = (campo: keyof DatosCurso, valor: string) => {
-    setValores((previo) => ({ ...previo, [campo]: valor }));
-    setErrores((previo) => ({ ...previo, [campo]: undefined }));
-  };
+  const { imagen, setImagen, cambio: cambioImagen, resolverUrl } = useImagenFormulario(
+    curso?.thumbnailUrl ?? ''
+  );
+
+  const hayCambios = cambioImagen || JSON.stringify(valores) !== JSON.stringify(inicial);
+
+  useEffect(() => {
+    onCambiosPendientes(hayCambios);
+  }, [hayCambios, onCambiosPendientes]);
+
+  const enlazar = (campo: CampoTextual) => ({
+    id: `curso-${campo}`,
+    value: valores[campo],
+    error: errores[campo],
+    onChange: (evento: { target: { value: string } }) => {
+      setValores((previo) => ({ ...previo, [campo]: evento.target.value }));
+      setErrores((previo) => ({ ...previo, [campo]: undefined }));
+    },
+  });
 
   const enviar = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
     if (enviando) return;
 
-    const encontrados = validarCurso(valores);
+    const encontrados = validarCurso({
+      ...valores,
+      thumbnailUrl: imagen.archivo ? '' : imagen.url,
+    });
     setErrores(encontrados);
     setErrorGeneral(null);
-
-    if (!sinErroresCatalogo(encontrados)) return;
+    if (Object.keys(encontrados).length > 0) return;
 
     setEnviando(true);
     try {
-      const curso = await crearCursoApi(valores);
-      onCreado(curso);
-      setValores(CURSO_VACIO);
+      const datos = { ...valores, thumbnailUrl: await resolverUrl() };
+      const guardado = curso
+        ? await actualizarCursoApi(curso.courseId, datos)
+        : await crearCursoApi(datos);
+      onGuardado(guardado);
     } catch (error) {
-      setErrorGeneral(error instanceof Error ? error.message : 'No se pudo crear el curso');
+      setErrorGeneral(error instanceof Error ? error.message : 'No se pudo guardar el curso');
     } finally {
       setEnviando(false);
     }
   };
 
   return (
-    <form className="space-y-4" onSubmit={enviar} noValidate>
-      <AlertaFormulario mensaje={errorGeneral} />
+    <form className="flex min-h-0 flex-1 flex-col" onSubmit={enviar} noValidate>
+      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+        <AlertaFormulario mensaje={errorGeneral} />
 
-      <CampoFormulario
-        id="curso-name"
-        etiqueta="Nombre"
-        placeholder="Logistica de ultima milla"
-        value={valores.name}
-        error={errores.name}
-        onChange={(evento) => cambiar('name', evento.target.value)}
+        <div className="grid gap-6 md:grid-cols-[300px_minmax(0,1fr)]">
+          <ZonaImagen
+            etiqueta="Miniatura del curso"
+            proporcion="video"
+            valor={imagen}
+            onCambiar={(nuevo) => {
+              setImagen(nuevo);
+              setErrores((previo) => ({ ...previo, thumbnailUrl: undefined }));
+            }}
+            error={errores.thumbnailUrl}
+          />
+
+          <div className="space-y-4">
+            <CampoTexto
+              {...enlazar('name')}
+              etiqueta="Nombre"
+              placeholder="Pausas activas en oficina"
+              maxLength={200}
+            />
+            <CampoTexto
+              {...enlazar('videoUrl')}
+              etiqueta="URL del video"
+              placeholder="https://www.youtube.com/watch?v=..."
+              inputMode="url"
+              ayuda="Link de YouTube. Se verá dentro de la web y, si no subes miniatura, se usa la del video."
+              opcional
+            />
+            <div className="grid gap-4 sm:grid-cols-3">
+              <CampoTexto
+                {...enlazar('durationMinutes')}
+                etiqueta="Duración (min)"
+                inputMode="numeric"
+                placeholder="90"
+                opcional
+              />
+              <CampoTexto
+                {...enlazar('price')}
+                etiqueta="Precio"
+                prefijo="S/"
+                inputMode="decimal"
+                placeholder="120.00"
+              />
+              <CampoTexto
+                {...enlazar('discountPrice')}
+                etiqueta="Precio de oferta"
+                prefijo="S/"
+                inputMode="decimal"
+                placeholder="99.00"
+                opcional
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_260px]">
+          <CampoTextoLargo
+            {...enlazar('description')}
+            etiqueta="Descripción"
+            placeholder="Qué aprenderá el alumno"
+            opcional
+          />
+          <SelectorEstado
+            nombre="curso-status"
+            valor={valores.status}
+            onCambiar={(status) => setValores((previo) => ({ ...previo, status }))}
+          />
+        </div>
+      </div>
+
+      <PieFormulario
+        textoGuardar={curso ? 'Guardar cambios' : 'Agregar curso'}
+        textoGuardando="Guardando..."
+        enviando={enviando}
+        onCancelar={onCancelar}
       />
-
-      <CampoArea
-        id="curso-description"
-        etiqueta="Descripcion (opcional)"
-        placeholder="De que trata el curso"
-        value={valores.description}
-        onChange={(evento) => cambiar('description', evento.target.value)}
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <CampoFormulario
-          id="curso-videoUrl"
-          etiqueta="URL del video (opcional)"
-          placeholder="https://youtu.be/abc123"
-          value={valores.videoUrl}
-          error={errores.videoUrl}
-          onChange={(evento) => cambiar('videoUrl', evento.target.value)}
-        />
-        <CampoFormulario
-          id="curso-thumbnailUrl"
-          etiqueta="URL de la miniatura (opcional)"
-          placeholder="https://cdn.hycon.lat/curso.webp"
-          value={valores.thumbnailUrl}
-          error={errores.thumbnailUrl}
-          onChange={(evento) => cambiar('thumbnailUrl', evento.target.value)}
-        />
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-4">
-        <CampoFormulario
-          id="curso-durationMinutes"
-          etiqueta="Duracion (min)"
-          inputMode="numeric"
-          placeholder="90"
-          value={valores.durationMinutes}
-          error={errores.durationMinutes}
-          onChange={(evento) => cambiar('durationMinutes', evento.target.value)}
-        />
-        <CampoFormulario
-          id="curso-price"
-          etiqueta="Precio (S/)"
-          inputMode="decimal"
-          placeholder="120.00"
-          value={valores.price}
-          error={errores.price}
-          onChange={(evento) => cambiar('price', evento.target.value)}
-        />
-        <CampoFormulario
-          id="curso-discountPrice"
-          etiqueta="Precio oferta (opcional)"
-          inputMode="decimal"
-          placeholder="99.00"
-          value={valores.discountPrice}
-          error={errores.discountPrice}
-          onChange={(evento) => cambiar('discountPrice', evento.target.value)}
-        />
-        <CampoSeleccion
-          id="curso-status"
-          etiqueta="Estado"
-          opciones={ESTADOS}
-          value={valores.status}
-          onChange={(evento) => cambiar('status', evento.target.value)}
-        />
-      </div>
-
-      <div className="flex flex-col-reverse gap-3 pt-1 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancelar}
-          disabled={enviando}
-          className="rounded-lg border border-g-30 px-6 py-2.5 font-semibold text-g-60 transition-colors hover:bg-g-5 disabled:opacity-70"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="submit"
-          disabled={enviando}
-          className="flex items-center justify-center gap-2 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
-        >
-          {enviando ? (
-            <>
-              <Cargador etiqueta="Guardando curso" />
-              <span>Guardando...</span>
-            </>
-          ) : (
-            <>
-              <span>Agregar curso</span>
-              <Icon icon="solar:add-circle-bold" width="18" height="18" />
-            </>
-          )}
-        </button>
-      </div>
     </form>
   );
 }

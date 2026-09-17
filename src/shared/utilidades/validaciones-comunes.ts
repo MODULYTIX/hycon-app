@@ -53,7 +53,10 @@ export const validarEnteroOpcional = (
   return undefined;
 };
 
-export const validarUrlOpcional = (valor: string): string | undefined => {
+export const validarTextoOpcional = (valor: string, maximo: number): string | undefined =>
+  valor.trim().length > maximo ? `No puede superar los ${maximo} caracteres` : undefined;
+
+export const validarUrlOpcional =(valor: string): string | undefined => {
   if (!valor.trim()) return undefined;
   if (!esUrlValida(valor.trim())) return 'Debe ser una URL valida (http o https)';
   if (valor.trim().length > 500) return 'La URL es demasiado larga';

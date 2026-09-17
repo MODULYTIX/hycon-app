@@ -2,6 +2,9 @@ import { Icon } from '@iconify/react';
 import { NavLink } from 'react-router-dom';
 import type { SeccionPanel } from '@/features/administracion/utilidades/opciones-panel';
 
+const BASE =
+  'relative flex shrink-0 items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2.5 text-[14px] font-semibold tracking-wide transition-colors';
+
 // Entrada de la barra lateral. Las secciones sin respaldo en el backend
 // se pintan apagadas y no navegan a ningun sitio.
 export default function ItemSeccion({ seccion }: { seccion: SeccionPanel }) {
@@ -10,10 +13,10 @@ export default function ItemSeccion({ seccion }: { seccion: SeccionPanel }) {
       <li>
         <span
           aria-disabled="true"
-          title="Todavia no disponible"
-          className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-[17px] font-semibold tracking-wide text-g-30"
+          title="Todavía no disponible"
+          className={`${BASE} cursor-not-allowed text-g-30`}
         >
-          <Icon icon={seccion.icono} width="18" height="18" aria-hidden className="shrink-0" />
+          <Icon icon={seccion.icono} width="19" height="19" aria-hidden className="shrink-0" />
           {seccion.etiqueta}
         </span>
       </li>
@@ -25,12 +28,14 @@ export default function ItemSeccion({ seccion }: { seccion: SeccionPanel }) {
       <NavLink
         to={seccion.ruta}
         className={({ isActive }) =>
-          `flex items-center gap-3 rounded-lg px-3 py-2.5 text-[17px] font-semibold tracking-wide transition-colors ${
-            isActive ? 'bg-bc-5 text-primary' : 'text-g-70 hover:bg-g-5 hover:text-primary'
+          `${BASE} ${
+            isActive
+              ? 'bg-hy-60 text-white'
+              : 'text-hy-80 hover:bg-hy-10'
           }`
         }
       >
-        <Icon icon={seccion.icono} width="18" height="18" aria-hidden className="shrink-0" />
+        <Icon icon={seccion.icono} width="19" height="19" aria-hidden className="shrink-0" />
         {seccion.etiqueta}
       </NavLink>
     </li>

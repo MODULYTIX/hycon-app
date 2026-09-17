@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { Icon } from '@iconify/react';
 import CampoFormulario from '@/shared/ui/moleculas/CampoFormulario';
-import Cargador from '@/shared/ui/atomos/Cargador';
 import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
+import Boton from '@/shared/ui/atomos/Boton';
 import CampoContrasena from '@/features/autenticacion/componentes/moleculas/CampoContrasena';
+import CasillaRecordar from '@/features/autenticacion/componentes/moleculas/CasillaRecordar';
+import AvisoBloqueo from '@/features/autenticacion/componentes/moleculas/AvisoBloqueo';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
+import { useCuentaAtras } from '@/features/autenticacion/hooks/useCuentaAtras';
 import {
   sinErrores,
   validarEmail,
@@ -12,42 +14,47 @@ import {
   validarPasswordLogin,
   type ErroresLogin,
 } from '@/features/autenticacion/utilidades/validaciones';
+import { ErrorHttp } from '@/shared/utilidades/cliente-http';
 import type { Usuario } from '@/features/autenticacion/tipos/autenticacion.tipos';
+
+type Campo = 'email' | 'password';
 
 export default function FormularioLogin({ onExito }: { onExito: (usuario: Usuario) => void }) {
   const { iniciarSesion } = useAutenticacion();
 
   const [valores, setValores] = useState({ email: '', password: '' });
+  const [recordar, setRecordar] = useState(false);
   const [errores, setErrores] = useState<ErroresLogin>({});
-  const [tocados, setTocados] = useState<Record<string, boolean>>({});
+  const [tocados, setTocados] = useState<Partial<Record<Campo, boolean>>>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [bloqueadoHasta, setBloqueadoHasta] = useState<number | null>(null);
 
-  const cambiar = (campo: 'email' | 'password', valor: string) => {
+  const segundosBloqueo = useCuentaAtras(bloqueadoHasta);
+  const bloqueado = segundosBloqueo > 0;
+
+  const validarCampo = (campo: Campo, valor: string) =>
+    campo === 'email' ? validarEmail(valor) : validarPasswordLogin(valor);
+
+  const cambiar = (campo: Campo, valor: string) => {
     setValores((previo) => ({ ...previo, [campo]: valor }));
     // Si el campo ya fue tocado se revalida al escribir para que el error desaparezca solo
-    if (tocados[campo]) {
-      const mensaje = campo === 'email' ? validarEmail(valor) : validarPasswordLogin(valor);
-      setErrores((previo) => ({ ...previo, [campo]: mensaje }));
-    }
+    if (tocados[campo]) setErrores((previo) => ({ ...previo, [campo]: validarCampo(campo, valor) }));
   };
 
-  const marcarTocado = (campo: 'email' | 'password') => {
+  const marcarTocado = (campo: Campo) => {
     setTocados((previo) => ({ ...previo, [campo]: true }));
-    const mensaje =
-      campo === 'email' ? validarEmail(valores.email) : validarPasswordLogin(valores.password);
-    setErrores((previo) => ({ ...previo, [campo]: mensaje }));
+    setErrores((previo) => ({ ...previo, [campo]: validarCampo(campo, valores[campo]) }));
   };
 
   const enviar = async (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
-    if (enviando) return;
+    if (enviando || bloqueado) return;
 
     const encontrados = validarLogin(valores);
     setErrores(encontrados);
     setTocados({ email: true, password: true });
     setErrorGeneral(null);
-
     if (!sinErrores(encontrados)) return;
 
     setEnviando(true);
@@ -55,12 +62,17 @@ export default function FormularioLogin({ onExito }: { onExito: (usuario: Usuari
       const usuario = await iniciarSesion({
         email: valores.email.trim().toLowerCase(),
         password: valores.password,
+        recordar,
       });
       onExito(usuario);
     } catch (error) {
-      setErrorGeneral(
-        error instanceof Error ? error.message : 'No se pudo iniciar sesion'
-      );
+      // Tras un intento fallido la contrasena se borra: no se queda escrita en pantalla
+      setValores((previo) => ({ ...previo, password: '' }));
+      if (error instanceof ErrorHttp && error.estado === 429 && error.reintentarEnSegundos) {
+        setBloqueadoHasta(Date.now() + error.reintentarEnSegundos * 1000);
+      } else {
+        setErrorGeneral(error instanceof Error ? error.message : 'No se pudo iniciar sesión');
+      }
     } finally {
       setEnviando(false);
     }
@@ -68,14 +80,16 @@ export default function FormularioLogin({ onExito }: { onExito: (usuario: Usuari
 
   return (
     <form className="space-y-4" onSubmit={enviar} noValidate>
-      <AlertaFormulario mensaje={errorGeneral} />
+      {bloqueado ? <AvisoBloqueo segundos={segundosBloqueo} /> : <AlertaFormulario mensaje={errorGeneral} />}
 
       <CampoFormulario
         id="login-email"
-        etiqueta="Correo electronico"
-        icono="solar:letter-bold"
+        etiqueta="Correo electrónico"
+        icono="solar:letter-linear"
         type="email"
-        autoComplete="email"
+        autoComplete="username"
+        autoCapitalize="none"
+        spellCheck={false}
         placeholder="tucorreo@empresa.com"
         value={valores.email}
         error={errores.email}
@@ -85,32 +99,26 @@ export default function FormularioLogin({ onExito }: { onExito: (usuario: Usuari
 
       <CampoContrasena
         id="login-password"
-        etiqueta="Contrasena"
+        etiqueta="Contraseña"
         autoComplete="current-password"
-        placeholder="Tu contrasena"
+        placeholder="Tu contraseña"
         value={valores.password}
         error={errores.password}
         onChange={(evento) => cambiar('password', evento.target.value)}
         onBlur={() => marcarTocado('password')}
       />
 
-      <button
+      <CasillaRecordar id="login-recordar" marcada={recordar} onCambiar={setRecordar} />
+
+      <Boton
         type="submit"
-        disabled={enviando}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-70"
+        cargando={enviando}
+        disabled={bloqueado}
+        icono={bloqueado ? 'solar:lock-keyhole-minimalistic-bold' : 'solar:login-3-bold'}
+        className="h-12 w-full text-[15px]"
       >
-        {enviando ? (
-          <>
-            <Cargador etiqueta="Iniciando sesion" />
-            <span>Iniciando sesion...</span>
-          </>
-        ) : (
-          <>
-            <span>Iniciar sesion</span>
-            <Icon icon="solar:login-3-bold" width="18" height="18" />
-          </>
-        )}
-      </button>
+        {enviando ? 'Verificando...' : 'Iniciar sesión'}
+      </Boton>
     </form>
   );
 }

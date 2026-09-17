@@ -1,4 +1,4 @@
-import { peticion } from '@/shared/utilidades/cliente-http';
+import { peticion, renovarSesion } from '@/shared/utilidades/cliente-http';
 import type {
   CredencialesLogin,
   DatosRegistro,
@@ -14,7 +14,12 @@ export const iniciarSesionApi = (credenciales: CredencialesLogin) =>
 export const registrarApi = (datos: DatosRegistro) =>
   peticion<Sesion>(`${BASE}/register`, { metodo: 'POST', cuerpo: datos });
 
-// Recupera el usuario de la sesion guardada al recargar la pagina
+// Recupera la sesion al recargar la pagina a partir de la cookie httpOnly
+export const restaurarSesionApi = () => renovarSesion<Usuario>();
+
+// Revoca la sesion en el servidor; olvidar el token en el navegador no basta
+export const cerrarSesionApi = () => peticion<void>(`${BASE}/logout`, { metodo: 'POST' });
+
 export const obtenerPerfilApi = (senal?: AbortSignal) =>
   peticion<{ usuario: Usuario }>(`${BASE}/me`, { autenticada: true, senal }).then(
     (respuesta) => respuesta.usuario

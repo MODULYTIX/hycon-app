@@ -52,8 +52,8 @@ const renderizar = () =>
 describe('rutas del panel', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.mocked(apiProductos.listarProductosApi).mockResolvedValue([]);
-    vi.mocked(apiCursos.listarCursosApi).mockResolvedValue([]);
+    vi.mocked(apiProductos.listarProductosApi).mockResolvedValue({ elementos: [], paginacion: { pagina: 1, porPagina: 6, total: 0, totalPaginas: 1 } });
+    vi.mocked(apiCursos.listarCursosApi).mockResolvedValue({ elementos: [], paginacion: { pagina: 1, porPagina: 6, total: 0, totalPaginas: 1 } });
   });
 
   it('la ruta base redirige a la seccion de productos', async () => {

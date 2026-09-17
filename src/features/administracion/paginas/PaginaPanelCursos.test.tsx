@@ -1,19 +1,28 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import PaginaPanelCursos from './PaginaPanelCursos';
-import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
 import * as api from '@/features/cursos/servicios/cursos.api';
+import * as apiImagenes from '@/shared/servicios/imagenes.api';
+import * as youtubeApi from '@/shared/servicios/youtube-api';
+import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 vi.mock('@/features/cursos/servicios/cursos.api');
+vi.mock('@/shared/servicios/youtube-api');
 
-const cursoExistente: Curso = {
+let jugadores: JugadorFalso[];
+vi.mock('@/shared/servicios/imagenes.api');
+
+type Usuario = ReturnType<typeof userEvent.setup>;
+
+const pausas: Curso = {
   courseId: 1,
-  name: 'Logistica de ultima milla',
+  name: 'Pausas activas en oficina',
   description: null,
-  videoUrl: 'https://youtu.be/abc123',
+  videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
+  youtubeId: 'dQw4w9WgXcQ',
   thumbnailUrl: null,
   durationMinutes: 90,
   price: 120,
@@ -22,122 +31,194 @@ const cursoExistente: Curso = {
   createdAt: '2026-09-10T12:00:00.000Z',
 };
 
-const cursoNuevo: Curso = {
-  courseId: 2,
-  name: 'Atencion al cliente',
-  description: null,
-  videoUrl: null,
-  thumbnailUrl: null,
-  durationMinutes: null,
-  price: 80,
-  discountPrice: null,
-  status: 'active',
-  createdAt: '2026-09-10T13:00:00.000Z',
-};
+const pagina = (elementos: Curso[], extra = {}) => ({
+  elementos,
+  paginacion: { pagina: 1, porPagina: 6, total: elementos.length, totalPaginas: 1, ...extra },
+});
 
 const renderizar = () =>
   render(
-    <AutenticacionProveedor>
-      <MemoryRouter>
-        <PaginaPanelCursos />
-      </MemoryRouter>
-    </AutenticacionProveedor>
+    <MemoryRouter>
+      <PaginaPanelCursos />
+    </MemoryRouter>
   );
 
-const lista = () => screen.getByRole('list', { name: /cursos del catalogo/i });
+const esperarListado = () => screen.findByText('Pausas activas en oficina');
 
-const abrirModal = async (usuario: ReturnType<typeof userEvent.setup>) => {
+const abrirAlta = async (usuario: Usuario) => {
   await usuario.click(screen.getByRole('button', { name: /agregar curso/i }));
-  return screen.findByRole('dialog');
+  return screen.findByRole('dialog', { name: /agregar curso/i });
 };
 
 describe('PaginaPanelCursos', () => {
   beforeEach(() => {
-    window.localStorage.clear();
-    vi.mocked(api.listarCursosApi).mockResolvedValue([cursoExistente]);
-    vi.mocked(api.crearCursoApi).mockResolvedValue(cursoNuevo);
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([pausas]));
+    vi.mocked(api.crearCursoApi).mockImplementation(async (datos) => ({
+      ...pausas,
+      courseId: 2,
+      name: datos.name,
+    }));
+    vi.mocked(api.actualizarCursoApi).mockImplementation(async (id, datos) => ({
+      ...pausas,
+      courseId: id,
+      name: datos.name,
+      durationMinutes: Number(datos.durationMinutes) || null,
+    }));
+    vi.mocked(api.eliminarCursoApi).mockResolvedValue(undefined);
+    vi.mocked(apiImagenes.subirImagenApi).mockResolvedValue(
+      'http://localhost:4000/uploads/imagenes/miniatura.webp'
+    );
   });
 
-  it('muestra los cursos con la duracion formateada y el enlace al video', async () => {
+  it('lista los cursos con duracion formateada y su video', async () => {
     renderizar();
+    await esperarListado();
 
-    const fila = within(await screen.findByRole('list', { name: /cursos/i })).getByRole(
+    const fila = within(screen.getByRole('list', { name: /cursos del cat[aá]logo/i })).getByRole(
       'listitem'
     );
-
-    expect(within(fila).getByText('1 h 30 min')).toBeInTheDocument();
-    expect(within(fila).getByRole('link', { name: /ver video/i })).toHaveAttribute(
-      'href',
-      'https://youtu.be/abc123'
-    );
+    expect(fila).toHaveTextContent('1 h 30 min');
+    expect(within(fila).getByRole('button', { name: /ver video/i })).toBeInTheDocument();
+    expect(api.listarCursosApi).toHaveBeenCalledWith('todos', 1, expect.anything());
   });
 
   it('muestra un estado vacio cuando no hay cursos', async () => {
-    vi.mocked(api.listarCursosApi).mockResolvedValue([]);
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([]));
     renderizar();
 
-    expect(await screen.findByText(/todavia no hay cursos/i)).toBeInTheDocument();
+    expect(await screen.findByText(/todav[ií]a no hay cursos/i)).toBeInTheDocument();
   });
 
-  it('el formulario vive en un modal que empieza cerrado', async () => {
+  it('pagina desde el backend cuando hay mas de 6', async () => {
     const usuario = userEvent.setup();
+    vi.mocked(api.listarCursosApi).mockImplementation(async (_estado, numero) =>
+      numero === 1
+        ? pagina([pausas], { total: 9, totalPaginas: 2 })
+        : pagina([{ ...pausas, courseId: 9, name: 'Levantamiento de cargas' }], {
+            pagina: 2,
+            total: 9,
+            totalPaginas: 2,
+          })
+    );
     renderizar();
-    await screen.findByText('Logistica de ultima milla');
+    await esperarListado();
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
 
-    const dialogo = await abrirModal(usuario);
-
-    expect(within(dialogo).getByLabelText(/^nombre$/i)).toBeInTheDocument();
+    expect(await screen.findByText('Levantamiento de cargas')).toBeInTheDocument();
   });
 
-  it('valida dentro del modal antes de llamar al backend', async () => {
+  it('ver video lo reproduce en un modal dentro del panel', async () => {
     const usuario = userEvent.setup();
     renderizar();
-    await screen.findByText('Logistica de ultima milla');
+    await esperarListado();
 
-    const dialogo = await abrirModal(usuario);
-    await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
+    await usuario.click(screen.getByRole('button', { name: /ver video/i }));
 
-    expect(await within(dialogo).findByText('El nombre es obligatorio')).toBeInTheDocument();
-    expect(api.crearCursoApi).not.toHaveBeenCalled();
+    const dialogo = await screen.findByRole('dialog', { name: 'Pausas activas en oficina' });
+    expect(within(dialogo).getByRole('region', { name: /reproductor/i })).toBeInTheDocument();
+    await waitFor(() => expect(jugadores[0]?.opciones.videoId).toBe('dQw4w9WgXcQ'));
   });
 
-  it('rechaza una URL de video mal escrita', async () => {
+  it('avisa si un curso antiguo tiene un link que no es de YouTube', async () => {
+    vi.mocked(api.listarCursosApi).mockResolvedValue(
+      pagina([{ ...pausas, videoUrl: 'https://youtu.be/demo-hycon', youtubeId: null }])
+    );
+    renderizar();
+
+    expect(await screen.findByText(/link de video no valido/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /ver video/i })).not.toBeInTheDocument();
+  });
+
+  it('solo acepta links de YouTube antes de guardar', async () => {
     const usuario = userEvent.setup();
     renderizar();
-    await screen.findByText('Logistica de ultima milla');
+    await esperarListado();
 
-    const dialogo = await abrirModal(usuario);
-    await usuario.type(within(dialogo).getByLabelText(/^nombre$/i), 'Atencion al cliente');
-    await usuario.type(within(dialogo).getByLabelText(/^precio \(s\/\)$/i), '80');
+    const dialogo = await abrirAlta(usuario);
+    await usuario.type(within(dialogo).getByLabelText(/^nombre$/i), 'Levantamiento de cargas');
+    await usuario.type(within(dialogo).getByLabelText(/^precio$/i), '80');
     await usuario.type(within(dialogo).getByLabelText(/url del video/i), 'youtube');
     await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
 
-    expect(await within(dialogo).findByText(/debe ser una url valida/i)).toBeInTheDocument();
+    expect(await within(dialogo).findByText(/debe ser un link de youtube valido/i)).toBeInTheDocument();
     expect(api.crearCursoApi).not.toHaveBeenCalled();
   });
 
-  it('guarda, cierra el modal y agrega el curso al listado', async () => {
+  it('crea el curso con su miniatura subida y vuelve a la primera pagina', async () => {
     const usuario = userEvent.setup();
     renderizar();
-    await screen.findByText('Logistica de ultima milla');
+    await esperarListado();
 
-    const dialogo = await abrirModal(usuario);
-    await usuario.type(within(dialogo).getByLabelText(/^nombre$/i), 'Atencion al cliente');
-    await usuario.type(within(dialogo).getByLabelText(/^precio \(s\/\)$/i), '80');
+    const dialogo = await abrirAlta(usuario);
+    await usuario.type(within(dialogo).getByLabelText(/^nombre$/i), 'Levantamiento de cargas');
+    await usuario.type(within(dialogo).getByLabelText(/^precio$/i), '80');
+    const archivo = new File([new Uint8Array(500)], 'portada.webp', { type: 'image/webp' });
+    await usuario.upload(within(dialogo).getByLabelText(/elegir archivo/i), archivo);
     await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-
+    expect(apiImagenes.subirImagenApi).toHaveBeenCalledWith(archivo);
     expect(api.crearCursoApi).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'Atencion al cliente', price: '80' })
+      expect.objectContaining({
+        name: 'Levantamiento de cargas',
+        price: '80',
+        thumbnailUrl: 'http://localhost:4000/uploads/imagenes/miniatura.webp',
+      })
     );
+    expect(await screen.findByRole('status')).toHaveTextContent(/agregado/i);
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything());
+  });
 
-    const filas = within(lista()).getAllByRole('listitem');
-    expect(filas[0]).toHaveTextContent('Atencion al cliente');
-    // Sin duracion declarada la fila muestra un guion en su lugar
-    expect(filas[0]).toHaveTextContent('-');
-    expect(await screen.findByText(/agregado al catalogo/i)).toBeInTheDocument();
+  it('edita un curso y actualiza su fila', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await esperarListado();
+
+    await usuario.click(screen.getByRole('button', { name: 'Editar Pausas activas en oficina' }));
+    const dialogo = await screen.findByRole('dialog', { name: /editar curso/i });
+    const duracion = within(dialogo).getByLabelText(/duraci[oó]n/i);
+    expect(duracion).toHaveValue('90');
+
+    await usuario.clear(duracion);
+    await usuario.type(duracion, '45');
+    await usuario.click(within(dialogo).getByRole('button', { name: /guardar cambios/i }));
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(api.actualizarCursoApi).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ durationMinutes: '45' })
+    );
+    expect(screen.getByText('45 min')).toBeInTheDocument();
+  });
+
+  it('pide confirmacion antes de salir con datos escritos', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await esperarListado();
+
+    const dialogo = await abrirAlta(usuario);
+    await usuario.type(within(dialogo).getByLabelText(/^nombre$/i), 'Borrador');
+    fireEvent.mouseDown(dialogo.parentElement as HTMLElement);
+
+    expect(screen.getByRole('alertdialog', { name: /cambios sin guardar/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /agregar curso/i })).toBeInTheDocument();
+  });
+
+  it('elimina un curso tras confirmar', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await esperarListado();
+
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([]));
+    await usuario.click(screen.getByRole('button', { name: 'Eliminar Pausas activas en oficina' }));
+    const dialogo = await screen.findByRole('dialog', { name: /eliminar este curso/i });
+    await usuario.click(within(dialogo).getByRole('button', { name: /s[ií], eliminar/i }));
+
+    expect(await screen.findByText(/todav[ií]a no hay cursos/i)).toBeInTheDocument();
+    expect(api.eliminarCursoApi).toHaveBeenCalledWith(1);
   });
 });

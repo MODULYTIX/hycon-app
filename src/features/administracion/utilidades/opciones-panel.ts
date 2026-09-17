@@ -1,8 +1,7 @@
 import { RUTAS } from '@/app/rutas/rutas';
 
-// Secciones de la barra lateral del panel.
-// PUBLICACIONES aparece desactivada a proposito: todavia no existe una tabla que la
-// respalde en el esquema de Prisma, asi que no hay endpoint al que llamar.
+// Secciones de la barra lateral del panel. Una seccion con disponible: false se pinta
+// apagada: sirve para anunciar algo que aun no tiene respaldo en el backend.
 export interface SeccionPanel {
   id: string;
   etiqueta: string;
@@ -31,7 +30,7 @@ export const SECCIONES_PANEL: SeccionPanel[] = [
     etiqueta: 'PUBLICACIONES',
     icono: 'solar:document-text-bold',
     ruta: RUTAS.panelPublicaciones,
-    disponible: false,
+    disponible: true,
   },
 ];
 

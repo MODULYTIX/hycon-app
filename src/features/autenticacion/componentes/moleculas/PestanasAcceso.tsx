@@ -6,15 +6,15 @@ interface Props {
 }
 
 const PESTANAS: Array<{ modo: ModoAcceso; etiqueta: string }> = [
-  { modo: 'login', etiqueta: 'Iniciar sesion' },
+  { modo: 'login', etiqueta: 'Iniciar sesión' },
   { modo: 'registro', etiqueta: 'Crear cuenta' },
 ];
 
-// Reutiliza el mismo lenguaje visual que las pestanas del formulario de contacto
+// Control segmentado: la pestana activa se levanta sobre un fondo suave
 export default function PestanasAcceso({ modo, onCambiar }: Props) {
   return (
-    <div className="flex" role="tablist" aria-label="Tipo de acceso">
-      {PESTANAS.map((pestana, indice) => {
+    <div role="tablist" aria-label="Tipo de acceso" className="grid grid-cols-2 gap-1 rounded-xl bg-g-10 p-1">
+      {PESTANAS.map((pestana) => {
         const activa = pestana.modo === modo;
         return (
           <button
@@ -23,10 +23,9 @@ export default function PestanasAcceso({ modo, onCambiar }: Props) {
             role="tab"
             aria-selected={activa}
             onClick={() => onCambiar(pestana.modo)}
-            className={`flex-1 py-2 font-semibold shadow-lg transition-all duration-300 ease-in-out
-              ${indice === 0 ? 'rounded-l-lg' : ''}
-              ${indice === PESTANAS.length - 1 ? 'rounded-r-lg' : ''}
-              ${activa ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700'}`}
+            className={`h-10 rounded-lg text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-marca ${
+              activa ? 'bg-white text-marca shadow-sm' : 'text-g-50 hover:text-g-80'
+            }`}
           >
             {pestana.etiqueta}
           </button>

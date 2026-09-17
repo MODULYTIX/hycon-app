@@ -32,12 +32,13 @@ describe('BarraLateral', () => {
     );
   });
 
-  it('publicaciones aparece desactivada y sin enlace', () => {
-    // No hay tabla de publicaciones en el backend, asi que no debe navegar
+  it('publicaciones es un enlace navegable', () => {
     renderizar();
 
-    expect(screen.queryByRole('link', { name: 'PUBLICACIONES' })).not.toBeInTheDocument();
-    expect(screen.getByText('PUBLICACIONES')).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('link', { name: 'PUBLICACIONES' })).toHaveAttribute(
+      'href',
+      '/panel-de-configuracion/publicaciones'
+    );
   });
 
   it('marca como actual la seccion en la que estas', () => {

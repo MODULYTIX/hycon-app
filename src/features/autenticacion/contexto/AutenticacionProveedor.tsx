@@ -1,19 +1,24 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import {
+  cerrarSesionApi,
   iniciarSesionApi,
-  obtenerPerfilApi,
   registrarApi,
+  restaurarSesionApi,
 } from '@/features/autenticacion/servicios/autenticacion.api';
 import type {
   CredencialesLogin,
   DatosRegistro,
+  Sesion,
   Usuario,
 } from '@/features/autenticacion/tipos/autenticacion.tipos';
 import {
   borrarToken,
   guardarToken,
-  leerToken,
+  haySesionMarcada,
+  limpiarTokenAntiguo,
+  marcarSesionActiva,
 } from '@/shared/utilidades/almacenamiento-sesion';
+import { alExpirarSesion } from '@/shared/utilidades/cliente-http';
 import {
   AutenticacionContexto,
   type ValorAutenticacion,
@@ -21,28 +26,33 @@ import {
 
 export default function AutenticacionProveedor({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
-  const [cargando, setCargando] = useState<boolean>(() => Boolean(leerToken()));
+  const [cargando, setCargando] = useState<boolean>(() => haySesionMarcada());
 
-  // Al montar, si hay token guardado se pide el perfil para reconstruir la sesion.
-  // Si el token caduco o el usuario fue borrado, se limpia sin molestar al visitante.
+  const olvidarSesion = useCallback(() => {
+    borrarToken();
+    marcarSesionActiva(false);
+    setUsuario(null);
+  }, []);
+
+  // Al cargar: si hubo sesion en este navegador, se recupera con la cookie httpOnly.
+  // Si la cookie caduco o fue revocada, se limpia sin molestar al visitante.
   useEffect(() => {
-    const token = leerToken();
-    if (!token) {
+    limpiarTokenAntiguo();
+
+    if (!haySesionMarcada()) {
       setCargando(false);
       return;
     }
 
-    const controlador = new AbortController();
     let vigente = true;
-
-    obtenerPerfilApi(controlador.signal)
-      .then((perfil) => {
-        if (vigente) setUsuario(perfil);
+    // La renovacion no se cancela al desmontar: cortarla a mitad dejaria el
+    // navegador con un token que el servidor ya roto
+    restaurarSesionApi()
+      .then((sesion) => {
+        if (vigente) setUsuario(sesion.usuario);
       })
       .catch(() => {
-        if (!vigente) return;
-        borrarToken();
-        setUsuario(null);
+        if (vigente) olvidarSesion();
       })
       .finally(() => {
         if (vigente) setCargando(false);
@@ -50,28 +60,38 @@ export default function AutenticacionProveedor({ children }: { children: ReactNo
 
     return () => {
       vigente = false;
-      controlador.abort();
     };
-  }, []);
+  }, [olvidarSesion]);
 
-  const iniciarSesion = useCallback(async (credenciales: CredencialesLogin) => {
-    const sesion = await iniciarSesionApi(credenciales);
+  // Si en mitad de la navegacion la sesion ya no se puede renovar, la interfaz lo refleja
+  useEffect(() => alExpirarSesion(olvidarSesion), [olvidarSesion]);
+
+  const aplicarSesion = useCallback((sesion: Sesion) => {
     guardarToken(sesion.token);
+    marcarSesionActiva(true);
     setUsuario(sesion.usuario);
     return sesion.usuario;
   }, []);
 
-  const registrar = useCallback(async (datos: DatosRegistro) => {
-    const sesion = await registrarApi(datos);
-    guardarToken(sesion.token);
-    setUsuario(sesion.usuario);
-    return sesion.usuario;
-  }, []);
+  const iniciarSesion = useCallback(
+    async (credenciales: CredencialesLogin) => aplicarSesion(await iniciarSesionApi(credenciales)),
+    [aplicarSesion]
+  );
 
-  const cerrarSesion = useCallback(() => {
-    borrarToken();
-    setUsuario(null);
-  }, []);
+  const registrar = useCallback(
+    async (datos: DatosRegistro) => aplicarSesion(await registrarApi(datos)),
+    [aplicarSesion]
+  );
+
+  const cerrarSesion = useCallback(async () => {
+    // La interfaz se limpia aunque el servidor no responda: el usuario pidio salir
+    olvidarSesion();
+    try {
+      await cerrarSesionApi();
+    } catch {
+      // Sin conexion la sesion caducara sola en el servidor
+    }
+  }, [olvidarSesion]);
 
   const valor = useMemo<ValorAutenticacion>(
     () => ({

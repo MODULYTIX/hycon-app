@@ -1,4 +1,4 @@
-import { Icon } from '@iconify/react';
+import Boton from '@/shared/ui/atomos/Boton';
 
 interface Props {
   titulo: string;
@@ -10,20 +10,20 @@ interface Props {
 // Titulo de la seccion con el boton que abre el modal de alta
 export default function CabeceraSeccion({ titulo, descripcion, textoBoton, onAgregar }: Props) {
   return (
-    <header className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <header className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="text-[26px] font-medium text-g-80">{titulo}</h1>
-        <p className="text-[15px] text-g-50">{descripcion}</p>
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-hy-50">
+          Panel de configuración
+        </p>
+        <h1 className="mt-1 text-[26px] font-semibold leading-tight text-hy-tinta sm:text-[30px]">
+          {titulo}
+        </h1>
+        <p className="mt-1 max-w-[560px] text-[14.5px] text-g-50">{descripcion}</p>
       </div>
 
-      <button
-        type="button"
-        onClick={onAgregar}
-        className="flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700"
-      >
-        <Icon icon="solar:add-circle-bold" width="18" height="18" aria-hidden />
+      <Boton onClick={onAgregar} icono="solar:add-circle-bold" className="h-11 px-5 sm:shrink-0">
         {textoBoton}
-      </button>
+      </Boton>
     </header>
   );
 }
