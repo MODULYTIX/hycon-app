@@ -26,10 +26,18 @@ describe('validarCurso', () => {
     expect(validarCurso({ ...curso, durationMinutes: '90' }).durationMinutes).toBeUndefined();
   });
 
-  it('valida las URLs de video y miniatura', () => {
+  it('solo acepta links de YouTube como video', () => {
     expect(validarCurso({ ...curso, videoUrl: 'youtube' }).videoUrl).toBeDefined();
+    expect(validarCurso({ ...curso, videoUrl: 'https://vimeo.com/123' }).videoUrl).toBe(
+      'Debe ser un link de YouTube valido'
+    );
+    expect(
+      validarCurso({ ...curso, videoUrl: 'https://youtu.be/dQw4w9WgXcQ' }).videoUrl
+    ).toBeUndefined();
+  });
+
+  it('valida la URL de la miniatura', () => {
     expect(validarCurso({ ...curso, thumbnailUrl: 'foto' }).thumbnailUrl).toBeDefined();
-    expect(validarCurso({ ...curso, videoUrl: 'https://youtu.be/abc' }).videoUrl).toBeUndefined();
   });
 
   it('exige que la oferta sea menor que el precio', () => {
@@ -53,6 +61,7 @@ describe('cursoAFormulario', () => {
         name: 'Pausas activas',
         description: null,
         videoUrl: 'https://youtu.be/abc',
+        youtubeId: null,
         thumbnailUrl: null,
         durationMinutes: null,
         price: 120,

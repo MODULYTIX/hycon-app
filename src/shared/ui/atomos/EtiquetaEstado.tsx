@@ -1,5 +1,11 @@
 // Distintivo de estado en los listados del panel
-export default function EtiquetaEstado({ estado }: { estado: string }) {
+export default function EtiquetaEstado({
+  estado,
+  textos = { activo: 'Activo', inactivo: 'Inactivo' },
+}: {
+  estado: string;
+  textos?: { activo: string; inactivo: string };
+}) {
   const activo = estado === 'active';
 
   return (
@@ -12,7 +18,7 @@ export default function EtiquetaEstado({ estado }: { estado: string }) {
         aria-hidden
         className={`h-1.5 w-1.5 rounded-full ${activo ? 'bg-hy-verde' : 'bg-g-40'}`}
       />
-      {activo ? 'Activo' : 'Inactivo'}
+      {activo ? textos.activo : textos.inactivo}
     </span>
   );
 }

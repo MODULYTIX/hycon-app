@@ -2,9 +2,8 @@ import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
 
 /**
- * Publicaciones todavia no tiene respaldo en el backend: el esquema de Prisma
- * no define una tabla de articulos, asi que no hay endpoint que consultar.
- * La pagina existe para que la ruta del menu no quede rota.
+ * La vista publica de articulos aun no esta construida; los articulos ya se
+ * gestionan desde el panel (/api/v1/posts). La pagina evita que el menu quede roto.
  */
 export default function PaginaPublicaciones() {
   return (
@@ -16,7 +15,7 @@ export default function PaginaPublicaciones() {
         <EstadoVacio
           icono="solar:document-text-linear"
           titulo="Seccion en preparacion"
-          descripcion="Aun no hay publicaciones. Esta seccion se activara cuando el backend tenga su modelo de articulos."
+          descripcion="Muy pronto publicaremos aqui nuestros articulos sobre ergonomia y logistica."
         />
       </div>
     </PlantillaSeccion>

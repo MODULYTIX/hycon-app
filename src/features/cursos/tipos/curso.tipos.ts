@@ -4,6 +4,8 @@ export interface Curso {
   name: string;
   description: string | null;
   videoUrl: string | null;
+  // Id del video calculado por el backend a partir de videoUrl
+  youtubeId: string | null;
   thumbnailUrl: string | null;
   durationMinutes: number | null;
   price: number;

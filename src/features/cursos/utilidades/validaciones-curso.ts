@@ -7,6 +7,14 @@ import {
   validarTextoOpcional,
   validarUrlOpcional,
 } from '@/shared/utilidades/validaciones-comunes';
+import { extraerIdYoutube } from '@/shared/utilidades/youtube';
+
+// El video se reproduce dentro de la web, por eso solo vale un link de YouTube
+export const validarYoutubeOpcional = (valor: string): string | undefined => {
+  if (!valor.trim()) return undefined;
+  if (valor.trim().length > 500) return 'La URL es demasiado larga';
+  return extraerIdYoutube(valor) ? undefined : 'Debe ser un link de YouTube valido';
+};
 
 export type ErroresCurso = Partial<Record<keyof DatosCurso, string>>;
 
@@ -17,7 +25,7 @@ export const validarCurso = (datos: DatosCurso): ErroresCurso => {
     price: validarPrecioObligatorio(datos.price),
     discountPrice: validarPrecioOpcional(datos.discountPrice, datos.price),
     durationMinutes: validarEnteroOpcional(datos.durationMinutes, 1, 'La duracion'),
-    videoUrl: validarUrlOpcional(datos.videoUrl),
+    videoUrl: validarYoutubeOpcional(datos.videoUrl),
     thumbnailUrl: validarUrlOpcional(datos.thumbnailUrl),
   };
 

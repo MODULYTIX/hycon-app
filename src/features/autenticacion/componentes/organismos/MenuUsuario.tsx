@@ -42,10 +42,10 @@ export default function MenuUsuario({ usuario }: { usuario: Usuario }) {
         aria-haspopup="menu"
         aria-expanded={abierto}
         aria-controls={idMenu}
-        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-white/10"
+        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-encabezado-texto/10"
       >
         <AvatarUsuario usuario={usuario} />
-        <span className="hidden max-w-[160px] truncate text-[16px] font-bold text-white sm:inline">
+        <span className="hidden max-w-[160px] truncate text-[16px] font-bold text-encabezado-texto sm:inline">
           {usuario.name} {usuario.lastname}
         </span>
         <Icon
@@ -53,7 +53,7 @@ export default function MenuUsuario({ usuario }: { usuario: Usuario }) {
           width="18"
           height="18"
           aria-hidden
-          className={`text-white transition-transform ${abierto ? 'rotate-180' : ''}`}
+          className={`text-encabezado-texto transition-transform ${abierto ? 'rotate-180' : ''}`}
         />
       </button>
 

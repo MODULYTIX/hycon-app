@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
+import { useId, useRef, useState, type DragEvent } from 'react';
+import { useUrlTemporal } from '@/shared/hooks/useUrlTemporal';
 import { Icon } from '@iconify/react';
 import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
 import MensajeCampo from '@/shared/ui/atomos/MensajeCampo';
@@ -20,23 +21,6 @@ interface Props {
   // Proporcion de la vista previa: cuadrada para productos, 16:9 para cursos
   proporcion?: 'cuadrada' | 'video';
 }
-
-// La vista previa de un archivo local necesita una URL temporal que hay que liberar
-const useUrlTemporal = (archivo: File | null) => {
-  const [url, setUrl] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!archivo || typeof URL.createObjectURL !== 'function') {
-      setUrl(null);
-      return;
-    }
-    const temporal = URL.createObjectURL(archivo);
-    setUrl(temporal);
-    return () => URL.revokeObjectURL(temporal);
-  }, [archivo]);
-
-  return url;
-};
 
 export default function ZonaImagen({
   etiqueta,

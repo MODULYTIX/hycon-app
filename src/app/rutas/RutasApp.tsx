@@ -16,6 +16,7 @@ import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
 import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
+import PaginaPanelPublicaciones from '@/features/administracion/paginas/PaginaPanelPublicaciones';
 
 export default function RutasApp() {
   return (
@@ -54,6 +55,7 @@ export default function RutasApp() {
           <Route index element={<Navigate to="productos" replace />} />
           <Route path="productos" element={<PaginaPanelProductos />} />
           <Route path="cursos" element={<PaginaPanelCursos />} />
+          <Route path="publicaciones" element={<PaginaPanelPublicaciones />} />
         </Route>
       </Routes>
     </BrowserRouter>

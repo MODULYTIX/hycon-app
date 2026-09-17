@@ -7,6 +7,8 @@ interface Props {
   titulo: string;
   // Nombre en plural para el paginador y los mensajes: "productos"
   entidad: string;
+  // Forma singular para el contador; por defecto se quita la s final
+  entidadSingular?: string;
   columnas: string[];
   claseColumnas: string;
   paginacion: Paginacion;
@@ -23,6 +25,7 @@ interface Props {
 export default function TablaPanel({
   titulo,
   entidad,
+  entidadSingular = entidad.replace(/s$/, ''),
   columnas,
   claseColumnas,
   paginacion,
@@ -42,7 +45,7 @@ export default function TablaPanel({
         <h2 className="text-[16px] font-semibold text-hy-tinta">{titulo}</h2>
         {!primeraCarga && !error && (
           <span className="rounded-full bg-hy-10 px-2.5 py-0.5 text-[12.5px] font-semibold text-hy-70">
-            {paginacion.total} {paginacion.total === 1 ? entidad.replace(/s$/, '') : entidad}
+            {paginacion.total} {paginacion.total === 1 ? entidadSingular : entidad}
           </span>
         )}
       </header>

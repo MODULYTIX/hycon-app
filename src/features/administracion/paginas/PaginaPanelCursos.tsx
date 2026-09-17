@@ -1,8 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import CabeceraSeccion from '@/features/administracion/componentes/moleculas/CabeceraSeccion';
 import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPanel';
 import ModalCurso from '@/features/cursos/componentes/organismos/ModalCurso';
 import ListaCursos from '@/features/cursos/componentes/organismos/ListaCursos';
+import ModalVideoCurso from '@/features/cursos/componentes/organismos/ModalVideoCurso';
 import DialogoConfirmacion from '@/shared/ui/organismos/DialogoConfirmacion';
 import { useGestionCatalogo } from '@/features/administracion/hooks/useGestionCatalogo';
 import { eliminarCursoApi, listarCursosApi } from '@/features/cursos/servicios/cursos.api';
@@ -23,6 +24,8 @@ export default function PaginaPanelCursos() {
     mensajeError: 'No se pudieron cargar los cursos',
   });
 
+  const [enReproduccion, setEnReproduccion] = useState<Curso | null>(null);
+
   return (
     <>
       <CabeceraSeccion
@@ -42,6 +45,7 @@ export default function PaginaPanelCursos() {
           onCambiarPagina={listado.irAPagina}
           onEditar={modal.abrirEdicion}
           onEliminar={borrado.pedir}
+          onVerVideo={setEnReproduccion}
         />
       </div>
 
@@ -51,6 +55,8 @@ export default function PaginaPanelCursos() {
         onCerrar={modal.cerrar}
         onGuardado={modal.alGuardar}
       />
+
+      <ModalVideoCurso curso={enReproduccion} onCerrar={() => setEnReproduccion(null)} />
 
       <DialogoConfirmacion
         abierto={borrado.elemento !== null}

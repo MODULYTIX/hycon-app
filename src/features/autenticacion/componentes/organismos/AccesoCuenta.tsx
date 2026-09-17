@@ -17,7 +17,7 @@ export default function AccesoCuenta() {
       <Link
         to={RUTAS.carrito}
         aria-label="Ver carrito"
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-white text-white transition-colors hover:bg-white/10"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-encabezado-texto text-encabezado-texto transition-colors hover:bg-encabezado-texto/10"
       >
         <Icon icon="solar:cart-large-2-linear" width="22" height="22" />
       </Link>

@@ -1,6 +1,8 @@
 type Estado = 'active' | 'inactive';
 
-const OPCIONES: Array<{ valor: Estado; etiqueta: string; detalle: string }> = [
+export type OpcionEstado = { valor: Estado; etiqueta: string; detalle: string };
+
+const OPCIONES: OpcionEstado[] = [
   { valor: 'active', etiqueta: 'Activo', detalle: 'Visible en la web' },
   { valor: 'inactive', etiqueta: 'Inactivo', detalle: 'Oculto al publico' },
 ];
@@ -10,16 +12,19 @@ export default function SelectorEstado({
   nombre,
   valor,
   onCambiar,
+  opciones = OPCIONES,
 }: {
   nombre: string;
   valor: Estado;
   onCambiar: (valor: Estado) => void;
+  // Textos propios, por ejemplo Publicado / Borrador en los articulos
+  opciones?: OpcionEstado[];
 }) {
   return (
     <fieldset>
       <legend className="mb-1.5 text-[13px] font-semibold text-hy-tinta">Estado</legend>
       <div className="grid grid-cols-2 gap-1 rounded-lg border border-hy-20 bg-hy-5 p-1">
-        {OPCIONES.map((opcion) => {
+        {opciones.map((opcion) => {
           const marcado = valor === opcion.valor;
           return (
             <label

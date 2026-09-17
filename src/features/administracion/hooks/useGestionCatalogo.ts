@@ -9,6 +9,8 @@ interface Opciones<T> {
   // Como se nombra en los avisos: "Producto", "Curso"
   etiqueta: string;
   mensajeError: string;
+  // Aviso tras crear; por defecto: Producto "X" agregado al catalogo
+  mensajeCreado?: (nombre: string) => string;
 }
 
 /**
@@ -22,6 +24,7 @@ export function useGestionCatalogo<T>({
   obtenerNombre,
   etiqueta,
   mensajeError,
+  mensajeCreado,
 }: Opciones<T>) {
   const listado = useListadoPaginado(cargar, mensajeError);
   const { recargar, reemplazar } = listado;
@@ -54,7 +57,7 @@ export function useGestionCatalogo<T>({
     } else {
       // Lo nuevo aparece primero: se vuelve a la primera pagina ordenada por el backend
       recargar({ aLaPrimera: true });
-      setAviso(`${etiqueta} "${nombre}" agregado al catálogo`);
+      setAviso(mensajeCreado ? mensajeCreado(nombre) : `${etiqueta} "${nombre}" agregado al catálogo`);
     }
   };
 

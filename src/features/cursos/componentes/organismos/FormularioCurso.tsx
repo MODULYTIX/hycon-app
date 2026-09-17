@@ -109,8 +109,9 @@ export default function FormularioCurso({
             <CampoTexto
               {...enlazar('videoUrl')}
               etiqueta="URL del video"
-              placeholder="https://youtu.be/abc123"
+              placeholder="https://www.youtube.com/watch?v=..."
               inputMode="url"
+              ayuda="Link de YouTube. Se verá dentro de la web y, si no subes miniatura, se usa la del video."
               opcional
             />
             <div className="grid gap-4 sm:grid-cols-3">

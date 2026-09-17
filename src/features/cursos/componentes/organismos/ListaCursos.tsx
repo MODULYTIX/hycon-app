@@ -11,6 +11,7 @@ interface Props {
   onCambiarPagina: (pagina: number) => void;
   onEditar: (curso: Curso) => void;
   onEliminar: (curso: Curso) => void;
+  onVerVideo: (curso: Curso) => void;
 }
 
 export default function ListaCursos({
@@ -21,6 +22,7 @@ export default function ListaCursos({
   onCambiarPagina,
   onEditar,
   onEliminar,
+  onVerVideo,
 }: Props) {
   return (
     <TablaPanel
@@ -40,7 +42,13 @@ export default function ListaCursos({
       }}
     >
       {cursos.map((curso) => (
-        <FilaCurso key={curso.courseId} curso={curso} onEditar={onEditar} onEliminar={onEliminar} />
+        <FilaCurso
+          key={curso.courseId}
+          curso={curso}
+          onEditar={onEditar}
+          onEliminar={onEliminar}
+          onVerVideo={onVerVideo}
+        />
       ))}
     </TablaPanel>
   );

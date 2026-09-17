@@ -5,9 +5,14 @@ import { MemoryRouter } from 'react-router-dom';
 import PaginaPanelCursos from './PaginaPanelCursos';
 import * as api from '@/features/cursos/servicios/cursos.api';
 import * as apiImagenes from '@/shared/servicios/imagenes.api';
+import * as youtubeApi from '@/shared/servicios/youtube-api';
+import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 vi.mock('@/features/cursos/servicios/cursos.api');
+vi.mock('@/shared/servicios/youtube-api');
+
+let jugadores: JugadorFalso[];
 vi.mock('@/shared/servicios/imagenes.api');
 
 type Usuario = ReturnType<typeof userEvent.setup>;
@@ -16,7 +21,8 @@ const pausas: Curso = {
   courseId: 1,
   name: 'Pausas activas en oficina',
   description: null,
-  videoUrl: 'https://youtu.be/abc123',
+  videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
+  youtubeId: 'dQw4w9WgXcQ',
   thumbnailUrl: null,
   durationMinutes: 90,
   price: 120,
@@ -46,6 +52,9 @@ const abrirAlta = async (usuario: Usuario) => {
 
 describe('PaginaPanelCursos', () => {
   beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
     vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([pausas]));
     vi.mocked(api.crearCursoApi).mockImplementation(async (datos) => ({
       ...pausas,
@@ -64,7 +73,7 @@ describe('PaginaPanelCursos', () => {
     );
   });
 
-  it('lista los cursos con duracion formateada y enlace al video', async () => {
+  it('lista los cursos con duracion formateada y su video', async () => {
     renderizar();
     await esperarListado();
 
@@ -72,10 +81,7 @@ describe('PaginaPanelCursos', () => {
       'listitem'
     );
     expect(fila).toHaveTextContent('1 h 30 min');
-    expect(within(fila).getByRole('link', { name: /ver video/i })).toHaveAttribute(
-      'href',
-      'https://youtu.be/abc123'
-    );
+    expect(within(fila).getByRole('button', { name: /ver video/i })).toBeInTheDocument();
     expect(api.listarCursosApi).toHaveBeenCalledWith('todos', 1, expect.anything());
   });
 
@@ -105,7 +111,29 @@ describe('PaginaPanelCursos', () => {
     expect(await screen.findByText('Levantamiento de cargas')).toBeInTheDocument();
   });
 
-  it('valida la URL del video antes de guardar', async () => {
+  it('ver video lo reproduce en un modal dentro del panel', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await esperarListado();
+
+    await usuario.click(screen.getByRole('button', { name: /ver video/i }));
+
+    const dialogo = await screen.findByRole('dialog', { name: 'Pausas activas en oficina' });
+    expect(within(dialogo).getByRole('region', { name: /reproductor/i })).toBeInTheDocument();
+    await waitFor(() => expect(jugadores[0]?.opciones.videoId).toBe('dQw4w9WgXcQ'));
+  });
+
+  it('avisa si un curso antiguo tiene un link que no es de YouTube', async () => {
+    vi.mocked(api.listarCursosApi).mockResolvedValue(
+      pagina([{ ...pausas, videoUrl: 'https://youtu.be/demo-hycon', youtubeId: null }])
+    );
+    renderizar();
+
+    expect(await screen.findByText(/link de video no valido/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /ver video/i })).not.toBeInTheDocument();
+  });
+
+  it('solo acepta links de YouTube antes de guardar', async () => {
     const usuario = userEvent.setup();
     renderizar();
     await esperarListado();
@@ -116,7 +144,7 @@ describe('PaginaPanelCursos', () => {
     await usuario.type(within(dialogo).getByLabelText(/url del video/i), 'youtube');
     await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
 
-    expect(await within(dialogo).findByText(/debe ser una url valida/i)).toBeInTheDocument();
+    expect(await within(dialogo).findByText(/debe ser un link de youtube valido/i)).toBeInTheDocument();
     expect(api.crearCursoApi).not.toHaveBeenCalled();
   });
 
