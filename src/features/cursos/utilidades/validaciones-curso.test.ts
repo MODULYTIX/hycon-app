@@ -1,17 +1,18 @@
 import { describe, expect, it } from 'vitest';
 import { validarCurso } from './validaciones-curso';
 import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
-import { CURSO_VACIO } from '@/features/cursos/tipos/curso.tipos';
+import { CURSO_VACIO, cursoAFormulario } from '@/features/cursos/tipos/curso.tipos';
 
-const curso = { ...CURSO_VACIO, name: 'Logistica basica', price: '120' };
+const vacio = { ...CURSO_VACIO, thumbnailUrl: '' };
+const curso = { ...vacio, name: 'Pausas activas', price: '120' };
 
 describe('validarCurso', () => {
   it('acepta un curso con lo minimo obligatorio', () => {
-    expect(sinErroresCatalogo(validarCurso(curso))).toBe(true);
+    expect(validarCurso(curso)).toEqual({});
   });
 
   it('exige nombre y precio', () => {
-    const errores = validarCurso(CURSO_VACIO);
+    const errores = validarCurso(vacio);
     expect(errores.name).toBeDefined();
     expect(errores.price).toBeDefined();
   });
@@ -41,5 +42,32 @@ describe('validarCurso', () => {
         validarCurso({ ...curso, durationMinutes: '', discountPrice: '', videoUrl: '' })
       )
     ).toBe(true);
+  });
+});
+
+describe('cursoAFormulario', () => {
+  it('prepara un curso guardado para editarlo', () => {
+    expect(
+      cursoAFormulario({
+        courseId: 1,
+        name: 'Pausas activas',
+        description: null,
+        videoUrl: 'https://youtu.be/abc',
+        thumbnailUrl: null,
+        durationMinutes: null,
+        price: 120,
+        discountPrice: 99,
+        status: 'active',
+        createdAt: '2026-09-10T12:00:00.000Z',
+      })
+    ).toEqual({
+      name: 'Pausas activas',
+      description: '',
+      videoUrl: 'https://youtu.be/abc',
+      durationMinutes: '',
+      price: '120',
+      discountPrice: '99',
+      status: 'active',
+    });
   });
 });

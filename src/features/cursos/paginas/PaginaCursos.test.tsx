@@ -1,5 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import PaginaCursos from './PaginaCursos';
 import * as api from '@/features/cursos/servicios/cursos.api';
@@ -20,6 +21,11 @@ const curso: Curso = {
   createdAt: '2026-09-10T12:00:00.000Z',
 };
 
+const pagina = (elementos: Curso[], extra = {}) => ({
+  elementos,
+  paginacion: { pagina: 1, porPagina: 6, total: elementos.length, totalPaginas: 1, ...extra },
+});
+
 const renderizar = () =>
   render(
     <MemoryRouter>
@@ -29,14 +35,14 @@ const renderizar = () =>
 
 describe('PaginaCursos (publica)', () => {
   beforeEach(() => {
-    vi.mocked(api.listarCursosApi).mockResolvedValue([curso]);
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([curso]));
   });
 
   it('pide al backend solo los cursos activos', async () => {
     renderizar();
     await screen.findByText('Logistica de ultima milla');
 
-    expect(api.listarCursosApi).toHaveBeenCalledWith('active', expect.anything());
+    expect(api.listarCursosApi).toHaveBeenCalledWith('active', 1, expect.anything());
   });
 
   it('muestra duracion, precio de oferta y enlace al avance', async () => {
@@ -55,9 +61,29 @@ describe('PaginaCursos (publica)', () => {
   });
 
   it('muestra un estado vacio si no hay cursos', async () => {
-    vi.mocked(api.listarCursosApi).mockResolvedValue([]);
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([]));
     renderizar();
 
     expect(await screen.findByText(/todavia no hay cursos publicados/i)).toBeInTheDocument();
+  });
+
+  it('pagina los cursos cuando hay mas de 6', async () => {
+    const usuario = userEvent.setup();
+    vi.mocked(api.listarCursosApi).mockImplementation(async (_estado, numero) =>
+      numero === 1
+        ? pagina([curso], { total: 7, totalPaginas: 2 })
+        : pagina([{ ...curso, courseId: 7, name: 'Pausas activas' }], {
+            pagina: 2,
+            total: 7,
+            totalPaginas: 2,
+          })
+    );
+    renderizar();
+    await screen.findByText('Logistica de ultima milla');
+
+    await usuario.click(screen.getByRole('button', { name: /pagina siguiente/i }));
+
+    expect(await screen.findByText('Pausas activas')).toBeInTheDocument();
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('active', 2, expect.anything());
   });
 });

@@ -42,6 +42,23 @@
   --color-y-80: #854d0e;
   --color-y-90: #713f12;
 
+  /* Paleta del logo (verde azulado de fondo, azul y verde de las figuras).
+     Se usa en el panel de configuracion y en sus modales. */
+  --color-hy-5: #f3f8f7;
+  --color-hy-10: #e5efee;
+  --color-hy-20: #cbdfdd;
+  --color-hy-30: #a6c8c5;
+  --color-hy-40: #79aba7;
+  --color-hy-50: #57928d;
+  --color-hy-60: #417f7b;
+  --color-hy-70: #35696a;
+  --color-hy-80: #2a5553;
+  --color-hy-90: #1c3a39;
+  --color-hy-azul: #1f6ea3;
+  --color-hy-verde: #3e9a4c;
+  --color-hy-tinta: #1f2e2d;
+  --color-hy-fondo: #f4f6f5;
+
   /* Fonts */
   --font-BostNoBillsColombo: BostNoBillsColombo;
 
@@ -82,6 +99,13 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* Dentro del panel, los componentes compartidos que usan "primary" (etiquetas,
+   bordes de foco) toman el verde azulado del logo sin tocar el sitio publico. */
+.tema-panel {
+  --color-primary: var(--color-hy-60);
+  color: var(--color-hy-tinta);
 }
 
 /* Respeta a quien pide menos movimiento en el sistema */

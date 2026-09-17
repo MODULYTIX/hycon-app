@@ -1,48 +1,67 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import CabeceraSeccion from '@/features/administracion/componentes/moleculas/CabeceraSeccion';
+import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPanel';
 import ModalCurso from '@/features/cursos/componentes/organismos/ModalCurso';
 import ListaCursos from '@/features/cursos/componentes/organismos/ListaCursos';
-import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
-import { listarCursosApi } from '@/features/cursos/servicios/cursos.api';
-import { useListaRemota } from '@/shared/hooks/useListaRemota';
+import DialogoConfirmacion from '@/shared/ui/organismos/DialogoConfirmacion';
+import { useGestionCatalogo } from '@/features/administracion/hooks/useGestionCatalogo';
+import { eliminarCursoApi, listarCursosApi } from '@/features/cursos/servicios/cursos.api';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 export default function PaginaPanelCursos() {
-  const cargar = useCallback((senal: AbortSignal) => listarCursosApi('todos', senal), []);
-  const { datos, cargando, error, anteponer } = useListaRemota<Curso>(
+  const cargar = useCallback(
+    (pagina: number, senal: AbortSignal) => listarCursosApi('todos', pagina, senal),
+    []
+  );
+
+  const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Curso>({
     cargar,
-    'No se pudieron cargar los cursos'
-  );
-
-  const [modalAbierto, setModalAbierto] = useState(false);
-  const [aviso, setAviso] = useState<string | null>(null);
-
-  const agregar = useCallback(
-    (curso: Curso) => {
-      anteponer(curso);
-      setAviso(`Curso "${curso.name}" agregado al catalogo`);
-    },
-    [anteponer]
-  );
+    eliminar: eliminarCursoApi,
+    obtenerId: (curso) => curso.courseId,
+    obtenerNombre: (curso) => curso.name,
+    etiqueta: 'Curso',
+    mensajeError: 'No se pudieron cargar los cursos',
+  });
 
   return (
     <>
       <CabeceraSeccion
         titulo="Cursos"
-        descripcion="Agrega cursos al catalogo y revisa los que ya estan publicados."
+        descripcion="Agrega, edita o retira los cursos del catálogo de formación."
         textoBoton="Agregar curso"
-        onAgregar={() => {
-          setAviso(null);
-          setModalAbierto(true);
-        }}
+        onAgregar={modal.abrirAlta}
       />
 
       <div className="space-y-4">
-        <AlertaFormulario mensaje={aviso} tono="exito" />
-        <ListaCursos cursos={datos} cargando={cargando} error={error} />
+        <AvisoPanel mensaje={aviso} onCerrar={cerrarAviso} />
+        <ListaCursos
+          cursos={listado.elementos}
+          paginacion={listado.paginacion}
+          cargando={listado.cargando}
+          error={listado.error}
+          onCambiarPagina={listado.irAPagina}
+          onEditar={modal.abrirEdicion}
+          onEliminar={borrado.pedir}
+        />
       </div>
 
-      <ModalCurso abierto={modalAbierto} onCerrar={() => setModalAbierto(false)} onCreado={agregar} />
+      <ModalCurso
+        abierto={modal.abierto}
+        curso={modal.elemento}
+        onCerrar={modal.cerrar}
+        onGuardado={modal.alGuardar}
+      />
+
+      <DialogoConfirmacion
+        abierto={borrado.elemento !== null}
+        titulo="¿Eliminar este curso?"
+        descripcion={`"${borrado.elemento?.name ?? ''}" dejará de aparecer en la web y en el panel. Esta acción no se puede deshacer.`}
+        textoConfirmar="Sí, eliminar"
+        procesando={borrado.procesando}
+        error={borrado.error}
+        onConfirmar={borrado.confirmar}
+        onCancelar={borrado.cancelar}
+      />
     </>
   );
 }

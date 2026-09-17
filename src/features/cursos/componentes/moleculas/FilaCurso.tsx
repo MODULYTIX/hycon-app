@@ -1,68 +1,69 @@
 import { Icon } from '@iconify/react';
 import EtiquetaEstado from '@/shared/ui/atomos/EtiquetaEstado';
-import {
-  formatearDuracion,
-  formatearFecha,
-  formatearPrecio,
-} from '@/shared/utilidades/formato';
+import AccionesFila from '@/shared/ui/moleculas/AccionesFila';
+import Miniatura from '@/shared/ui/moleculas/Miniatura';
+import { formatearDuracion, formatearPrecio } from '@/shared/utilidades/formato';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
-export default function FilaCurso({ curso }: { curso: Curso }) {
+export const COLUMNAS_CURSO = 'lg:grid-cols-[minmax(0,1fr)_130px_110px_110px_88px]';
+
+interface Props {
+  curso: Curso;
+  onEditar: (curso: Curso) => void;
+  onEliminar: (curso: Curso) => void;
+}
+
+export default function FilaCurso({ curso, onEditar, onEliminar }: Props) {
   const enOferta = curso.discountPrice !== null;
 
   return (
-    <li className="flex flex-col gap-3 px-5 py-4 transition-colors hover:bg-g-5 sm:flex-row sm:items-center">
-      {curso.thumbnailUrl ? (
-        <img
-          src={curso.thumbnailUrl}
-          alt=""
-          className="h-14 w-14 shrink-0 rounded-lg border border-g-20 object-cover"
-        />
-      ) : (
-        <span
-          aria-hidden
-          className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg border border-g-20 bg-g-5"
-        >
-          <Icon icon="solar:diploma-linear" width="22" height="22" className="text-g-40" />
-        </span>
-      )}
+    <li className={`grid gap-3 px-4 py-4 transition-colors hover:bg-hy-5/60 sm:px-5 lg:items-center lg:gap-4 ${COLUMNAS_CURSO}`}>
+      <div className="flex min-w-0 gap-3.5">
+        <Miniatura url={curso.thumbnailUrl} iconoReserva="solar:diploma-linear" clase="h-16 w-24" />
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[16px] font-semibold text-g-80">{curso.name}</p>
-        <p className="flex flex-wrap items-center gap-x-1 text-[13px] text-g-50">
-          <span>{formatearDuracion(curso.durationMinutes)}</span>
-          <span>· Alta {formatearFecha(curso.createdAt)}</span>
-          {curso.videoUrl && (
-            <>
-              <span>·</span>
-              <a
-                href={curso.videoUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-0.5 text-primary hover:underline"
-              >
-                Ver video
-                <Icon icon="solar:arrow-right-up-linear" width="13" height="13" aria-hidden />
-              </a>
-            </>
+        <div className="min-w-0 flex-1 self-center">
+          <p className="truncate text-[15px] font-semibold text-hy-tinta">{curso.name}</p>
+          {curso.description && (
+            <p className="line-clamp-1 text-[13px] text-g-50">{curso.description}</p>
           )}
-        </p>
-        {curso.description && (
-          <p className="mt-1 line-clamp-1 text-[13px] text-g-40">{curso.description}</p>
-        )}
+          {curso.videoUrl && (
+            <a
+              href={curso.videoUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-1 inline-flex items-center gap-1 text-[12.5px] font-semibold text-hy-60 hover:text-hy-80 hover:underline"
+            >
+              <Icon icon="solar:play-circle-linear" width="14" height="14" aria-hidden />
+              Ver video
+            </a>
+          )}
+        </div>
       </div>
 
-      <div className="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
-        <EtiquetaEstado estado={curso.status} />
-
-        <div className="text-right">
-          <p className={`text-[17px] font-bold ${enOferta ? 'text-primary' : 'text-g-80'}`}>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-hy-10 pt-3 lg:contents">
+        <div>
+          <p className={`text-[15px] font-bold ${enOferta ? 'text-hy-60' : 'text-hy-tinta'}`}>
             {formatearPrecio(enOferta ? (curso.discountPrice as number) : curso.price)}
           </p>
           {enOferta && (
             <p className="text-[12px] text-g-40 line-through">{formatearPrecio(curso.price)}</p>
           )}
         </div>
+
+        <p className="flex items-center gap-1 text-[14px] text-g-60">
+          <Icon icon="solar:clock-circle-linear" width="15" height="15" aria-hidden className="lg:hidden" />
+          {formatearDuracion(curso.durationMinutes)}
+        </p>
+
+        <div>
+          <EtiquetaEstado estado={curso.status} />
+        </div>
+
+        <AccionesFila
+          nombre={curso.name}
+          onEditar={() => onEditar(curso)}
+          onEliminar={() => onEliminar(curso)}
+        />
       </div>
     </li>
   );

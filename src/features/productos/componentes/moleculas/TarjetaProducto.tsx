@@ -51,6 +51,27 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
           <p className="line-clamp-2 text-[14px] text-g-50">{producto.description}</p>
         )}
 
+        {producto.color && (
+          <p className="text-[13px] text-g-60">
+            Color: <span className="font-semibold">{producto.color}</span>
+          </p>
+        )}
+
+        {producto.shippingAgencies.length > 0 && (
+          <p className="flex items-start gap-1.5 text-[13px] text-g-60">
+            <Icon
+              icon="solar:delivery-linear"
+              width="15"
+              height="15"
+              aria-hidden
+              className="mt-px shrink-0 text-primary"
+            />
+            <span>
+              Envíos por {producto.shippingAgencies.map((agencia) => agencia.name).join(', ')}
+            </span>
+          </p>
+        )}
+
         <div className="mt-auto flex items-end justify-between pt-3">
           <div>
             <p className={`text-[20px] font-bold ${enOferta ? 'text-primary' : 'text-g-80'}`}>

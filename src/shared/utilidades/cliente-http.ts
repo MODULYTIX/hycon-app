@@ -14,6 +14,7 @@ export class ErrorHttp extends Error {
 
 interface OpcionesPeticion {
   metodo?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  // Un FormData se envia tal cual (subida de archivos); cualquier otra cosa como JSON
   cuerpo?: unknown;
   // Adjunta el token guardado en la cabecera Authorization
   autenticada?: boolean;
@@ -29,9 +30,11 @@ interface SobreRespuesta<T> {
 
 export async function peticion<T>(ruta: string, opciones: OpcionesPeticion = {}): Promise<T> {
   const { metodo = 'GET', cuerpo, autenticada = false, senal } = opciones;
+  const esFormulario = cuerpo instanceof FormData;
 
   const cabeceras: Record<string, string> = {};
-  if (cuerpo !== undefined) cabeceras['Content-Type'] = 'application/json';
+  // Con FormData el navegador pone el Content-Type con su boundary; fijarlo a mano lo rompe
+  if (cuerpo !== undefined && !esFormulario) cabeceras['Content-Type'] = 'application/json';
 
   if (autenticada) {
     const token = leerToken();
@@ -43,10 +46,12 @@ export async function peticion<T>(ruta: string, opciones: OpcionesPeticion = {})
     respuesta = await fetch(`${URL_API}${ruta}`, {
       method: metodo,
       headers: cabeceras,
-      body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
+      body: cuerpo === undefined ? undefined : esFormulario ? cuerpo : JSON.stringify(cuerpo),
       signal: senal,
     });
-  } catch {
+  } catch (error) {
+    // Una cancelacion no es un fallo de red: se relanza para que quien la pidio la ignore
+    if (error instanceof DOMException && error.name === 'AbortError') throw error;
     // fetch solo rechaza por problemas de red o CORS, nunca por codigo de estado
     throw new ErrorHttp('No se pudo conectar con el servidor. Intentalo de nuevo', 0);
   }
@@ -55,7 +60,7 @@ export async function peticion<T>(ruta: string, opciones: OpcionesPeticion = {})
   try {
     sobre = (await respuesta.json()) as SobreRespuesta<T>;
   } catch {
-    // Respuesta sin cuerpo JSON valido
+    // Respuesta sin cuerpo JSON valido, por ejemplo un 204 de un borrado
   }
 
   if (!respuesta.ok) {
