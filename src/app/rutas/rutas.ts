@@ -3,7 +3,9 @@
 export const RUTAS = {
   home: '/',
   productos: '/productos',
+  productoDetalle: '/productos/:productId',
   cursos: '/cursos',
+  cursoDetalle: '/cursos/:courseId',
   publicaciones: '/publicaciones',
   acercaDe: '/acerca-de',
   contactanos: '/contactanos',
@@ -17,6 +19,9 @@ export const RUTAS = {
   panelPublicaciones: '/panel-de-configuracion/publicaciones',
   panelCursosAdmin: '/panel-de-configuracion/cursos',
 } as const;
+
+export const rutaProductoDetalle = (productId: number) => `/productos/${productId}`;
+export const rutaCursoDetalle = (courseId: number) => `/cursos/${courseId}`;
 
 export interface EnlaceNavegacion {
   id: string;

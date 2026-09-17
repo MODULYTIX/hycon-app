@@ -10,7 +10,9 @@ import PlantillaPanel from '@/features/administracion/componentes/plantillas/Pla
 
 import PaginaHome from '@/features/home/paginas/PaginaHome';
 import PaginaProductos from '@/features/productos/paginas/PaginaProductos';
+import PaginaDetalleProducto from '@/features/productos/paginas/PaginaDetalleProducto';
 import PaginaCursos from '@/features/cursos/paginas/PaginaCursos';
+import PaginaDetalleCurso from '@/features/cursos/paginas/PaginaDetalleCurso';
 import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
 import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
@@ -27,7 +29,9 @@ export default function RutasApp() {
         <Route element={<PlantillaPublica />}>
           <Route path={RUTAS.home} element={<PaginaHome />} />
           <Route path={RUTAS.productos} element={<PaginaProductos />} />
+          <Route path={RUTAS.productoDetalle} element={<PaginaDetalleProducto />} />
           <Route path={RUTAS.cursos} element={<PaginaCursos />} />
+          <Route path={RUTAS.cursoDetalle} element={<PaginaDetalleCurso />} />
           <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
           <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
           <Route path={RUTAS.contactanos} element={<PaginaContacto />} />

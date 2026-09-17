@@ -11,12 +11,15 @@ interface Props {
 export default function RejillaCursos({ cursos, cargando, error }: Props) {
   if (cargando) {
     return (
-      <ul aria-label="Cargando cursos" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {[0, 1, 2].map((posicion) => (
-          <li
-            key={posicion}
-            className="h-[320px] animate-pulse rounded-xl border border-g-20 bg-g-5"
-          />
+      <ul aria-label="Cargando cursos" className="grid gap-6 md:grid-cols-2 lg:gap-8">
+        {[0, 1, 2, 3].map((posicion) => (
+          <li key={posicion} className="relative overflow-hidden rounded-[3px] bg-g-20 ring-1 ring-g-20">
+            <div className="aspect-[4/3] animate-pulse sm:aspect-[5/4]" />
+            <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-4 bg-white/80 px-4 py-4 sm:inset-x-6 sm:bottom-6">
+              <div className="h-5 w-1/2 animate-pulse bg-g-20" />
+              <div className="h-5 w-20 animate-pulse bg-g-20" />
+            </div>
+          </li>
         ))}
       </ul>
     );
@@ -43,7 +46,7 @@ export default function RejillaCursos({ cursos, cargando, error }: Props) {
   }
 
   return (
-    <ul aria-label="Catalogo de cursos" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <ul aria-label="Catalogo de cursos" className="grid gap-6 md:grid-cols-2 lg:gap-8">
       {cursos.map((curso) => (
         <TarjetaCurso key={curso.courseId} curso={curso} />
       ))}

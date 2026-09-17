@@ -39,7 +39,7 @@ describe('PaginaCursos (publica)', () => {
     expect(api.listarCursosApi).toHaveBeenCalledWith('active', expect.anything());
   });
 
-  it('muestra duracion, precio de oferta y enlace al avance', async () => {
+  it('muestra duracion, precio de oferta y enlace al detalle', async () => {
     renderizar();
 
     const tarjeta = within(
@@ -48,9 +48,9 @@ describe('PaginaCursos (publica)', () => {
 
     expect(within(tarjeta).getByText('2 h 30 min')).toBeInTheDocument();
     expect(within(tarjeta).getByText(/149\.00/)).toBeInTheDocument();
-    expect(within(tarjeta).getByRole('link', { name: /ver avance/i })).toHaveAttribute(
+    expect(within(tarjeta).getByRole('link', { name: /ver detalles de logistica/i })).toHaveAttribute(
       'href',
-      'https://youtu.be/abc123'
+      '/cursos/1'
     );
   });
 

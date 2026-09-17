@@ -14,6 +14,10 @@ export interface Producto {
   createdAt: string;
 }
 
+export interface ProductoDetalle extends Producto {
+  imageUrls: string[];
+}
+
 // Lo que escribe el administrador en el formulario: todo texto.
 // El backend se encarga de convertir y validar.
 export interface FormularioProducto {
