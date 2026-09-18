@@ -91,30 +91,32 @@ export default function FormularioRegistro({ onExito }: { onExito: (usuario: Usu
         />
       </div>
 
-      <CampoFormulario
-        id="registro-email"
-        etiqueta="Correo electrónico"
-        icono="solar:letter-linear"
-        type="email"
-        autoComplete="email"
-        autoCapitalize="none"
-        spellCheck={false}
-        placeholder="tucorreo@empresa.com"
-        value={valores.email}
-        error={errores.email}
-        onChange={(evento) => cambiar('email', evento.target.value)}
-      />
+      <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
+        <CampoFormulario
+          id="registro-email"
+          etiqueta="Correo electrónico"
+          icono="solar:letter-linear"
+          type="email"
+          autoComplete="email"
+          autoCapitalize="none"
+          spellCheck={false}
+          placeholder="tucorreo@empresa.com"
+          value={valores.email}
+          error={errores.email}
+          onChange={(evento) => cambiar('email', evento.target.value)}
+        />
 
-      <CampoFormulario
-        id="registro-phone"
-        etiqueta="Teléfono (opcional)"
-        icono="solar:phone-linear"
-        type="tel"
-        autoComplete="tel"
-        placeholder="999 888 777"
-        value={valores.phone}
-        onChange={(evento) => cambiar('phone', evento.target.value)}
-      />
+        <CampoFormulario
+          id="registro-phone"
+          etiqueta="Teléfono (opcional)"
+          icono="solar:phone-linear"
+          type="tel"
+          autoComplete="tel"
+          placeholder="999 888 777"
+          value={valores.phone}
+          onChange={(evento) => cambiar('phone', evento.target.value)}
+        />
+      </div>
 
       <CampoContrasena
         id="registro-password"

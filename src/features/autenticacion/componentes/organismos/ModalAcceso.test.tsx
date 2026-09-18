@@ -168,6 +168,22 @@ describe('ModalAcceso', () => {
       expect(botonEntrar()).toBeDisabled();
     });
 
+    it('al escribir otro correo se levanta el bloqueo, porque es de esa cuenta', async () => {
+      const usuario = userEvent.setup();
+      vi.mocked(api.iniciarSesionApi).mockRejectedValue(new ErrorHttp('Demasiados intentos', 429, 840));
+      renderizar();
+
+      await escribirCredenciales(usuario, 'fantasma@hycon.lat', 'mala');
+      await usuario.click(botonEntrar());
+      expect(await screen.findByText(/acceso bloqueado temporalmente/i)).toBeInTheDocument();
+
+      await usuario.clear(correo());
+      await usuario.type(correo(), 'info@hycon.lat');
+
+      expect(screen.queryByText(/acceso bloqueado temporalmente/i)).not.toBeInTheDocument();
+      expect(botonEntrar()).toBeEnabled();
+    });
+
     it('avisa cuando Bloq Mayus esta activado', () => {
       renderizar();
 

@@ -15,6 +15,11 @@ const producto: ProductoDetalle = {
   description: 'Soporte para jornadas de trabajo prolongadas.',
   brand: 'Hycon',
   model: 'E-20',
+  color: 'Negro',
+  shippingAgencies: [
+    { code: 'shalom', name: 'Shalom' },
+    { code: 'olva', name: 'Olva Courier' },
+  ],
   price: 150,
   discountPrice: 120,
   stock: 3,
@@ -36,8 +41,21 @@ const renderizar = (ruta = '/productos') => render(
 describe('detalle de producto', () => {
   beforeEach(() => {
     window.localStorage.clear();
-    vi.mocked(api.listarProductosApi).mockResolvedValue([producto]);
+    vi.mocked(api.listarProductosApi).mockResolvedValue({
+      elementos: [producto],
+      paginacion: { pagina: 1, porPagina: 6, total: 1, totalPaginas: 1 },
+    });
     vi.mocked(api.obtenerProductoApi).mockResolvedValue(producto);
+  });
+
+  it('muestra el color y las agencias de envio del producto', async () => {
+    renderizar('/productos/7');
+
+    expect(await screen.findByRole('heading', { level: 1, name: producto.name })).toBeInTheDocument();
+    // La ficha tecnica lista cada dato con su etiqueta
+    expect(screen.getByText('Color')).toBeInTheDocument();
+    expect(screen.getByText('Negro')).toBeInTheDocument();
+    expect(screen.getByText(/Env[ií]os por Shalom, Olva Courier/)).toBeInTheDocument();
   });
 
   it('abre el detalle al seleccionar una tarjeta y consulta el ID', async () => {

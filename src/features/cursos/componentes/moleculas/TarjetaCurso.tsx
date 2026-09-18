@@ -13,23 +13,8 @@ interface Props {
 // Comparte el formato visual del catalogo de productos, con datos propios del curso.
 export default function TarjetaCurso({ curso, onVerAvance }: Props) {
   const enOferta = curso.discountPrice !== null;
-  const tieneVideo = curso.youtubeId !== null;
   // Sin miniatura propia se usa la del video de YouTube
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
-
-  const imagen = portada ? (
-    <img
-      src={portada}
-      alt={curso.name}
-      draggable={false}
-      loading="lazy"
-      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-    />
-  ) : (
-    <span aria-hidden className="flex h-full w-full items-center justify-center text-g-30">
-      <Icon icon="solar:diploma-linear" width="56" height="56" />
-    </span>
-  );
 
   return (
     <li className="group overflow-hidden rounded-[3px] bg-white ring-1 ring-g-20 transition-shadow duration-500 hover:shadow-xl">
@@ -39,9 +24,9 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
         className="block outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary"
       >
       <div className="relative aspect-[4/3] overflow-hidden bg-g-10 sm:aspect-[5/4]">
-        {curso.thumbnailUrl ? (
+        {portada ? (
           <img
-            src={curso.thumbnailUrl}
+            src={portada}
             alt={curso.name}
             draggable={false}
             loading="lazy"

@@ -46,9 +46,9 @@ export const esComunOPrevisible = (password: string): boolean => {
 };
 
 export const contieneDatosPersonales = (password: string, datos: DatosPersonales): boolean => {
-  const compacta = normalizar(password).replace(/[\s._\-]/g, '');
+  const compacta = normalizar(password).replace(/[\s._-]/g, '');
   return fragmentosPersonales(datos).some((fragmento) =>
-    compacta.includes(fragmento.replace(/[\s._\-]/g, ''))
+    compacta.includes(fragmento.replace(/[\s._-]/g, ''))
   );
 };
 

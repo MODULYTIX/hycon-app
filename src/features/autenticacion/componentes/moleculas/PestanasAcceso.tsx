@@ -10,10 +10,10 @@ const PESTANAS: Array<{ modo: ModoAcceso; etiqueta: string }> = [
   { modo: 'registro', etiqueta: 'Crear cuenta' },
 ];
 
-// Control segmentado: la pestana activa se levanta sobre un fondo suave
+// Dos pestanas subrayadas: la activa marca su linea en el color del logo
 export default function PestanasAcceso({ modo, onCambiar }: Props) {
   return (
-    <div role="tablist" aria-label="Tipo de acceso" className="grid grid-cols-2 gap-1 rounded-xl bg-g-10 p-1">
+    <div role="tablist" aria-label="Tipo de acceso" className="flex border-b border-g-20">
       {PESTANAS.map((pestana) => {
         const activa = pestana.modo === modo;
         return (
@@ -23,8 +23,8 @@ export default function PestanasAcceso({ modo, onCambiar }: Props) {
             role="tab"
             aria-selected={activa}
             onClick={() => onCambiar(pestana.modo)}
-            className={`h-10 rounded-lg text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-marca ${
-              activa ? 'bg-white text-marca shadow-sm' : 'text-g-50 hover:text-g-80'
+            className={`-mb-px flex-1 border-b-2 pb-3 pt-1 text-[14.5px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-marca ${
+              activa ? 'border-marca text-marca' : 'border-transparent text-g-50 hover:text-g-80'
             }`}
           >
             {pestana.etiqueta}

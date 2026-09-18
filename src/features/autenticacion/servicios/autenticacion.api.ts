@@ -19,8 +19,3 @@ export const restaurarSesionApi = () => renovarSesion<Usuario>();
 
 // Revoca la sesion en el servidor; olvidar el token en el navegador no basta
 export const cerrarSesionApi = () => peticion<void>(`${BASE}/logout`, { metodo: 'POST' });
-
-export const obtenerPerfilApi = (senal?: AbortSignal) =>
-  peticion<{ usuario: Usuario }>(`${BASE}/me`, { autenticada: true, senal }).then(
-    (respuesta) => respuesta.usuario
-  );

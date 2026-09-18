@@ -14,6 +14,7 @@ const curso: Curso = {
   name: 'Curso completo de Claude Code',
   description: 'Aprende a crear aplicaciones.\n\nDesarrolla un proyecto paso a paso.',
   thumbnailUrl: 'https://example.com/curso.jpg',
+  youtubeId: null,
   videoUrl: 'https://example.com/avance.mp4',
   durationMinutes: 150,
   price: 150,
@@ -35,7 +36,10 @@ describe('detalle del curso', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.clear();
-    vi.mocked(api.listarCursosApi).mockResolvedValue([curso]);
+    vi.mocked(api.listarCursosApi).mockResolvedValue({
+      elementos: [curso],
+      paginacion: { pagina: 1, porPagina: 6, total: 1, totalPaginas: 1 },
+    });
     vi.mocked(api.obtenerCursoApi).mockResolvedValue(curso);
   });
 

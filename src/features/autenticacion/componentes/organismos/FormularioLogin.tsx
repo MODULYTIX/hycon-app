@@ -38,6 +38,8 @@ export default function FormularioLogin({ onExito }: { onExito: (usuario: Usuari
 
   const cambiar = (campo: Campo, valor: string) => {
     setValores((previo) => ({ ...previo, [campo]: valor }));
+    // El bloqueo es de esa cuenta: al escribir otro correo se puede volver a intentar
+    if (campo === 'email' && bloqueadoHasta) setBloqueadoHasta(null);
     // Si el campo ya fue tocado se revalida al escribir para que el error desaparezca solo
     if (tocados[campo]) setErrores((previo) => ({ ...previo, [campo]: validarCampo(campo, valor) }));
   };

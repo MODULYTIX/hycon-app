@@ -94,7 +94,7 @@ export default function PaginaDetalleProducto() {
     );
   }
 
-  const imagenes = [...new Set(producto.imageUrls.length
+  const imagenes = [...new Set(producto.imageUrls?.length
     ? producto.imageUrls
     : producto.imageUrl
       ? [producto.imageUrl]
@@ -108,7 +108,11 @@ export default function PaginaDetalleProducto() {
   const datosProducto = [
     { etiqueta: 'Marca', valor: producto.brand || 'Por confirmar' },
     { etiqueta: 'Modelo', valor: producto.model || 'Por confirmar' },
+    ...(producto.color ? [{ etiqueta: 'Color', valor: producto.color }] : []),
   ];
+
+  // Agencias con las que el administrador marco que se despacha este producto
+  const agencias = producto.shippingAgencies ?? [];
 
   const agregar = () => {
     try {
@@ -195,6 +199,14 @@ export default function PaginaDetalleProducto() {
               </div>
             ))}
           </dl>
+
+          {agencias.length > 0 && (
+            <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-g-60">
+              <Icon icon="solar:delivery-linear" width="16" height="16" aria-hidden className="text-primary" />
+              <span>Envíos por {agencias.map((agencia) => agencia.name).join(', ')}</span>
+              <span className="text-g-40">(a elección del cliente)</span>
+            </p>
+          )}
 
           <div className="mt-6">
             <p className="mb-2 text-xs text-g-50">Cantidad</p>

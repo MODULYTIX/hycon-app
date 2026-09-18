@@ -82,22 +82,12 @@ describe('PaginaProductos (publica)', () => {
     expect(within(tarjeta).getByText(/25\.90/)).toBeInTheDocument();
   });
 
-  it('informa el color y las agencias de envio', async () => {
-    renderizar();
-
-    const tarjeta = within(await rejilla()).getAllByRole('listitem')[0];
-
-    expect(tarjeta).toHaveTextContent('Color: Negro');
-    expect(tarjeta).toHaveTextContent('Envíos por Shalom, Olva Courier');
-  });
-
   it('avisa cuando un producto esta agotado', async () => {
     renderizar();
 
     const tarjeta = within(await rejilla()).getAllByRole('listitem')[1];
 
     expect(within(tarjeta).getByText('Sin stock')).toBeInTheDocument();
-    expect(tarjeta).not.toHaveTextContent('Envíos por');
   });
 
   it('muestra un estado vacio si no hay catalogo', async () => {
