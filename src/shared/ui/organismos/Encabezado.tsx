@@ -7,7 +7,8 @@ import { RUTAS } from '@/app/rutas/rutas';
 // 'publico' lleva la barra de secciones del sitio.
 // 'panel' reutiliza la misma cabecera sin esa barra, porque dentro del panel
 // la navegacion la aporta la barra lateral.
-type VarianteEncabezado = 'publico' | 'panel';
+// 'sin-navegacion' oculta la barra de navegacion principal sin añadir botones extra.
+type VarianteEncabezado = 'publico' | 'panel' | 'sin-navegacion';
 
 export default function Encabezado({
   variante = 'publico',
@@ -38,7 +39,7 @@ export default function Encabezado({
         </div>
       </div>
 
-      {!esPanel && <NavegacionPrincipal />}
+      {!esPanel && variante !== 'sin-navegacion' && <NavegacionPrincipal />}
     </header>
   );
 }

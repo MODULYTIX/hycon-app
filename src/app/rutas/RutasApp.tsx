@@ -6,6 +6,7 @@ import PaginaNoEncontrada from '@/app/rutas/PaginaNoEncontrada';
 import { RUTAS } from '@/app/rutas/rutas';
 
 import PlantillaPublica from '@/shared/ui/plantillas/PlantillaPublica';
+import PlantillaSinNavegacion from '@/shared/ui/plantillas/PlantillaSinNavegacion';
 import PlantillaPanel from '@/features/administracion/componentes/plantillas/PlantillaPanel';
 
 import PaginaHome from '@/features/home/paginas/PaginaHome';
@@ -19,6 +20,7 @@ import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
 import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
 import PaginaPanelPublicaciones from '@/features/administracion/paginas/PaginaPanelPublicaciones';
+import PaginaRegistroEmpresa from '@/features/software-ergonomico/paginas/PaginaRegistroEmpresa';
 
 export default function RutasApp() {
   return (
@@ -42,9 +44,13 @@ export default function RutasApp() {
           <Route path={RUTAS.perfil} element={<PaginaEnConstruccion />} />
           <Route path={RUTAS.historial} element={<PaginaEnConstruccion />} />
           <Route path={RUTAS.panelCursos} element={<PaginaEnConstruccion />} />
-          <Route path={RUTAS.softwareErgonomico} element={<PaginaEnConstruccion />} />
 
           <Route path="*" element={<PaginaNoEncontrada />} />
+        </Route>
+
+        {/* Layout sin navegacion principal para flujos especificos */}
+        <Route element={<PlantillaSinNavegacion />}>
+          <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
         </Route>
 
         {/* Panel de administracion: layout propio con barra lateral */}
