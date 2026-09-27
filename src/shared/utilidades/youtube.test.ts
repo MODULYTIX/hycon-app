@@ -88,9 +88,10 @@ describe('formatearTiempo', () => {
 
 describe('mensajeErrorYoutube', () => {
   it('explica los errores habituales', () => {
-    expect(mensajeErrorYoutube(150)).toMatch(/no permite reproducirlo/);
-    expect(mensajeErrorYoutube(101)).toMatch(/no permite reproducirlo/);
-    expect(mensajeErrorYoutube(100)).toMatch(/no existe/);
+    // 101 y 150: el video no permite insertarse o es privado
+    expect(mensajeErrorYoutube(150)).toMatch(/no se puede reproducir fuera de YouTube/);
+    expect(mensajeErrorYoutube(101)).toMatch(/no se puede reproducir fuera de YouTube/);
+    expect(mensajeErrorYoutube(100)).toMatch(/ya no está disponible/);
     expect(mensajeErrorYoutube(5)).toBe('No se pudo reproducir el video.');
   });
 });

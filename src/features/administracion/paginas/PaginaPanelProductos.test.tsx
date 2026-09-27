@@ -164,7 +164,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('con mas de 6 pagina pidiendo cada pagina al backend', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.listarProductosApi).mockImplementation(async (_estado, numero) =>
         numero === 1
           ? pagina([silla], { total: 14, totalPaginas: 3 })
@@ -196,7 +196,7 @@ describe('PaginaPanelProductos', () => {
 
   describe('agregar', () => {
     it('el formulario vive en un modal con los campos pedidos', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -213,7 +213,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('valida antes de llamar al backend', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -226,7 +226,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('bloquea una oferta mayor que el precio', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -240,7 +240,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('envia color, cantidad y agencias elegidas y vuelve a la primera pagina', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -272,7 +272,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('sube la imagen arrastrada y guarda el producto con su URL', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -295,7 +295,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('si falla la subida no crea el producto y lo explica', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(apiImagenes.subirImagenApi).mockRejectedValue(
         new Error('La imagen supera el maximo de 5 MB')
       );
@@ -315,7 +315,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('muestra el error del backend dentro del modal', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.crearProductoApi).mockRejectedValue(new Error('No tienes permisos para esta accion'));
       renderizar();
       await esperarListado();
@@ -331,7 +331,7 @@ describe('PaginaPanelProductos', () => {
 
   describe('salir del modal con datos escritos', () => {
     it('sin escribir nada, pulsar fuera cierra directamente', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -342,7 +342,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('con datos escritos, pulsar fuera pide confirmacion antes de salir', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -365,7 +365,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('marcar una agencia tambien cuenta como cambio', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -377,7 +377,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('al editar, abrir y cerrar sin tocar nada no pregunta', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -391,7 +391,7 @@ describe('PaginaPanelProductos', () => {
 
   describe('editar', () => {
     it('abre el modal con los datos guardados', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -408,7 +408,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('guarda con PUT, conserva la imagen y actualiza la fila sin recargar', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -432,7 +432,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('quitar la imagen envia la URL vacia', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -449,7 +449,7 @@ describe('PaginaPanelProductos', () => {
 
   describe('eliminar', () => {
     it('pide confirmacion y cancelar no borra nada', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -464,7 +464,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('al confirmar borra en el backend y recarga la pagina', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -480,7 +480,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('si el backend lo impide muestra el motivo y no cierra', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.eliminarProductoApi).mockRejectedValue(
         new Error('Este producto ya tiene pedidos o carritos asociados. Desactivalo en lugar de eliminarlo')
       );
@@ -496,7 +496,7 @@ describe('PaginaPanelProductos', () => {
     });
 
     it('si se borra lo unico de la ultima pagina retrocede a la anterior', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.listarProductosApi).mockImplementation(async (_estado, numero) =>
         numero === 1
           ? pagina([silla], { total: 7, totalPaginas: 2 })

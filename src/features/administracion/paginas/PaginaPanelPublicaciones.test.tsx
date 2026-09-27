@@ -141,7 +141,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('pagina desde el backend con mas de 6', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.listarPublicacionesApi).mockImplementation(async (_estado, opciones) =>
         opciones?.pagina === 1
           ? pagina([pausas], { total: 8, totalPaginas: 2 })
@@ -159,7 +159,7 @@ describe('PaginaPanelPublicaciones', () => {
 
   describe('crear', () => {
     it('el modal trae los campos del articulo y la fecha de hoy', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -176,7 +176,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('valida titulo y contenido antes de enviar', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -189,7 +189,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('cuenta los caracteres del resumen y las palabras del contenido', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -202,7 +202,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('el contenido tiene barra de formato', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -215,7 +215,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('la vista previa muestra el articulo con su formato', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -242,7 +242,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('guarda como borrador con fecha y portada subida', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -272,7 +272,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('si hay errores estando en la vista previa vuelve a la pestana de escribir', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -285,7 +285,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('con texto escrito pide confirmacion antes de salir', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -297,7 +297,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('sin tocar nada se cierra sin preguntar', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -310,7 +310,7 @@ describe('PaginaPanelPublicaciones', () => {
 
   describe('editar', () => {
     it('abre con los datos guardados y actualiza la fila', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -341,7 +341,7 @@ describe('PaginaPanelPublicaciones', () => {
 
   describe('eliminar', () => {
     it('confirma y borra en el backend', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 
@@ -356,7 +356,7 @@ describe('PaginaPanelPublicaciones', () => {
     });
 
     it('cancelar no borra nada', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await esperarListado();
 

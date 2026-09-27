@@ -87,9 +87,10 @@ export const formatearTiempo = (total: number): string => {
 
 // Codigos de error de la IFrame API traducidos para el usuario
 export const mensajeErrorYoutube = (codigo: number): string => {
+  // 101 y 150: el video tiene desactivado "Permitir insertar" o es privado
   if (codigo === 101 || codigo === 150) {
-    return 'El dueño de este video no permite reproducirlo fuera de YouTube.';
+    return 'Este video no se puede reproducir fuera de YouTube. Escríbenos y lo resolvemos.';
   }
-  if (codigo === 100) return 'El video no existe o es privado.';
+  if (codigo === 100) return 'El video ya no está disponible.';
   return 'No se pudo reproducir el video.';
 };

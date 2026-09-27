@@ -81,7 +81,7 @@ describe('ModalAcceso', () => {
     });
 
     it('cierra con Escape', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
 
       await usuario.keyboard('{Escape}');
@@ -92,7 +92,7 @@ describe('ModalAcceso', () => {
 
   describe('iniciar sesion', () => {
     it('valida antes de llamar al backend', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
 
       await usuario.click(botonEntrar());
@@ -103,7 +103,7 @@ describe('ModalAcceso', () => {
     });
 
     it('entra, guarda el token solo en memoria y cierra el modal', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.iniciarSesionApi).mockResolvedValue(sesionAdmin);
       renderizar();
 
@@ -123,7 +123,7 @@ describe('ModalAcceso', () => {
     });
 
     it('Mantener la sesion iniciada viene desmarcado y se envia al marcarlo', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.iniciarSesionApi).mockResolvedValue(sesionAdmin);
       renderizar();
 
@@ -140,7 +140,7 @@ describe('ModalAcceso', () => {
     });
 
     it('muestra el error del backend y borra la contrasena escrita', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.iniciarSesionApi).mockRejectedValue(new ErrorHttp('Correo o contrasena incorrectos', 401));
       renderizar();
 
@@ -155,7 +155,7 @@ describe('ModalAcceso', () => {
     });
 
     it('si el servidor bloquea el acceso muestra la cuenta atras y desactiva el boton', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.iniciarSesionApi).mockRejectedValue(new ErrorHttp('Demasiados intentos', 429, 840));
       renderizar();
 
@@ -169,7 +169,7 @@ describe('ModalAcceso', () => {
     });
 
     it('al escribir otro correo se levanta el bloqueo, porque es de esa cuenta', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.iniciarSesionApi).mockRejectedValue(new ErrorHttp('Demasiados intentos', 429, 840));
       renderizar();
 
@@ -195,7 +195,7 @@ describe('ModalAcceso', () => {
     });
 
     it('permite ver la contrasena escrita', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
 
       await usuario.click(screen.getByRole('button', { name: /mostrar contrase[nñ]a/i }));
@@ -211,7 +211,7 @@ describe('ModalAcceso', () => {
     };
 
     it('se llega por la pestana o por el enlace inferior', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
 
       await usuario.click(screen.getByRole('button', { name: /cr[eé]ala aqu[ií]/i }));
@@ -222,7 +222,7 @@ describe('ModalAcceso', () => {
     });
 
     it('marca los requisitos de la contrasena mientras se escribe', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await irARegistro(usuario);
 
@@ -243,7 +243,7 @@ describe('ModalAcceso', () => {
     });
 
     it('no envia una contrasena comun', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       renderizar();
       await irARegistro(usuario);
 
@@ -258,7 +258,7 @@ describe('ModalAcceso', () => {
     });
 
     it('registra con una contrasena valida y abre la sesion', async () => {
-      const usuario = userEvent.setup();
+      const usuario = userEvent.setup({ delay: null });
       vi.mocked(api.registrarApi).mockResolvedValue({
         ...sesionAdmin,
         usuario: { ...sesionAdmin.usuario, rol: 'CLIENTE' },

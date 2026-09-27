@@ -188,7 +188,7 @@ describe('ReproductorYoutube', () => {
 
     await act(async () => jugador.fallar(150));
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/no permite reproducirlo fuera de YouTube/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/no se puede reproducir fuera de YouTube/i);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
