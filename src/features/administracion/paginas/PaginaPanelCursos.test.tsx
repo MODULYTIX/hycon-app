@@ -98,7 +98,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('pagina desde el backend cuando hay mas de 6', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     vi.mocked(api.listarCursosApi).mockImplementation(async (_estado, numero) =>
       numero === 1
         ? pagina([pausas], { total: 9, totalPaginas: 2 })
@@ -117,7 +117,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('ver video lo reproduce en un modal dentro del panel', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 
@@ -139,7 +139,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('solo acepta links de YouTube antes de guardar', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 
@@ -154,7 +154,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('crea el curso con su miniatura subida y vuelve a la primera pagina', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 
@@ -179,7 +179,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('edita un curso y actualiza su fila', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 
@@ -201,7 +201,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('pide confirmacion antes de salir con datos escritos', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 
@@ -214,7 +214,7 @@ describe('PaginaPanelCursos', () => {
   });
 
   it('elimina un curso tras confirmar', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     await esperarListado();
 

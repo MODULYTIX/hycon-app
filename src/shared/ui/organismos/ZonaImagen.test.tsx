@@ -71,7 +71,7 @@ describe('ZonaImagen', () => {
   });
 
   it('tambien se puede elegir con el selector de archivos', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     const alCambiar = renderizar();
     const archivo = png();
 
@@ -81,7 +81,7 @@ describe('ZonaImagen', () => {
   });
 
   it('permite pegar una URL en lugar de subir un archivo', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     const alCambiar = renderizar();
 
     await usuario.click(screen.getByRole('button', { name: /usar una url/i }));
@@ -92,7 +92,7 @@ describe('ZonaImagen', () => {
   });
 
   it('muestra la imagen que ya tenia el registro y deja quitarla', async () => {
-    const usuario = userEvent.setup();
+    const usuario = userEvent.setup({ delay: null });
     const alCambiar = renderizar({ archivo: null, url: 'https://cdn.hycon.lat/actual.webp' });
 
     expect(screen.getByAltText('Vista previa')).toHaveAttribute(

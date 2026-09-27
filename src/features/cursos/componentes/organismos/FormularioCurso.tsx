@@ -111,7 +111,7 @@ export default function FormularioCurso({
               etiqueta="URL del video"
               placeholder="https://www.youtube.com/watch?v=..."
               inputMode="url"
-              ayuda="Link de YouTube. Se verá dentro de la web y, si no subes miniatura, se usa la del video."
+              ayuda="Link de YouTube. Se ve dentro de la web, sin salir a YouTube. El video debe ser público u oculto (no privado) y tener activada la opción Permitir insertar; si no, YouTube bloquea la reproducción aquí."
               opcional
             />
             <div className="grid gap-4 sm:grid-cols-3">
