@@ -18,18 +18,15 @@ export default function Paso1Administrativo({ datos, onChange }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
           <label htmlFor="area" className="text-sm font-medium text-g-80">Área</label>
-          <select
+          <input
             id="area"
             name="area"
+            type="text"
             value={datos.area}
             onChange={handleChange}
-            className="rounded-lg border border-g-30 bg-white px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="">Selecciona el área...</option>
-            <option value="operaciones">Operaciones</option>
-            <option value="mantenimiento">Mantenimiento</option>
-            <option value="administracion">Administración</option>
-          </select>
+            placeholder="Ej. Operaciones, Mantenimiento..."
+            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 placeholder-g-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -85,46 +82,16 @@ export default function Paso1Administrativo({ datos, onChange }: Props) {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="gerencia" className="text-sm font-medium text-g-80">Gerencia</label>
-          <input
-            id="gerencia"
-            name="gerencia"
-            type="text"
-            value={datos.gerencia}
-            onChange={handleChange}
-            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="duracionMinutos" className="text-sm font-medium text-g-80">Duración diaria (minutos)</label>
-          <input
-            id="duracionMinutos"
-            name="duracionMinutos"
-            type="number"
-            min="0"
-            value={datos.duracionMinutos}
-            onChange={handleChange}
-            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="frecuencia" className="text-sm font-medium text-g-80">Frecuencia</label>
-          <select
-            id="frecuencia"
-            name="frecuencia"
-            value={datos.frecuencia}
-            onChange={handleChange}
-            className="rounded-lg border border-g-30 bg-white px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          >
-            <option value="">Seleccione...</option>
-            <option value="cotidiana">Cotidiana / diaria</option>
-            <option value="no_cotidiana">No cotidiana</option>
-          </select>
-        </div>
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="gerencia" className="text-sm font-medium text-g-80">Gerencia</label>
+        <input
+          id="gerencia"
+          name="gerencia"
+          type="text"
+          value={datos.gerencia}
+          onChange={handleChange}
+          className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        />
       </div>
     </div>
   );

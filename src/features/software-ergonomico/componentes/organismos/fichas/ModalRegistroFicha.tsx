@@ -6,6 +6,9 @@ import Paso2Representatividad from './Paso2Representatividad';
 import Paso3PosturasForzadas from './Paso3PosturasForzadas';
 import Paso4ManipulacionCargas from './Paso4ManipulacionCargas';
 import Paso5MovimientosRepetitivos from './Paso5MovimientosRepetitivos';
+import PasoTareasEvaluar from './PasoTareasEvaluar';
+import PasoResultadoEvaluacion from './PasoResultadoEvaluacion';
+import { clasificarNiosh, clasificarOcra, clasificarPostura } from './nivelesExposicion';
 import Paso6Resumen from './Paso6Resumen';
 import { Icon } from '@iconify/react';
 
@@ -20,15 +23,32 @@ const NOMBRES_PASOS = [
   'Posturas Forzadas',
   'Manipulación Cargas',
   'Movs. Repetitivos',
+  'Tareas a Evaluar',
+  'Mov. Repetitivos DX / IX',
+  'Postura Forzada D / I',
+  'Levantamiento NIOSH',
+  'Empuje y Tracción',
   'Resumen',
 ];
+
+const ULTIMO_PASO = NOMBRES_PASOS.length - 1;
 
 export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
   const [pasoActual, setPasoActual] = useState(0);
   const [datosFicha, setDatosFicha] = useState<FormularioFichaErgonomica>(FICHA_VACIA);
 
+  const actualizarEvaluacion = <K extends keyof FormularioFichaErgonomica['evaluacion']>(
+    grupo: K,
+    cambios: Partial<FormularioFichaErgonomica['evaluacion'][K]>,
+  ) => {
+    setDatosFicha((previo) => ({
+      ...previo,
+      evaluacion: { ...previo.evaluacion, [grupo]: { ...previo.evaluacion[grupo], ...cambios } },
+    }));
+  };
+
   const irSiguientePaso = () => {
-    if (pasoActual < 5) setPasoActual(pasoActual + 1);
+    if (pasoActual < ULTIMO_PASO) setPasoActual(pasoActual + 1);
   };
 
   const irPasoAnterior = () => {
@@ -55,7 +75,7 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
       abierto={abierto}
       onCerrar={onCerrar}
       idTitulo="modal-registro-ficha"
-      ancho="max-w-[720px]"
+      ancho="max-w-[1100px]"
       protegido={pasoActual > 0} // protejo si ya avanzaron al menos un paso
     >
       {(solicitarCierre) => (
@@ -67,7 +87,7 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
             </h2>
             <div className="mt-4 flex w-full items-center justify-between">
               {NOMBRES_PASOS.map((nombre, i) => (
-                <div key={nombre} className="flex flex-1 flex-col items-center gap-2">
+                <div key={nombre} className="flex min-w-0 flex-1 flex-col items-center gap-2">
                   <div className="flex w-full items-center justify-center">
                     <div
                       className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors
@@ -99,9 +119,7 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
             {pasoActual === 1 && (
               <Paso2Representatividad 
                 datos={datosFicha.paso2} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso2: nuevosDatos })}
-                frecuenciaPaso1={datosFicha.paso1.frecuencia}
-              />
+                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso2: nuevosDatos })}              />
             )}
             {pasoActual === 2 && (
               <Paso3PosturasForzadas 
@@ -121,8 +139,46 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
                 onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso5: nuevosDatos })} 
               />
             )}
-            {pasoActual === 5 && (
-              <Paso6Resumen 
+            {pasoActual === 5 && <PasoTareasEvaluar datos={datosFicha} />}
+            {pasoActual === 6 && (
+              <PasoResultadoEvaluacion
+                titulo="7. Movimientos repetitivos"
+                clasificar={clasificarOcra}
+                campos={[
+                  { id: 'dx', etiqueta: 'DX', valor: datosFicha.evaluacion.movimientosRepetitivos.dx, onChange: (v) => actualizarEvaluacion('movimientosRepetitivos', { dx: v }) },
+                  { id: 'ix', etiqueta: 'IX', valor: datosFicha.evaluacion.movimientosRepetitivos.ix, onChange: (v) => actualizarEvaluacion('movimientosRepetitivos', { ix: v }) },
+                ]}
+              />
+            )}
+            {pasoActual === 7 && (
+              <PasoResultadoEvaluacion
+                titulo="8. Postura forzada"
+                clasificar={clasificarPostura}
+                campos={[
+                  { id: 'd', etiqueta: 'D', valor: datosFicha.evaluacion.posturaForzada.d, onChange: (v) => actualizarEvaluacion('posturaForzada', { d: v }) },
+                  { id: 'i', etiqueta: 'I', valor: datosFicha.evaluacion.posturaForzada.i, onChange: (v) => actualizarEvaluacion('posturaForzada', { i: v }) },
+                ]}
+              />
+            )}
+            {pasoActual === 8 && (
+              <PasoResultadoEvaluacion
+                titulo="9. Levantamiento de cargas"
+                clasificar={clasificarNiosh}
+                campos={[
+                  { id: 'niosh', etiqueta: 'NIOSH', valor: datosFicha.evaluacion.levantamientoCargas.niosh, onChange: (v) => actualizarEvaluacion('levantamientoCargas', { niosh: v }) },
+                ]}
+              />
+            )}
+            {pasoActual === 9 && (
+              <PasoResultadoEvaluacion
+                titulo="10. Empuje y tracción"
+                campos={[
+                  { id: 'iso11228', etiqueta: '11228-2', valor: datosFicha.evaluacion.empujeTraccion.iso11228, onChange: (v) => actualizarEvaluacion('empujeTraccion', { iso11228: v }) },
+                ]}
+              />
+            )}
+            {pasoActual === ULTIMO_PASO && (
+              <Paso6Resumen
                 datos={datosFicha} 
               />
             )}
@@ -138,7 +194,7 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
               {pasoActual === 0 ? 'Cancelar' : 'Anterior'}
             </button>
             <div className="flex gap-3">
-              {pasoActual === 5 && (
+              {pasoActual === ULTIMO_PASO && (
                 <button
                   type="button"
                   className="rounded-lg border border-g-30 bg-white px-4 py-2.5 text-sm font-medium text-g-70 transition-colors hover:bg-g-10"
@@ -149,10 +205,10 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
               )}
               <button
                 type="button"
-                onClick={pasoActual === 5 ? manejarGuardado : irSiguientePaso}
+                onClick={pasoActual === ULTIMO_PASO ? manejarGuardado : irSiguientePaso}
                 className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
               >
-                {pasoActual === 5 ? 'Guardar ficha' : 'Siguiente'}
+                {pasoActual === ULTIMO_PASO ? 'Guardar ficha' : 'Siguiente'}
               </button>
             </div>
           </div>

@@ -11,8 +11,8 @@ export default function Paso6Resumen({ datos }: Props) {
   
   const tieneCargas = Object.values(datos.paso4).some(factor => factor.aplica);
   
-  const tieneMovimientos = Object.values(datos.paso5.esfuerzoManos).some(val => val) || 
-                           datos.paso5.movimientosAltaFrecuencia.repiteMovimiento4vecesMinuto2horas;
+  const tieneMovimientos = Object.values(datos.paso5.esfuerzoManos).some(factor => factor.aplica) ||
+                           datos.paso5.movimientosAltaFrecuencia.repiteMovimiento4vecesMinuto2horas.aplica;
 
   const codigos = {
     movimientoRepetitivo: tieneMovimientos ? 'DX / IX' : 'Ninguno',
@@ -24,7 +24,7 @@ export default function Paso6Resumen({ datos }: Props) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold text-g-90">6. Resumen y Clasificación</h3>
+        <h3 className="text-lg font-semibold text-g-90">11. Resumen y Clasificación</h3>
         <p className="text-sm text-g-60">Revise la información y los factores detectados antes de guardar la ficha.</p>
       </div>
 

@@ -1,21 +1,10 @@
 import type { PosturasForzadas } from '@/features/software-ergonomico/tipos/ficha.tipos';
+import { NOMBRES_POSTURAS as NOMBRES_FACTORES } from './catalogoFactores';
 
 interface Props {
   datos: PosturasForzadas;
   onChange: (datos: PosturasForzadas) => void;
 }
-
-const NOMBRES_FACTORES: Record<keyof PosturasForzadas, string> = {
-  manosSobreCabeza: 'Manos por encima de la cabeza',
-  codosSobreHombro: 'Codos por encima del hombro',
-  espaldaInclinadaAdelante: 'Espalda inclinada hacia adelante más de 30°',
-  espaldaExtension: 'Espalda en extensión más de 30°',
-  cuelloDobladoGirado: 'Cuello doblado o girado más de 30°',
-  sentadoEspaldaInclinada: 'Sentado con espalda inclinada hacia adelante más de 30°',
-  sentadoEspaldaGirada: 'Sentado con espalda girada/lateralizada más de 30°',
-  trabajoCuclillas: 'Trabajo en cuclillas',
-  trabajoRodillas: 'Trabajo de rodillas',
-};
 
 export default function Paso3PosturasForzadas({ datos, onChange }: Props) {
   const handleChangeAplica = (llave: keyof PosturasForzadas, valor: boolean) => {
@@ -42,8 +31,13 @@ export default function Paso3PosturasForzadas({ datos, onChange }: Props) {
       <div className="flex flex-col gap-3">
         {(Object.keys(NOMBRES_FACTORES) as Array<keyof PosturasForzadas>).map((llave) => {
           const factor = datos[llave];
+          // Alerta de salud (no es error de escritura): 120 min diarios o más en la postura
+          const alerta = factor.aplica && Number(factor.duracionDiaria) >= 120;
           return (
-            <div key={llave} className="flex flex-col gap-3 rounded-xl border border-g-20 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div
+              key={llave}
+              className={`flex flex-col gap-3 rounded-xl border p-4 shadow-sm transition-colors sm:flex-row sm:items-center sm:justify-between ${alerta ? 'border-red-500 bg-red-50' : 'border-g-20 bg-white'}`}
+            >
               <label className="flex cursor-pointer items-center gap-3">
                 <input
                   type="checkbox"
@@ -63,7 +57,7 @@ export default function Paso3PosturasForzadas({ datos, onChange }: Props) {
                     placeholder="Minutos"
                     value={factor.duracionDiaria}
                     onChange={(e) => handleChangeDuracion(llave, e.target.value)}
-                    className="w-24 rounded-md border border-g-30 px-2 py-1.5 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                    className={`w-24 rounded-md border bg-white px-2 py-1.5 text-sm text-g-90 focus:outline-none focus:ring-1 ${alerta ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-g-30 focus:border-primary focus:ring-primary'}`}
                   />
                 </div>
               )}

@@ -7,13 +7,14 @@ export interface DatosAdministrativos {
   actividad: string;
   superintendencia: string;
   gerencia: string;
-  duracionMinutos: string; // lo guardamos como string para el input y lo parseamos luego
-  frecuencia: 'cotidiana' | 'no_cotidiana' | '';
 }
 
 export interface DatosRepresentatividad {
-  duracionMayor120: boolean;
+  duracionMinutos: string; // lo guardamos como string para el input y lo parseamos luego
+  cotidiana: boolean; // Frecuencia cotidiana / diaria (Sí / No)
+  duracionMayor120: boolean; // Automático: duracionMinutos > 120
   requiereIdentificacion: boolean; // Automático: duracion > 120 && cotidiana
+  identificacionErgonomica: string; // Texto libre, solo se muestra si requiereIdentificacion
 }
 
 export interface FactorPostura {
@@ -34,21 +35,29 @@ export interface PosturasForzadas {
 }
 
 export interface ManipulacionCargas {
-  levantamiento40kg: { aplica: boolean; frecuencia: string };
-  levantamiento25kg: { aplica: boolean; frecuencia: string };
-  levantamiento5kg: { aplica: boolean; frecuencia: string };
+  levantamiento40kg: FactorPostura;
+  levantamiento25kg: FactorPostura;
+  levantamiento5kg: FactorPostura;
+  levantamientoMenor3kg: FactorPostura;
 }
 
 export interface MovimientosRepetitivos {
   esfuerzoManos: {
-    manipulacionMenor3kg: boolean;
-    manipulacionPinzaMayor1kg: boolean;
-    munecasFlexionadasAgarre: boolean;
-    accionAtornillar: boolean;
+    manipulacionPinzaMayor1kg: FactorPostura;
+    munecasFlexionadasAgarre: FactorPostura;
+    accionAtornillar: FactorPostura;
   };
   movimientosAltaFrecuencia: {
-    repiteMovimiento4vecesMinuto2horas: boolean;
+    repiteMovimiento4vecesMinuto2horas: FactorPostura;
   };
+}
+
+// Pasos 7 a 10: valores decimales opcionales, como texto para el input y se parsean luego
+export interface EvaluacionResultados {
+  movimientosRepetitivos: { dx: string; ix: string };
+  posturaForzada: { d: string; i: string };
+  levantamientoCargas: { niosh: string };
+  empujeTraccion: { iso11228: string };
 }
 
 export interface InformacionAdicional {
@@ -62,6 +71,7 @@ export interface FormularioFichaErgonomica {
   paso3: PosturasForzadas;
   paso4: ManipulacionCargas;
   paso5: MovimientosRepetitivos;
+  evaluacion: EvaluacionResultados;
   paso7Adicional: InformacionAdicional;
 }
 
@@ -74,12 +84,13 @@ export const FICHA_VACIA: FormularioFichaErgonomica = {
     actividad: '',
     superintendencia: '',
     gerencia: '',
-    duracionMinutos: '',
-    frecuencia: '',
   },
   paso2: {
+    duracionMinutos: '',
+    cotidiana: false,
     duracionMayor120: false,
     requiereIdentificacion: false,
+    identificacionErgonomica: '',
   },
   paso3: {
     manosSobreCabeza: { aplica: false, duracionDiaria: '' },
@@ -93,20 +104,26 @@ export const FICHA_VACIA: FormularioFichaErgonomica = {
     trabajoRodillas: { aplica: false, duracionDiaria: '' },
   },
   paso4: {
-    levantamiento40kg: { aplica: false, frecuencia: '' },
-    levantamiento25kg: { aplica: false, frecuencia: '' },
-    levantamiento5kg: { aplica: false, frecuencia: '' },
+    levantamiento40kg: { aplica: false, duracionDiaria: '' },
+    levantamiento25kg: { aplica: false, duracionDiaria: '' },
+    levantamiento5kg: { aplica: false, duracionDiaria: '' },
+    levantamientoMenor3kg: { aplica: false, duracionDiaria: '' },
   },
   paso5: {
     esfuerzoManos: {
-      manipulacionMenor3kg: false,
-      manipulacionPinzaMayor1kg: false,
-      munecasFlexionadasAgarre: false,
-      accionAtornillar: false,
+      manipulacionPinzaMayor1kg: { aplica: false, duracionDiaria: '' },
+      munecasFlexionadasAgarre: { aplica: false, duracionDiaria: '' },
+      accionAtornillar: { aplica: false, duracionDiaria: '' },
     },
     movimientosAltaFrecuencia: {
-      repiteMovimiento4vecesMinuto2horas: false,
+      repiteMovimiento4vecesMinuto2horas: { aplica: false, duracionDiaria: '' },
     },
+  },
+  evaluacion: {
+    movimientosRepetitivos: { dx: '', ix: '' },
+    posturaForzada: { d: '', i: '' },
+    levantamientoCargas: { niosh: '' },
+    empujeTraccion: { iso11228: '' },
   },
   paso7Adicional: {
     sector: '',

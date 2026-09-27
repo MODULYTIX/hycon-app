@@ -1,21 +1,25 @@
 import { useEffect } from 'react';
 import type { DatosRepresentatividad } from '@/features/software-ergonomico/tipos/ficha.tipos';
-import { Icon } from '@iconify/react';
 
 interface Props {
   datos: DatosRepresentatividad;
   onChange: (datos: DatosRepresentatividad) => void;
-  frecuenciaPaso1: string;
 }
 
-export default function Paso2Representatividad({ datos, onChange, frecuenciaPaso1 }: Props) {
+export default function Paso2Representatividad({ datos, onChange }: Props) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    onChange({ ...datos, [name]: value });
+  };
+
   // Calculo automatico basado en reglas de negocio
   useEffect(() => {
-    const requiere = datos.duracionMayor120 && frecuenciaPaso1 === 'cotidiana';
-    if (requiere !== datos.requiereIdentificacion) {
-      onChange({ ...datos, requiereIdentificacion: requiere });
+    const mayor120 = Number(datos.duracionMinutos) > 120;
+    const requiere = mayor120 && datos.cotidiana;
+    if (mayor120 !== datos.duracionMayor120 || requiere !== datos.requiereIdentificacion) {
+      onChange({ ...datos, duracionMayor120: mayor120, requiereIdentificacion: requiere });
     }
-  }, [datos.duracionMayor120, frecuenciaPaso1, datos.requiereIdentificacion, onChange, datos]);
+  }, [datos, onChange]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -24,55 +28,58 @@ export default function Paso2Representatividad({ datos, onChange, frecuenciaPaso
         <p className="text-sm text-g-60">Determina si la tarea requiere una evaluación ergonómica detallada.</p>
       </div>
 
-      <div className="rounded-xl border border-g-20 bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-medium text-g-90">¿La duración es mayor a 120 minutos diarios?</p>
-            <p className="mt-1 text-xs text-g-50">Según lo indicado en el paso anterior.</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="radio"
-                name="duracionMayor120"
-                checked={datos.duracionMayor120 === true}
-                onChange={() => onChange({ ...datos, duracionMayor120: true })}
-                className="h-4 w-4 text-primary focus:ring-primary"
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="duracionMinutos" className="text-sm font-medium text-g-80">Duración diaria (minutos)</label>
+          <input
+            id="duracionMinutos"
+            name="duracionMinutos"
+            type="number"
+            min="0"
+            value={datos.duracionMinutos}
+            onChange={handleChange}
+            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <span id="cotidiana-label" className="text-sm font-medium text-g-80">Cotidiana / diaria</span>
+          <div className="flex items-center gap-3 py-2">
+            <button
+              id="cotidiana"
+              type="button"
+              role="switch"
+              aria-checked={datos.cotidiana}
+              aria-labelledby="cotidiana-label"
+              onClick={() => onChange({ ...datos, cotidiana: !datos.cotidiana })}
+              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${datos.cotidiana ? 'bg-primary' : 'bg-g-30'}`}
+            >
+              <span
+                className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${datos.cotidiana ? 'translate-x-5' : 'translate-x-0'}`}
               />
-              <span className="text-sm text-g-80">Sí</span>
-            </label>
-            <label className="flex cursor-pointer items-center gap-2">
-              <input
-                type="radio"
-                name="duracionMayor120"
-                checked={datos.duracionMayor120 === false}
-                onChange={() => onChange({ ...datos, duracionMayor120: false })}
-                className="h-4 w-4 text-primary focus:ring-primary"
-              />
-              <span className="text-sm text-g-80">No</span>
-            </label>
+            </button>
+            <span className="text-sm font-medium text-g-80">{datos.cotidiana ? 'Sí' : 'No'}</span>
           </div>
         </div>
       </div>
 
-      <div className={`rounded-xl border p-5 transition-colors ${datos.requiereIdentificacion ? 'border-y-30 bg-y-5' : 'border-g-20 bg-g-5'}`}>
-        <div className="flex items-start gap-3">
-          <div className={`mt-0.5 shrink-0 ${datos.requiereIdentificacion ? 'text-y-60' : 'text-g-40'}`}>
-            <Icon icon="solar:info-circle-bold" width="24" height="24" />
-          </div>
-          <div>
-            <p className="font-semibold text-g-90">¿Se requiere identificación ergonómica?</p>
-            <div className="mt-2 flex items-center gap-2">
-              <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-sm font-semibold ${datos.requiereIdentificacion ? 'bg-y-20 text-y-80' : 'bg-g-20 text-g-70'}`}>
-                {datos.requiereIdentificacion ? 'SÍ REQUIERE' : 'NO REQUIERE'}
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-g-60">
-              Cálculo automático: requiere duración mayor a 120 minutos y frecuencia cotidiana (Paso 1).
-            </p>
-          </div>
+      {datos.requiereIdentificacion && (
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="identificacionErgonomica" className="text-sm font-medium text-g-80">
+            Se requiere identificación ergonómica
+          </label>
+          <textarea
+            id="identificacionErgonomica"
+            name="identificacionErgonomica"
+            value={datos.identificacionErgonomica}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Describe la identificación ergonómica requerida..."
+            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 placeholder-g-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <p className="text-xs text-g-50">Aplica porque la duración es mayor a 120 minutos y la frecuencia es cotidiana.</p>
         </div>
-      </div>
+      )}
     </div>
   );
 }

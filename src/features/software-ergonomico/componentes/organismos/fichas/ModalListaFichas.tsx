@@ -34,12 +34,6 @@ export default function ModalListaFichas({ abierto, onCerrar, empresaSeleccionad
               Empresa: <span className="font-semibold text-g-90">{empresaSeleccionada.nombre}</span>
             </p>
           </div>
-          <button
-            onClick={onCerrar}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-g-10 text-g-60 transition-colors hover:bg-g-20 hover:text-g-90"
-          >
-            <Icon icon="solar:close-circle-bold-duotone" width="24" height="24" />
-          </button>
         </div>
 
         <div className="flex w-full flex-col gap-4">
