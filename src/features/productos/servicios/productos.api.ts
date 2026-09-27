@@ -29,10 +29,8 @@ export const listarAgenciasApi = (senal?: AbortSignal) =>
     (r) => r.agencias
   );
 
-export const obtenerProductoApi = (productId: number, senal?: AbortSignal) =>
-  peticion<{ producto: ProductoDetalle }>(`${BASE}/${productId}`, { senal }).then(
-    (r) => r.producto
-  );
+export const obtenerProductoApi = (uuid: string, senal?: AbortSignal) =>
+  peticion<{ producto: ProductoDetalle }>(`${BASE}/${uuid}`, { senal }).then((r) => r.producto);
 
 export const crearProductoApi = (datos: DatosProducto) =>
   peticion<{ producto: Producto }>(BASE, {
@@ -41,12 +39,12 @@ export const crearProductoApi = (datos: DatosProducto) =>
     autenticada: true,
   }).then((r) => r.producto);
 
-export const actualizarProductoApi = (id: number, datos: DatosProducto) =>
-  peticion<{ producto: Producto }>(`${BASE}/${id}`, {
+export const actualizarProductoApi = (uuid: string, datos: DatosProducto) =>
+  peticion<{ producto: Producto }>(`${BASE}/${uuid}`, {
     metodo: 'PUT',
     cuerpo: datos,
     autenticada: true,
   }).then((r) => r.producto);
 
-export const eliminarProductoApi = (id: number) =>
-  peticion<void>(`${BASE}/${id}`, { metodo: 'DELETE', autenticada: true });
+export const eliminarProductoApi = (uuid: string) =>
+  peticion<void>(`${BASE}/${uuid}`, { metodo: 'DELETE', autenticada: true });

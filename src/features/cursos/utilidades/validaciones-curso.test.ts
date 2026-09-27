@@ -3,6 +3,9 @@ import { validarCurso } from './validaciones-curso';
 import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
 import { CURSO_VACIO, cursoAFormulario } from '@/features/cursos/tipos/curso.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+
 const vacio = { ...CURSO_VACIO, thumbnailUrl: '' };
 const curso = { ...vacio, name: 'Pausas activas', price: '120' };
 
@@ -57,7 +60,7 @@ describe('cursoAFormulario', () => {
   it('prepara un curso guardado para editarlo', () => {
     expect(
       cursoAFormulario({
-        courseId: 1,
+        uuid: UUID_1,
         name: 'Pausas activas',
         description: null,
         videoUrl: 'https://youtu.be/abc',

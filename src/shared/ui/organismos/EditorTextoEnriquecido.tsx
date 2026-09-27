@@ -253,7 +253,7 @@ export default function EditorTextoEnriquecido({
                 </p>
               )}
             </div>
-            <button type="button" onClick={() => aplicarEnlace()} className="h-9 rounded-md bg-hy-60 px-3 text-[13px] font-semibold text-white hover:bg-hy-70">
+            <button type="button" onClick={() => aplicarEnlace()} className="h-9 rounded-md bg-hy-60 px-3 text-[13px] font-semibold text-white hover:bg-marca-oscuro">
               Aplicar
             </button>
             {estado?.enlace && (

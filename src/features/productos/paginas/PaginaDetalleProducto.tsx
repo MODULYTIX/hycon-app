@@ -5,27 +5,37 @@ import { RUTAS } from '@/app/rutas/rutas';
 import { obtenerProductoApi } from '@/features/productos/servicios/productos.api';
 import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos';
 import { formatearPrecio } from '@/shared/utilidades/formato';
+import { esUuid } from '@/shared/utilidades/identificador';
 
 const CLAVE_CARRITO = 'hycon.carrito.productos';
 
 interface ItemCarrito {
-  productId: number;
+  uuid: string;
   quantity: number;
 }
 
-function agregarAlCarrito(productId: number, quantity: number, stock: number): boolean {
-  const guardado = window.localStorage.getItem(CLAVE_CARRITO);
-  const items: ItemCarrito[] = guardado ? JSON.parse(guardado) : [];
-  const existente = items.find((item) => item.productId === productId);
+// Solo se conservan las lineas con la forma actual: las guardadas con el id viejo se descartan
+const leerCarrito = (): ItemCarrito[] => {
+  const guardado: unknown = JSON.parse(window.localStorage.getItem(CLAVE_CARRITO) || '[]');
+  if (!Array.isArray(guardado)) return [];
+  return guardado.filter(
+    (item): item is ItemCarrito =>
+      typeof item?.uuid === 'string' && Number.isSafeInteger(item.quantity) && item.quantity > 0
+  );
+};
+
+function agregarAlCarrito(uuid: string, quantity: number, stock: number): boolean {
+  const items = leerCarrito();
+  const existente = items.find((item) => item.uuid === uuid);
   if ((existente?.quantity ?? 0) + quantity > stock) return false;
   if (existente) existente.quantity += quantity;
-  else items.push({ productId, quantity });
+  else items.push({ uuid, quantity });
   window.localStorage.setItem(CLAVE_CARRITO, JSON.stringify(items));
   return true;
 }
 
 export default function PaginaDetalleProducto() {
-  const { productId } = useParams();
+  const { uuid = '' } = useParams();
   const [producto, setProducto] = useState<ProductoDetalle | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,8 +45,7 @@ export default function PaginaDetalleProducto() {
   const [imagenFallida, setImagenFallida] = useState(false);
 
   useEffect(() => {
-    const id = Number(productId);
-    if (!Number.isSafeInteger(id) || id < 1) {
+    if (!esUuid(uuid)) {
       setError('Este producto no existe.');
       setCargando(false);
       return;
@@ -52,7 +61,7 @@ export default function PaginaDetalleProducto() {
     setAviso(null);
     setImagenFallida(false);
 
-    obtenerProductoApi(id, controlador.signal)
+    obtenerProductoApi(uuid, controlador.signal)
       .then((detalle) => {
         if (vigente) setProducto(detalle);
       })
@@ -67,7 +76,7 @@ export default function PaginaDetalleProducto() {
       vigente = false;
       controlador.abort();
     };
-  }, [productId]);
+  }, [uuid]);
 
   if (cargando) {
     return (
@@ -103,7 +112,7 @@ export default function PaginaDetalleProducto() {
   const precioFinal = producto.discountPrice ?? producto.price;
   const enOferta = producto.discountPrice !== null && producto.discountPrice < producto.price;
   const sinStock = producto.stock === 0;
-  const codigo = `HY-${String(producto.productId).padStart(6, '0')}`;
+  const codigo = `HY-${producto.uuid.slice(0, 6).toUpperCase()}`;
   const consultaUrl = `https://wa.me/51902665565?text=${encodeURIComponent(`Hola, quisiera más información sobre ${producto.name} (${codigo}).`)}`;
   const datosProducto = [
     { etiqueta: 'Marca', valor: producto.brand || 'Por confirmar' },
@@ -116,7 +125,7 @@ export default function PaginaDetalleProducto() {
 
   const agregar = () => {
     try {
-      if (agregarAlCarrito(producto.productId, cantidad, producto.stock)) {
+      if (agregarAlCarrito(producto.uuid, cantidad, producto.stock)) {
         setAviso(`${cantidad} ${cantidad === 1 ? 'unidad agregada' : 'unidades agregadas'} al carrito.`);
       } else {
         setAviso('Ya tienes en el carrito la cantidad disponible de este producto.');
@@ -216,7 +225,7 @@ export default function PaginaDetalleProducto() {
                 <span className="min-w-7 text-center text-sm tabular-nums" aria-live="polite">{cantidad}</span>
                 <button type="button" aria-label="Aumentar cantidad" disabled={cantidad >= producto.stock || sinStock} onClick={() => setCantidad((valor) => Math.min(producto.stock, valor + 1))} className="h-full w-10 text-lg text-g-80 hover:bg-g-5 disabled:opacity-35">+</button>
               </div>
-              <button type="button" disabled={sinStock} onClick={agregar} className="inline-flex h-12 min-w-[175px] flex-1 items-center justify-center gap-2 rounded-[2px] bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-bc-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
+              <button type="button" disabled={sinStock} onClick={agregar} className="inline-flex h-12 min-w-[175px] flex-1 items-center justify-center gap-2 rounded-[2px] bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
                 <Icon icon="solar:cart-large-2-linear" width="19" height="19" aria-hidden />
                 {sinStock ? 'Sin stock' : 'Agregar al carrito'}
               </button>

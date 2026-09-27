@@ -98,7 +98,7 @@ export default function FormularioPublicacion({
     try {
       const datos = { ...valores, coverUrl: await resolverUrl() };
       const guardada = publicacion
-        ? await actualizarPublicacionApi(publicacion.postId, datos)
+        ? await actualizarPublicacionApi(publicacion.uuid, datos)
         : await crearPublicacionApi(datos);
       onGuardado(guardada);
     } catch (error) {

@@ -12,6 +12,10 @@ interface Props {
 // Tras este tiempo sin mover el raton, los controles se esconden mientras se reproduce
 const OCULTAR_CONTROLES_MS = 2500;
 
+// Cuanto adelanta o retrocede cada boton y cada tecla
+const SALTO_CORTO = 10;
+const SALTO_LARGO = 60;
+
 const BOTON_CONTROL =
   'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-white transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white disabled:opacity-40';
 
@@ -62,8 +66,10 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
     const acciones: Record<string, () => void> = {
       ' ': alternarReproduccion,
       k: alternarReproduccion,
-      ArrowRight: () => buscar(actual + 5),
-      ArrowLeft: () => buscar(actual - 5),
+      ArrowRight: () => buscar(actual + SALTO_CORTO),
+      ArrowLeft: () => buscar(actual - SALTO_CORTO),
+      l: () => buscar(actual + SALTO_LARGO),
+      j: () => buscar(actual - SALTO_LARGO),
       m: alternarSonido,
       f: alternarPantallaCompleta,
     };
@@ -99,24 +105,31 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
         className="absolute inset-0 [&>iframe]:h-full [&>iframe]:w-full"
       />
 
-      {/* Capa transparente encima del video: recibe los clics para pausar y reanudar,
-          y evita que un clic en el titulo o el logo abra youtube.com */}
+      {/* Capa encima del video: recibe los clics para pausar y reanudar. Mientras no
+          se reproduce se vuelve opaca, porque ahi es cuando YouTube saca su titulo,
+          su logo y sus videos sugeridos */}
       <div
         aria-hidden
         data-testid="capa-video"
+        data-tapado={!reproduciendo}
         onClick={() => {
           mostrarControles();
           alternarReproduccion();
         }}
         onDoubleClick={alternarPantallaCompleta}
-        className="absolute inset-0 z-10 flex items-center justify-center"
+        className={`absolute inset-0 z-10 flex items-center justify-center transition-colors duration-200 ${
+          reproduciendo ? 'bg-transparent' : 'bg-g-90'
+        }`}
       >
         {!listo && !error && (
           <span className="h-12 w-12 animate-spin rounded-full border-4 border-white/25 border-t-white" />
         )}
         {listo && !reproduciendo && !error && (
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 sm:h-20 sm:w-20">
-            <Icon icon="solar:play-bold" width="34" height="34" className="ml-1" />
+          <span className="flex flex-col items-center gap-4 px-6 text-center">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 sm:h-20 sm:w-20">
+              <Icon icon="solar:play-bold" width="34" height="34" className="ml-1" />
+            </span>
+            <span className="line-clamp-2 text-[13px] font-medium text-white/80 sm:text-[15px]">{titulo}</span>
           </span>
         )}
       </div>
@@ -163,12 +176,45 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
         <div className="mt-1.5 flex items-center gap-1">
           <button
             type="button"
+            onClick={() => buscar(actual - SALTO_CORTO)}
+            disabled={!listo}
+            aria-label={`Retroceder ${SALTO_CORTO} segundos`}
+            title={`Retroceder ${SALTO_CORTO} s`}
+            className={BOTON_CONTROL}
+          >
+            <Icon icon="solar:rewind-10-seconds-back-bold" width="20" height="20" aria-hidden />
+          </button>
+
+          <button
+            type="button"
             onClick={alternarReproduccion}
             disabled={!listo}
             aria-label={reproduciendo ? 'Pausar' : 'Reproducir'}
             className={BOTON_CONTROL}
           >
             <Icon icon={reproduciendo ? 'solar:pause-bold' : 'solar:play-bold'} width="20" height="20" aria-hidden />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => buscar(actual + SALTO_CORTO)}
+            disabled={!listo}
+            aria-label={`Adelantar ${SALTO_CORTO} segundos`}
+            title={`Adelantar ${SALTO_CORTO} s`}
+            className={BOTON_CONTROL}
+          >
+            <Icon icon="solar:rewind-10-seconds-forward-bold" width="20" height="20" aria-hidden />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => buscar(actual + SALTO_LARGO)}
+            disabled={!listo}
+            aria-label="Adelantar un minuto"
+            title="Adelantar 1 min"
+            className={`${BOTON_CONTROL} w-auto px-2 text-[12px] font-semibold tabular-nums`}
+          >
+            +1 min
           </button>
 
           <button

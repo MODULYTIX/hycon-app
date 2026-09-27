@@ -45,7 +45,7 @@ export default function ModalProducto({ abierto, producto, onCerrar, onGuardado 
 
           <FormularioProducto
             // Una clave por registro reinicia el formulario al pasar de un producto a otro
-            key={producto?.productId ?? 'nuevo'}
+            key={producto?.uuid ?? 'nuevo'}
             producto={producto}
             onCambiosPendientes={setHayCambios}
             onCancelar={solicitarCierre}

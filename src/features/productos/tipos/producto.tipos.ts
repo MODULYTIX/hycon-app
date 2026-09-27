@@ -6,7 +6,8 @@ export interface AgenciaEnvio {
 }
 
 export interface Producto {
-  productId: number;
+  // Identificador publico: el correlativo de la base no sale del backend
+  uuid: string;
   name: string;
   description: string | null;
   brand: string | null;

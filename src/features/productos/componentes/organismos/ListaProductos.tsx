@@ -43,7 +43,7 @@ export default function ListaProductos({
     >
       {productos.map((producto) => (
         <FilaProducto
-          key={producto.productId}
+          key={producto.uuid}
           producto={producto}
           onEditar={onEditar}
           onEliminar={onEliminar}

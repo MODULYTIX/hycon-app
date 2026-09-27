@@ -72,7 +72,7 @@ export default function FormularioCurso({
     try {
       const datos = { ...valores, thumbnailUrl: await resolverUrl() };
       const guardado = curso
-        ? await actualizarCursoApi(curso.courseId, datos)
+        ? await actualizarCursoApi(curso.uuid, datos)
         : await crearCursoApi(datos);
       onGuardado(guardado);
     } catch (error) {

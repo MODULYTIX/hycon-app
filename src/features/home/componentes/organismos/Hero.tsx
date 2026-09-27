@@ -44,7 +44,7 @@ export default function Hero() {
           <div className="flex md:block">
             <Link
               to={RUTAS.contactanos}
-              className="mx-auto md:mx-0 px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors hover:bg-blue-700"
+              className="mx-auto md:mx-0 px-4 py-2 bg-primary text-white font-medium rounded-lg transition-colors hover:bg-marca-oscuro"
             >
               Contactanos
             </Link>

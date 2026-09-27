@@ -10,85 +10,95 @@ interface Props {
   onVerAvance?: (curso: Curso) => void;
 }
 
-// Comparte el formato visual del catalogo de productos, con datos propios del curso.
+// Mismo formato que el catalogo de productos, con la duracion sobre la miniatura.
 export default function TarjetaCurso({ curso, onVerAvance }: Props) {
   const enOferta = curso.discountPrice !== null;
   // Sin miniatura propia se usa la del video de YouTube
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
+  const conAvance = Boolean(curso.videoUrl && onVerAvance);
 
   return (
-    <li className="group overflow-hidden rounded-[3px] bg-white ring-1 ring-g-20 transition-shadow duration-500 hover:shadow-xl">
+    <li className="group flex flex-col bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
       <Link
-        to={rutaCursoDetalle(curso.courseId)}
+        to={rutaCursoDetalle(curso.uuid)}
         aria-label={`Ver detalles de ${curso.name}`}
-        className="block outline-offset-4 focus-visible:outline-2 focus-visible:outline-primary"
+        className="flex flex-1 flex-col outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary"
       >
-      <div className="relative aspect-[4/3] overflow-hidden bg-g-10 sm:aspect-[5/4]">
-        {portada ? (
-          <img
-            src={portada}
-            alt={curso.name}
-            draggable={false}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-          />
-        ) : (
-          <span
-            aria-hidden
-            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-bc-10 via-g-10 to-g-20 text-primary/35"
-          >
-            <Icon icon="solar:diploma-linear" width="96" height="96" />
-          </span>
-        )}
+        <div className="relative aspect-[16/9] overflow-hidden bg-g-5">
+          {portada ? (
+            <img
+              src={portada}
+              alt={curso.name}
+              draggable={false}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            />
+          ) : (
+            <span aria-hidden className="flex h-full w-full items-center justify-center bg-hy-5 text-hy-30">
+              <Icon icon="solar:diploma-linear" width="72" height="72" />
+            </span>
+          )}
 
-        {enOferta && (
-          <span className="absolute left-5 top-5 rounded-[2px] bg-secondary px-3 py-1.5 text-[11px] font-bold tracking-[0.16em] text-g-90 sm:left-7 sm:top-7">
-            OFERTA
-          </span>
-        )}
+          {enOferta && (
+            <span className="absolute left-0 top-4 bg-secondary px-3 py-1.5 text-[10.5px] font-bold tracking-[0.18em] text-g-90">
+              OFERTA
+            </span>
+          )}
 
-        <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-4 border border-white/70 bg-white/90 px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.12)] backdrop-blur-sm sm:inset-x-6 sm:bottom-6 sm:px-5 sm:py-4">
-          <div className="min-w-0 border-l-2 border-primary pl-3">
-            <h3 className="line-clamp-2 text-[18px] font-semibold leading-tight tracking-tight text-g-90 sm:text-[20px]">
-              {curso.name}
-            </h3>
-            {curso.durationMinutes !== null && (
-              <p className="mt-1 flex items-center gap-1 text-[11px] text-g-50">
-                <Icon icon="solar:clock-circle-linear" width="13" height="13" aria-hidden />
-                {formatearDuracion(curso.durationMinutes)}
+          {curso.durationMinutes !== null && (
+            <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 bg-g-90/85 px-2.5 py-1 text-[11px] font-medium text-white">
+              <Icon icon="solar:clock-circle-linear" width="13" height="13" aria-hidden />
+              {formatearDuracion(curso.durationMinutes)}
+            </span>
+          )}
+        </div>
+
+        <div className="flex flex-1 flex-col gap-3 border-t border-g-20 p-5">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">Curso</p>
+
+          <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-tight text-g-90">
+            {curso.name}
+          </h3>
+
+          {curso.description && (
+            <p className="line-clamp-2 text-[13.5px] leading-relaxed text-g-50">{curso.description}</p>
+          )}
+
+          <div className="mt-auto flex items-end justify-between gap-3 border-t border-g-20 pt-4">
+            <div>
+              <p className="text-[20px] font-semibold leading-none text-primary">
+                {formatearPrecio(enOferta ? (curso.discountPrice as number) : curso.price)}
               </p>
-            )}
-          </div>
+              {enOferta && (
+                <p className="mt-1 text-[12px] text-g-50 line-through">{formatearPrecio(curso.price)}</p>
+              )}
+            </div>
 
-          <div className="shrink-0 text-right">
-            <p className="text-[17px] font-semibold leading-tight text-primary sm:text-[19px]">
-              {formatearPrecio(enOferta ? (curso.discountPrice as number) : curso.price)}
-            </p>
-            {enOferta && (
-              <p className="mt-0.5 text-[11px] text-g-50 line-through">
-                {formatearPrecio(curso.price)}
-              </p>
-            )}
-            {curso.videoUrl && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  if (onVerAvance) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onVerAvance(curso);
-                  }
-                }}
-                className="mt-1 inline-flex items-center gap-0.5 text-[11px] font-medium text-primary hover:underline"
-              >
-                Ver avance
-                <Icon icon="solar:play-circle-linear" width="12" height="12" aria-hidden />
-              </button>
-            )}
+            <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
+              Ver detalle
+              <Icon
+                icon="solar:arrow-right-linear"
+                width="15"
+                height="15"
+                aria-hidden
+                className="transition-transform duration-300 group-hover:translate-x-0.5"
+              />
+            </span>
           </div>
         </div>
-      </div>
       </Link>
+
+      {/* El avance abre el reproductor, por eso va fuera del enlace al detalle */}
+      {conAvance && (
+        <button
+          type="button"
+          onClick={() => onVerAvance?.(curso)}
+          className="flex items-center justify-center gap-2 border-t border-g-20 bg-g-5 py-3 text-[13px] font-medium text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
+        >
+          <Icon icon="solar:play-circle-linear" width="16" height="16" aria-hidden />
+          Ver avance
+        </button>
+      )}
     </li>
   );
 }

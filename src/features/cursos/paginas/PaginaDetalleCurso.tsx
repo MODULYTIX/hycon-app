@@ -3,31 +3,44 @@ import { Icon } from '@iconify/react';
 import { Link, useParams } from 'react-router-dom';
 import { RUTAS } from '@/app/rutas/rutas';
 import { obtenerCursoApi } from '@/features/cursos/servicios/cursos.api';
+import ReproductorYoutube from '@/shared/ui/organismos/ReproductorYoutube';
+import { extraerInicioYoutube, miniaturaYoutube } from '@/shared/utilidades/youtube';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 import { formatearDuracion, formatearPrecio } from '@/shared/utilidades/formato';
+import { esUuid } from '@/shared/utilidades/identificador';
 
 const CLAVE_CARRITO = 'hycon.carrito.cursos';
 
 interface CursoEnCarrito {
-  courseId: number;
+  uuid: string;
   quantity: number;
 }
 
+// Solo se conservan las lineas con la forma actual: las guardadas con el id viejo se descartan
+const leerCarrito = (): CursoEnCarrito[] => {
+  const guardado: unknown = JSON.parse(window.localStorage.getItem(CLAVE_CARRITO) || '[]');
+  if (!Array.isArray(guardado)) return [];
+  return guardado.filter(
+    (item): item is CursoEnCarrito => typeof item?.uuid === 'string' && item.quantity === 1
+  );
+};
+
 export default function PaginaDetalleCurso() {
-  const { courseId } = useParams();
+  const { uuid = '' } = useParams();
   const [curso, setCurso] = useState<Curso | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [imagenFallida, setImagenFallida] = useState(false);
+  const [verAvance, setVerAvance] = useState(false);
 
   useEffect(() => {
     setCurso(null);
     setError(null);
     setAviso(null);
     setImagenFallida(false);
-    const id = Number(courseId);
-    if (!Number.isSafeInteger(id) || id < 1) {
+    setVerAvance(false);
+    if (!esUuid(uuid)) {
       setError('Este curso no existe.');
       setCargando(false);
       return;
@@ -37,7 +50,7 @@ export default function PaginaDetalleCurso() {
     let vigente = true;
     setCargando(true);
 
-    obtenerCursoApi(id, controlador.signal)
+    obtenerCursoApi(uuid, controlador.signal)
       .then((detalle) => {
         if (vigente) setCurso(detalle);
       })
@@ -52,7 +65,7 @@ export default function PaginaDetalleCurso() {
       vigente = false;
       controlador.abort();
     };
-  }, [courseId]);
+  }, [uuid]);
 
   if (cargando) {
     return (
@@ -80,19 +93,20 @@ export default function PaginaDetalleCurso() {
   const enOferta = curso.discountPrice !== null && curso.discountPrice < curso.price;
   const consultaUrl = `https://wa.me/51902665565?text=${encodeURIComponent(`Hola, quisiera más información sobre el curso «${curso.name}».`)}`;
   const parrafos = curso.description?.trim().split(/\n\s*\n/).filter(Boolean) ?? [];
+  // Sin miniatura propia se usa la del video
+  const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
 
   const agregar = () => {
     try {
-      const guardado: unknown = JSON.parse(window.localStorage.getItem(CLAVE_CARRITO) || '[]');
-      if (!Array.isArray(guardado) || !guardado.every((item) =>
-        item && Number.isSafeInteger(item.courseId) && item.courseId > 0 && item.quantity === 1
-      )) throw new Error('Carrito inválido');
-      const items: CursoEnCarrito[] = guardado;
-      if (items.some((item) => item.courseId === curso.courseId)) {
+      const items = leerCarrito();
+      if (items.some((item) => item.uuid === curso.uuid)) {
         setAviso('Este curso ya está en tu carrito.');
         return;
       }
-      window.localStorage.setItem(CLAVE_CARRITO, JSON.stringify([...items, { courseId: curso.courseId, quantity: 1 }]));
+      window.localStorage.setItem(
+        CLAVE_CARRITO,
+        JSON.stringify([...items, { uuid: curso.uuid, quantity: 1 }])
+      );
       setAviso('Curso agregado al carrito.');
     } catch {
       setAviso('No se pudo guardar el curso. Inténtalo de nuevo.');
@@ -103,7 +117,7 @@ export default function PaginaDetalleCurso() {
     <article className="mx-auto w-full max-w-[1120px] px-5 pb-16 pt-8 sm:px-7 min-[700px]:pt-10">
       <header className="mb-8 flex flex-col gap-5 min-[700px]:flex-row min-[700px]:items-center min-[700px]:justify-between">
         <h1 className="min-w-0 text-[2rem] font-medium leading-[1.15] tracking-tight text-g-80 sm:text-[2.6rem]">{curso.name}</h1>
-        <button type="button" onClick={agregar} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[2px] bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-bc-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary min-[700px]:self-auto">
+        <button type="button" onClick={agregar} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[2px] bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary min-[700px]:self-auto">
           <Icon icon="solar:cart-large-2-linear" width="18" height="18" aria-hidden />
           Agregar al carrito
         </button>
@@ -112,22 +126,42 @@ export default function PaginaDetalleCurso() {
       {aviso && <p role="status" className="mb-6 border-l-2 border-primary pl-4 text-sm text-g-60">{aviso}</p>}
 
       <section aria-label="Presentación del curso" className="grid items-start gap-8 min-[700px]:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
-        <div className="relative aspect-video overflow-hidden rounded-[2px] bg-bc-5">
-          {curso.thumbnailUrl && !imagenFallida ? (
-            <img src={curso.thumbnailUrl} alt={`Portada de ${curso.name}`} onError={() => setImagenFallida(true)} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-primary">
-              <Icon icon="solar:diploma-linear" width="64" height="64" aria-hidden />
-              <span className="text-xs uppercase tracking-[0.2em]">Formación Hycon</span>
-            </div>
-          )}
-          {curso.videoUrl && (
-            <a href={curso.videoUrl} target="_blank" rel="noreferrer" className="absolute bottom-4 left-4 inline-flex items-center gap-3 rounded-[2px] border border-white/70 bg-white/95 px-4 py-2.5 text-xs font-medium text-primary shadow-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">
-              Ver avance del curso
-              <Icon icon="solar:arrow-right-up-linear" width="17" height="17" aria-hidden />
-            </a>
-          )}
-        </div>
+        {/* El avance se reproduce aqui mismo: nada lleva a youtube.com */}
+        {verAvance && curso.youtubeId ? (
+          <div className="overflow-hidden rounded-[2px]">
+            <ReproductorYoutube
+              key={curso.youtubeId}
+              id={curso.youtubeId}
+              titulo={curso.name}
+              inicio={extraerInicioYoutube(curso.videoUrl)}
+            />
+          </div>
+        ) : (
+          <div className="relative aspect-video overflow-hidden rounded-[2px] bg-hy-5">
+            {portada && !imagenFallida ? (
+              <img src={portada} alt={`Portada de ${curso.name}`} onError={() => setImagenFallida(true)} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-3 text-primary">
+                <Icon icon="solar:diploma-linear" width="64" height="64" aria-hidden />
+                <span className="text-xs uppercase tracking-[0.2em]">Formación Hycon</span>
+              </div>
+            )}
+            {curso.youtubeId && (
+              <button
+                type="button"
+                onClick={() => setVerAvance(true)}
+                className="group absolute inset-0 flex flex-col items-center justify-center gap-3 bg-g-90/25 transition-colors hover:bg-g-90/35 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white"
+              >
+                <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform group-hover:scale-105">
+                  <Icon icon="solar:play-bold" width="30" height="30" aria-hidden className="ml-1" />
+                </span>
+                <span className="rounded-[2px] bg-white/95 px-3 py-1.5 text-xs font-medium text-primary">
+                  Ver avance del curso
+                </span>
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="min-w-0">
           <div className="border-l-[3px] border-primary pl-4">
@@ -160,15 +194,15 @@ export default function PaginaDetalleCurso() {
 
       <section aria-label="Información de inscripción" className="mt-9 grid gap-7 border-t border-g-20 pt-8 sm:grid-cols-3 sm:gap-6">
         <div className="flex items-start gap-4 sm:flex-col sm:items-center sm:text-center">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-bc-5 text-primary"><Icon icon="solar:wallet-linear" width="28" height="28" aria-hidden /></span>
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-hy-5 text-primary"><Icon icon="solar:wallet-linear" width="28" height="28" aria-hidden /></span>
           <div><h2 className="text-base font-medium text-g-80">{precioFinal === 0 ? 'Acceso gratuito' : 'Un solo pago'}</h2><p className="mt-1 max-w-[250px] text-xs leading-relaxed text-g-50">{precioFinal === 0 ? 'Este curso no tiene costo de inscripción.' : 'El precio del curso, en un único pago.'}</p></div>
         </div>
         <div className="flex items-start gap-4 sm:flex-col sm:items-center sm:text-center">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-bc-5 text-primary"><Icon icon="solar:verified-check-linear" width="28" height="28" aria-hidden /></span>
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-hy-5 text-primary"><Icon icon="solar:verified-check-linear" width="28" height="28" aria-hidden /></span>
           <div><h2 className="text-base font-medium text-g-80">Obtén tu certificado</h2><p className="mt-1 max-w-[250px] text-xs leading-relaxed text-g-50">Consulta los requisitos de certificación de este curso.</p></div>
         </div>
         <a href={consultaUrl} target="_blank" rel="noreferrer" className="group flex items-start gap-4 rounded-[2px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:flex-col sm:items-center sm:text-center">
-          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-bc-5 text-primary transition-colors group-hover:bg-bc-10"><Icon icon="ic:baseline-whatsapp" width="28" height="28" aria-hidden /></span>
+          <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-hy-5 text-primary transition-colors group-hover:bg-hy-10"><Icon icon="ic:baseline-whatsapp" width="28" height="28" aria-hidden /></span>
           <div><h2 className="flex items-center gap-2 text-base font-medium text-g-80 group-hover:text-primary sm:justify-center">Conversemos <Icon icon="solar:arrow-right-up-linear" width="15" height="15" aria-hidden /></h2><p className="mt-1 max-w-[250px] text-xs leading-relaxed text-g-50">Resuelve tus dudas con Hycon por WhatsApp.</p></div>
         </a>
       </section>

@@ -14,14 +14,14 @@ import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tip
 export default function PaginaPanelPublicaciones() {
   // El panel ve tambien los borradores
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarPublicacionesApi('todos', pagina, senal),
+    (pagina: number, senal: AbortSignal) => listarPublicacionesApi('todos', { pagina, senal }),
     []
   );
 
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Publicacion>({
     cargar,
     eliminar: eliminarPublicacionApi,
-    obtenerId: (publicacion) => publicacion.postId,
+    obtenerId: (publicacion) => publicacion.uuid,
     obtenerNombre: (publicacion) => publicacion.title,
     etiqueta: 'Artículo',
     mensajeError: 'No se pudieron cargar las publicaciones',

@@ -18,7 +18,7 @@ export default function PaginaPanelCursos() {
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Curso>({
     cargar,
     eliminar: eliminarCursoApi,
-    obtenerId: (curso) => curso.courseId,
+    obtenerId: (curso) => curso.uuid,
     obtenerNombre: (curso) => curso.name,
     etiqueta: 'Curso',
     mensajeError: 'No se pudieron cargar los cursos',

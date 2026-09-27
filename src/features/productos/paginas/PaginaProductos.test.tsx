@@ -6,10 +6,14 @@ import PaginaProductos from './PaginaProductos';
 import * as api from '@/features/productos/servicios/productos.api';
 import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+const UUID_2 = '00000002-0000-4000-8000-000000000000';
+
 vi.mock('@/features/productos/servicios/productos.api');
 
 const enOferta: Producto = {
-  productId: 1,
+  uuid: UUID_1,
   name: 'Silla ergonomica Pro',
   description: 'Soporte lumbar regulable',
   brand: 'Hycon',
@@ -29,7 +33,7 @@ const enOferta: Producto = {
 
 const agotado: Producto = {
   ...enOferta,
-  productId: 2,
+  uuid: UUID_2,
   name: 'Reposapies',
   description: null,
   brand: null,
@@ -80,6 +84,36 @@ describe('PaginaProductos (publica)', () => {
     expect(within(tarjeta).getByText('OFERTA')).toBeInTheDocument();
     expect(within(tarjeta).getByText(/19\.90/)).toBeInTheDocument();
     expect(within(tarjeta).getByText(/25\.90/)).toBeInTheDocument();
+  });
+
+  it('muestra la referencia, el color y el stock disponible', async () => {
+    renderizar();
+
+    const tarjeta = within(await rejilla()).getAllByRole('listitem')[0];
+
+    expect(within(tarjeta).getByText('Hycon · SE-200')).toBeInTheDocument();
+    expect(within(tarjeta).getByText('Negro')).toBeInTheDocument();
+    expect(within(tarjeta).getByText('12 disponibles')).toBeInTheDocument();
+    expect(within(tarjeta).getByText('Soporte lumbar regulable')).toBeInTheDocument();
+  });
+
+  it('omite la referencia y el stock cuando el producto no los tiene', async () => {
+    renderizar();
+
+    const tarjeta = within(await rejilla()).getAllByRole('listitem')[1];
+
+    expect(within(tarjeta).queryByText(/disponibles/)).not.toBeInTheDocument();
+    expect(within(tarjeta).queryByText('·')).not.toBeInTheDocument();
+  });
+
+  it('toda la tarjeta lleva al detalle del producto', async () => {
+    renderizar();
+
+    const tarjeta = within(await rejilla()).getAllByRole('listitem')[0];
+    const enlace = within(tarjeta).getByRole('link', { name: /ver detalles de silla ergonomica pro/i });
+
+    expect(enlace).toHaveAttribute('href', `/productos/${UUID_1}`);
+    expect(within(enlace).getByText('Ver detalle')).toBeInTheDocument();
   });
 
   it('avisa cuando un producto esta agotado', async () => {

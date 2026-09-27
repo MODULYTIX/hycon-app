@@ -6,6 +6,9 @@ import {
   type Publicacion,
 } from '@/features/publicaciones/tipos/publicacion.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_3 = '00000003-0000-4000-8000-000000000000';
+
 const valida = {
   title: 'Pausas activas en la oficina',
   excerpt: '',
@@ -65,7 +68,7 @@ describe('formularios de publicacion', () => {
 
   it('prepara una publicacion guardada para editarla', () => {
     const guardada: Publicacion = {
-      postId: 3,
+      uuid: UUID_3,
       title: 'Pausas activas',
       slug: 'pausas-activas',
       excerpt: null,

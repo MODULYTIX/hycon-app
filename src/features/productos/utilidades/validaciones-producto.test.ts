@@ -7,6 +7,9 @@ import {
   type Producto,
 } from '@/features/productos/tipos/producto.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_3 = '00000003-0000-4000-8000-000000000000';
+
 const producto = {
   ...PRODUCTO_VACIO,
   name: 'Silla ergonomica',
@@ -74,7 +77,7 @@ describe('validarProducto', () => {
 
 describe('productoAFormulario', () => {
   const guardado: Producto = {
-    productId: 3,
+    uuid: UUID_3,
     name: 'Silla',
     description: null,
     brand: 'Hycon',

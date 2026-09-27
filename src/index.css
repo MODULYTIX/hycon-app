@@ -2,8 +2,8 @@
 
 
 @theme {
-  /* colores globales */
-  --color-primary: #0057a3;
+  /* colores globales. El principal sale de --color-marca (el verde del logo) */
+  --color-primary: var(--color-marca);
   --color-secondary: #ff9e1b;
 
   /* colores grises */

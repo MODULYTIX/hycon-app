@@ -109,7 +109,7 @@ describe('ReproductorYoutube', () => {
     expect(jugador.unMute).toHaveBeenCalled();
   });
 
-  it('responde al teclado: espacio pausa y las flechas avanzan 5 segundos', async () => {
+  it('responde al teclado: espacio pausa, las flechas saltan 10 s y J/L un minuto', async () => {
     const { jugador } = await renderizar();
     await listoYReproduciendo(jugador);
     const marco = screen.getByRole('region', { name: /reproductor: pausas activas/i });
@@ -118,7 +118,58 @@ describe('ReproductorYoutube', () => {
     expect(jugador.pauseVideo).toHaveBeenCalled();
 
     fireEvent.keyDown(marco, { key: 'ArrowRight' });
-    expect(jugador.seekTo).toHaveBeenCalledWith(5, true);
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(10, true);
+
+    fireEvent.keyDown(marco, { key: 'l' });
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(70, true);
+
+    fireEvent.keyDown(marco, { key: 'j' });
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(10, true);
+  });
+
+  it('tapa el video mientras no se reproduce, que es cuando YouTube saca su marca', async () => {
+    const { jugador } = await renderizar();
+    const capa = screen.getByTestId('capa-video');
+
+    // Al cargar y en pausa la capa es opaca
+    expect(capa).toHaveAttribute('data-tapado', 'true');
+
+    await listoYReproduciendo(jugador);
+    expect(capa).toHaveAttribute('data-tapado', 'false');
+    expect(screen.queryByText('Pausas activas')).not.toBeInTheDocument();
+
+    await act(async () => jugador.cambiarEstado(ESTADOS.PAUSED));
+    expect(capa).toHaveAttribute('data-tapado', 'true');
+    expect(screen.getByText('Pausas activas')).toBeInTheDocument();
+  });
+
+  it('los botones adelantan y retroceden el video', async () => {
+    const usuario = userEvent.setup();
+    const { jugador } = await renderizar();
+    await listoYReproduciendo(jugador);
+
+    await usuario.click(screen.getByRole('button', { name: /adelantar 10 segundos/i }));
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(10, true);
+
+    await usuario.click(screen.getByRole('button', { name: /adelantar un minuto/i }));
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(70, true);
+
+    await usuario.click(screen.getByRole('button', { name: /retroceder 10 segundos/i }));
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(60, true);
+  });
+
+  it('no retrocede antes del inicio ni adelanta mas alla del final', async () => {
+    const usuario = userEvent.setup();
+    const { jugador } = await renderizar();
+    await listoYReproduciendo(jugador);
+
+    await usuario.click(screen.getByRole('button', { name: /retroceder 10 segundos/i }));
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(0, true);
+
+    // El video dura 327 s: un salto de un minuto desde el final se queda en el final
+    fireEvent.change(screen.getByRole('slider', { name: /progreso del video/i }), { target: { value: '320' } });
+    await usuario.click(screen.getByRole('button', { name: /adelantar un minuto/i }));
+    expect(jugador.seekTo).toHaveBeenLastCalledWith(327, true);
   });
 
   it('al terminar vuelve al inicio para no dejar la pantalla final de YouTube', async () => {

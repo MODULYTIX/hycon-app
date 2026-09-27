@@ -9,6 +9,11 @@ import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+const UUID_2 = '00000002-0000-4000-8000-000000000000';
+const UUID_9 = '00000009-0000-4000-8000-000000000000';
+
 vi.mock('@/features/cursos/servicios/cursos.api');
 vi.mock('@/shared/servicios/youtube-api');
 
@@ -18,7 +23,7 @@ vi.mock('@/shared/servicios/imagenes.api');
 type Usuario = ReturnType<typeof userEvent.setup>;
 
 const pausas: Curso = {
-  courseId: 1,
+  uuid: UUID_1,
   name: 'Pausas activas en oficina',
   description: null,
   videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
@@ -58,7 +63,7 @@ describe('PaginaPanelCursos', () => {
     vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([pausas]));
     vi.mocked(api.crearCursoApi).mockImplementation(async (datos) => ({
       ...pausas,
-      courseId: 2,
+      uuid: UUID_2,
       name: datos.name,
     }));
     vi.mocked(api.actualizarCursoApi).mockImplementation(async (id, datos) => ({
@@ -97,7 +102,7 @@ describe('PaginaPanelCursos', () => {
     vi.mocked(api.listarCursosApi).mockImplementation(async (_estado, numero) =>
       numero === 1
         ? pagina([pausas], { total: 9, totalPaginas: 2 })
-        : pagina([{ ...pausas, courseId: 9, name: 'Levantamiento de cargas' }], {
+        : pagina([{ ...pausas, uuid: UUID_9, name: 'Levantamiento de cargas' }], {
             pagina: 2,
             total: 9,
             totalPaginas: 2,
@@ -189,7 +194,7 @@ describe('PaginaPanelCursos', () => {
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(api.actualizarCursoApi).toHaveBeenCalledWith(
-      1,
+      UUID_1,
       expect.objectContaining({ durationMinutes: '45' })
     );
     expect(screen.getByText('45 min')).toBeInTheDocument();
@@ -219,6 +224,6 @@ describe('PaginaPanelCursos', () => {
     await usuario.click(within(dialogo).getByRole('button', { name: /s[ií], eliminar/i }));
 
     expect(await screen.findByText(/todav[ií]a no hay cursos/i)).toBeInTheDocument();
-    expect(api.eliminarCursoApi).toHaveBeenCalledWith(1);
+    expect(api.eliminarCursoApi).toHaveBeenCalledWith(UUID_1);
   });
 });

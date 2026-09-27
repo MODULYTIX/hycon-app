@@ -21,7 +21,7 @@ export default function PaginaPanelProductos() {
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Producto>({
     cargar,
     eliminar: eliminarProductoApi,
-    obtenerId: (producto) => producto.productId,
+    obtenerId: (producto) => producto.uuid,
     obtenerNombre: (producto) => producto.name,
     etiqueta: 'Producto',
     mensajeError: 'No se pudieron cargar los productos',

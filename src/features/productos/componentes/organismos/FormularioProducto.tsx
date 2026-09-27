@@ -89,7 +89,7 @@ export default function FormularioProducto({
     try {
       const datos = { ...valores, imageUrl: await resolverUrl() };
       const guardado = producto
-        ? await actualizarProductoApi(producto.productId, datos)
+        ? await actualizarProductoApi(producto.uuid, datos)
         : await crearProductoApi(datos);
       onGuardado(guardado);
     } catch (error) {

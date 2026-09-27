@@ -44,7 +44,7 @@ export default function ListaPublicaciones({
     >
       {publicaciones.map((publicacion) => (
         <FilaPublicacion
-          key={publicacion.postId}
+          key={publicacion.uuid}
           publicacion={publicacion}
           onEditar={onEditar}
           onEliminar={onEliminar}

@@ -16,7 +16,7 @@ export default function ItemMenuCuenta({ opcion, onSeleccionar }: Props) {
         role="menuitem"
         to={opcion.href}
         onClick={onSeleccionar}
-        className="flex items-center gap-3 px-4 py-2.5 text-[15px] text-g-70 transition-colors hover:bg-bc-5 hover:text-primary"
+        className="flex items-center gap-3 px-4 py-2.5 text-[15px] text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
       >
         <Icon icon={opcion.icono} width="18" height="18" aria-hidden className="shrink-0 text-g-50" />
         <span className="flex-1">{opcion.etiqueta}</span>

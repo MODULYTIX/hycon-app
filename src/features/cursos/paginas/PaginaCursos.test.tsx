@@ -8,13 +8,17 @@ import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+const UUID_7 = '00000007-0000-4000-8000-000000000000';
+
 vi.mock('@/features/cursos/servicios/cursos.api');
 vi.mock('@/shared/servicios/youtube-api');
 
 let jugadores: JugadorFalso[];
 
 const curso: Curso = {
-  courseId: 1,
+  uuid: UUID_1,
   name: 'Logistica de ultima milla',
   description: 'Ruteo y tiempos de entrega',
   videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1m30s',
@@ -65,8 +69,21 @@ describe('PaginaCursos (publica)', () => {
     expect(within(tarjeta).getByText(/149\.00/)).toBeInTheDocument();
     expect(within(tarjeta).getByRole('link', { name: /ver detalles de logistica/i })).toHaveAttribute(
       'href',
-      '/cursos/1'
+      `/cursos/${UUID_1}`
     );
+  });
+
+  it('el boton de avance queda fuera del enlace, para no abrir el detalle al pulsarlo', async () => {
+    renderizar();
+
+    const tarjeta = within(
+      await screen.findByRole('list', { name: /catalogo de cursos/i })
+    ).getByRole('listitem');
+    const avance = within(tarjeta).getByRole('button', { name: /ver avance/i });
+
+    expect(avance.closest('a')).toBeNull();
+    expect(within(tarjeta).getByText('Ver detalle').closest('a')).toHaveAttribute('href', `/cursos/${UUID_1}`);
+    expect(within(tarjeta).getByText('Ruteo y tiempos de entrega')).toBeInTheDocument();
   });
 
   it('sin miniatura propia usa la del video de YouTube', async () => {
@@ -128,7 +145,7 @@ describe('PaginaCursos (publica)', () => {
     vi.mocked(api.listarCursosApi).mockImplementation(async (_estado, numero) =>
       numero === 1
         ? pagina([curso], { total: 7, totalPaginas: 2 })
-        : pagina([{ ...curso, courseId: 7, name: 'Pausas activas' }], {
+        : pagina([{ ...curso, uuid: UUID_7, name: 'Pausas activas' }], {
             pagina: 2,
             total: 7,
             totalPaginas: 2,

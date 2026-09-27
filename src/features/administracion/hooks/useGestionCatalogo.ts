@@ -3,8 +3,8 @@ import { useListadoPaginado, type CargarPagina } from '@/shared/hooks/useListado
 
 interface Opciones<T> {
   cargar: CargarPagina<T>;
-  eliminar: (id: number) => Promise<unknown>;
-  obtenerId: (elemento: T) => number;
+  eliminar: (id: string) => Promise<unknown>;
+  obtenerId: (elemento: T) => string;
   obtenerNombre: (elemento: T) => string;
   // Como se nombra en los avisos: "Producto", "Curso"
   etiqueta: string;

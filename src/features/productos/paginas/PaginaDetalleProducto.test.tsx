@@ -7,10 +7,13 @@ import PaginaDetalleProducto from './PaginaDetalleProducto';
 import * as api from '@/features/productos/servicios/productos.api';
 import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_7 = '00000007-0000-4000-8000-000000000000';
+
 vi.mock('@/features/productos/servicios/productos.api');
 
 const producto: ProductoDetalle = {
-  productId: 7,
+  uuid: UUID_7,
   name: 'Silla ergonómica',
   description: 'Soporte para jornadas de trabajo prolongadas.',
   brand: 'Hycon',
@@ -33,7 +36,7 @@ const renderizar = (ruta = '/productos') => render(
   <MemoryRouter initialEntries={[ruta]}>
     <Routes>
       <Route path="/productos" element={<PaginaProductos />} />
-      <Route path="/productos/:productId" element={<PaginaDetalleProducto />} />
+      <Route path="/productos/:uuid" element={<PaginaDetalleProducto />} />
     </Routes>
   </MemoryRouter>
 );
@@ -49,7 +52,7 @@ describe('detalle de producto', () => {
   });
 
   it('muestra el color y las agencias de envio del producto', async () => {
-    renderizar('/productos/7');
+    renderizar(`/productos/${UUID_7}`);
 
     expect(await screen.findByRole('heading', { level: 1, name: producto.name })).toBeInTheDocument();
     // La ficha tecnica lista cada dato con su etiqueta
@@ -65,21 +68,21 @@ describe('detalle de producto', () => {
     await usuario.click(await screen.findByRole('link', { name: /ver detalles de silla ergonómica/i }));
 
     expect(await screen.findByRole('heading', { name: 'Silla ergonómica' })).toBeInTheDocument();
-    expect(api.obtenerProductoApi).toHaveBeenCalledWith(7, expect.anything());
+    expect(api.obtenerProductoApi).toHaveBeenCalledWith(UUID_7, expect.anything());
     expect(screen.getByText('Soporte para jornadas de trabajo prolongadas.')).toBeInTheDocument();
     expect(screen.getByText('E-20')).toBeInTheDocument();
   });
 
   it('controla la cantidad y guarda el producto en el carrito local', async () => {
     const usuario = userEvent.setup();
-    renderizar('/productos/7');
+    renderizar(`/productos/${UUID_7}`);
     await screen.findByRole('heading', { name: 'Silla ergonómica' });
 
     await usuario.click(screen.getByRole('button', { name: 'Aumentar cantidad' }));
     await usuario.click(screen.getByRole('button', { name: 'Agregar al carrito' }));
 
     expect(JSON.parse(window.localStorage.getItem('hycon.carrito.productos') || '[]')).toEqual([
-      { productId: 7, quantity: 2 },
+      { uuid: UUID_7, quantity: 2 },
     ]);
     expect(screen.getByRole('status')).toHaveTextContent('2 unidades agregadas');
   });
@@ -88,7 +91,7 @@ describe('detalle de producto', () => {
     const usuario = userEvent.setup();
     const secundaria = 'https://example.com/silla-lateral.jpg';
     vi.mocked(api.obtenerProductoApi).mockResolvedValue({ ...producto, imageUrls: [producto.imageUrl!, secundaria] });
-    renderizar('/productos/7');
+    renderizar(`/productos/${UUID_7}`);
     await screen.findByRole('heading', { name: 'Silla ergonómica' });
 
     const filaPrincipal = screen.getByRole('region', { name: 'Imagen e información principal' });
@@ -106,7 +109,7 @@ describe('detalle de producto', () => {
 
   it('evita repetir la misma foto y muestra información de entrega cuando no hay otra vista', async () => {
     vi.mocked(api.obtenerProductoApi).mockResolvedValue({ ...producto, imageUrls: [producto.imageUrl!, producto.imageUrl!] });
-    renderizar('/productos/7');
+    renderizar(`/productos/${UUID_7}`);
     await screen.findByRole('heading', { name: 'Silla ergonómica' });
 
     expect(screen.queryByRole('img', { name: 'Vista adicional de Silla ergonómica' })).not.toBeInTheDocument();

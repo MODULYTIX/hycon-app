@@ -329,7 +329,7 @@ export default function FormularioContacto() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 flex gap-2 items-center justify-center transition-colors duration-300 mt-11">
+                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300 mt-11">
                   <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>
@@ -339,7 +339,7 @@ export default function FormularioContacto() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-blue-700 flex gap-2 items-center justify-center transition-colors duration-300">
+                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300">
                   <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>

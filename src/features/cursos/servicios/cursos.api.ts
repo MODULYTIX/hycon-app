@@ -15,8 +15,8 @@ export const listarCursosApi = (
     { senal }
   ).then((r) => ({ elementos: r.cursos, paginacion: r.paginacion }));
 
-export const obtenerCursoApi = (courseId: number, senal?: AbortSignal) =>
-  peticion<{ curso: Curso }>(`${BASE}/${courseId}`, { senal }).then((r) => r.curso);
+export const obtenerCursoApi = (uuid: string, senal?: AbortSignal) =>
+  peticion<{ curso: Curso }>(`${BASE}/${uuid}`, { senal }).then((r) => r.curso);
 
 export const crearCursoApi = (datos: DatosCurso) =>
   peticion<{ curso: Curso }>(BASE, {
@@ -25,12 +25,12 @@ export const crearCursoApi = (datos: DatosCurso) =>
     autenticada: true,
   }).then((r) => r.curso);
 
-export const actualizarCursoApi = (id: number, datos: DatosCurso) =>
-  peticion<{ curso: Curso }>(`${BASE}/${id}`, {
+export const actualizarCursoApi = (uuid: string, datos: DatosCurso) =>
+  peticion<{ curso: Curso }>(`${BASE}/${uuid}`, {
     metodo: 'PUT',
     cuerpo: datos,
     autenticada: true,
   }).then((r) => r.curso);
 
-export const eliminarCursoApi = (id: number) =>
-  peticion<void>(`${BASE}/${id}`, { metodo: 'DELETE', autenticada: true });
+export const eliminarCursoApi = (uuid: string) =>
+  peticion<void>(`${BASE}/${uuid}`, { metodo: 'DELETE', autenticada: true });

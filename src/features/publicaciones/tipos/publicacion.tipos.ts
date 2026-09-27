@@ -2,7 +2,8 @@ import { fechaParaCampo, hoyParaCampo } from '@/features/publicaciones/utilidade
 
 // Espejo de lo que devuelve el backend en /api/v1/posts
 export interface Publicacion {
-  postId: number;
+  // Identificador publico: el correlativo de la base no sale del backend
+  uuid: string;
   title: string;
   slug: string;
   excerpt: string | null;

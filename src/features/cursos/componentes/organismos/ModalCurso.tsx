@@ -43,7 +43,7 @@ export default function ModalCurso({ abierto, curso, onCerrar, onGuardado }: Pro
           />
 
           <FormularioCurso
-            key={curso?.courseId ?? 'nuevo'}
+            key={curso?.uuid ?? 'nuevo'}
             curso={curso}
             onCambiosPendientes={setHayCambios}
             onCancelar={solicitarCierre}

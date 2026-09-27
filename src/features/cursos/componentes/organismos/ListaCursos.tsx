@@ -43,7 +43,7 @@ export default function ListaCursos({
     >
       {cursos.map((curso) => (
         <FilaCurso
-          key={curso.courseId}
+          key={curso.uuid}
           curso={curso}
           onEditar={onEditar}
           onEliminar={onEliminar}

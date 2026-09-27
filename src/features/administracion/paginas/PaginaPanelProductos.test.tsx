@@ -7,6 +7,11 @@ import * as api from '@/features/productos/servicios/productos.api';
 import * as apiImagenes from '@/shared/servicios/imagenes.api';
 import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+const UUID_2 = '00000002-0000-4000-8000-000000000000';
+const UUID_3 = '00000003-0000-4000-8000-000000000000';
+
 // Las pruebas no hablan con el backend: se sustituye la capa de servicios
 vi.mock('@/features/productos/servicios/productos.api');
 vi.mock('@/shared/servicios/imagenes.api');
@@ -20,7 +25,7 @@ const AGENCIAS = [
 ];
 
 const silla: Producto = {
-  productId: 1,
+  uuid: UUID_1,
   name: 'Silla ergonomica Pro',
   description: null,
   brand: 'Hycon',
@@ -37,7 +42,7 @@ const silla: Producto = {
 
 const reposapies: Producto = {
   ...silla,
-  productId: 2,
+  uuid: UUID_2,
   name: 'Reposapies regulable',
   brand: null,
   model: null,
@@ -89,7 +94,7 @@ describe('PaginaPanelProductos', () => {
     vi.mocked(api.listarAgenciasApi).mockResolvedValue(AGENCIAS);
     vi.mocked(api.crearProductoApi).mockImplementation(async (datos) => ({
       ...reposapies,
-      productId: 3,
+      uuid: UUID_3,
       name: datos.name,
     }));
     vi.mocked(api.actualizarProductoApi).mockImplementation(async (id, datos) => ({
@@ -417,7 +422,7 @@ describe('PaginaPanelProductos', () => {
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
 
       expect(api.actualizarProductoApi).toHaveBeenCalledWith(
-        1,
+        UUID_1,
         expect.objectContaining({ color: 'Azul marino', imageUrl: silla.imageUrl })
       );
       expect(apiImagenes.subirImagenApi).not.toHaveBeenCalled();
@@ -437,7 +442,7 @@ describe('PaginaPanelProductos', () => {
       await guardar(usuario, dialogo, /guardar cambios/i);
 
       await waitFor(() =>
-        expect(api.actualizarProductoApi).toHaveBeenCalledWith(1, expect.objectContaining({ imageUrl: '' }))
+        expect(api.actualizarProductoApi).toHaveBeenCalledWith(UUID_1, expect.objectContaining({ imageUrl: '' }))
       );
     });
   });
@@ -469,7 +474,7 @@ describe('PaginaPanelProductos', () => {
       await usuario.click(within(dialogo).getByRole('button', { name: /s[ií], eliminar/i }));
 
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-      expect(api.eliminarProductoApi).toHaveBeenCalledWith(1);
+      expect(api.eliminarProductoApi).toHaveBeenCalledWith(UUID_1);
       expect(await screen.findByRole('status')).toHaveTextContent(/silla ergonomica pro.*eliminado/i);
       await waitFor(() => expect(screen.queryByText('Silla ergonomica Pro')).not.toBeInTheDocument());
     });

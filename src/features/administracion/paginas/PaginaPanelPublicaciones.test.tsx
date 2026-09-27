@@ -8,6 +8,11 @@ import * as api from '@/features/publicaciones/servicios/publicaciones.api';
 import * as apiImagenes from '@/shared/servicios/imagenes.api';
 import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tipos';
 
+// Los catalogos se direccionan por uuid: el correlativo no sale del backend
+const UUID_1 = '00000001-0000-4000-8000-000000000000';
+const UUID_2 = '00000002-0000-4000-8000-000000000000';
+const UUID_3 = '00000003-0000-4000-8000-000000000000';
+
 vi.mock('@/features/publicaciones/servicios/publicaciones.api');
 vi.mock('@/shared/servicios/imagenes.api');
 
@@ -16,7 +21,7 @@ type Usuario = ReturnType<typeof userEvent.setup>;
 const CONTENIDO = '<p>Levantarse cada hora reduce la tension.</p><p>Estirar el cuello alivia la espalda.</p>';
 
 const pausas: Publicacion = {
-  postId: 1,
+  uuid: UUID_1,
   title: 'Pausas activas en la oficina',
   slug: 'pausas-activas-en-la-oficina',
   excerpt: 'Cinco ejercicios de dos minutos',
@@ -32,7 +37,7 @@ const pausas: Publicacion = {
 
 const borrador: Publicacion = {
   ...pausas,
-  postId: 2,
+  uuid: UUID_2,
   title: 'Cargas seguras en almacen',
   slug: 'cargas-seguras',
   excerpt: null,
@@ -91,7 +96,7 @@ describe('PaginaPanelPublicaciones', () => {
     vi.mocked(api.listarPublicacionesApi).mockResolvedValue(pagina([pausas, borrador]));
     vi.mocked(api.crearPublicacionApi).mockImplementation(async (datos) => ({
       ...borrador,
-      postId: 3,
+      uuid: UUID_3,
       title: datos.title,
     }));
     vi.mocked(api.actualizarPublicacionApi).mockImplementation(async (id, datos) => ({
@@ -111,7 +116,7 @@ describe('PaginaPanelPublicaciones', () => {
       renderizar();
       await esperarListado();
 
-      expect(api.listarPublicacionesApi).toHaveBeenCalledWith('todos', 1, expect.anything());
+      expect(api.listarPublicacionesApi).toHaveBeenCalledWith('todos', expect.objectContaining({ pagina: 1 }));
     });
 
     it('muestra fecha, lecturas, tiempo de lectura y estado', async () => {
@@ -137,8 +142,8 @@ describe('PaginaPanelPublicaciones', () => {
 
     it('pagina desde el backend con mas de 6', async () => {
       const usuario = userEvent.setup();
-      vi.mocked(api.listarPublicacionesApi).mockImplementation(async (_estado, numero) =>
-        numero === 1
+      vi.mocked(api.listarPublicacionesApi).mockImplementation(async (_estado, opciones) =>
+        opciones?.pagina === 1
           ? pagina([pausas], { total: 8, totalPaginas: 2 })
           : pagina([borrador], { pagina: 2, total: 8, totalPaginas: 2 })
       );
@@ -148,7 +153,7 @@ describe('PaginaPanelPublicaciones', () => {
       await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
 
       expect(await screen.findByText('Cargas seguras en almacen')).toBeInTheDocument();
-      expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('todos', 2, expect.anything());
+      expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('todos', expect.objectContaining({ pagina: 2 }));
     });
   });
 
@@ -263,7 +268,7 @@ describe('PaginaPanelPublicaciones', () => {
         coverUrl: 'http://localhost:4000/uploads/imagenes/nueva.webp',
       });
       expect(await screen.findByRole('status')).toHaveTextContent('Artículo "Ergonomia en casa" creado');
-      expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('todos', 1, expect.anything());
+      expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('todos', expect.objectContaining({ pagina: 1 }));
     });
 
     it('si hay errores estando en la vista previa vuelve a la pestana de escribir', async () => {
@@ -326,7 +331,7 @@ describe('PaginaPanelPublicaciones', () => {
 
       await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
       expect(api.actualizarPublicacionApi).toHaveBeenCalledWith(
-        1,
+        UUID_1,
         expect.objectContaining({ excerpt: 'Nuevo resumen', coverUrl: pausas.coverUrl, publishedAt: '2026-03-01' })
       );
       expect(fila('Pausas activas en la oficina')).toHaveTextContent('Nuevo resumen');
@@ -346,7 +351,7 @@ describe('PaginaPanelPublicaciones', () => {
       await usuario.click(within(dialogo).getByRole('button', { name: /s[ií], eliminar/i }));
 
       await waitFor(() => expect(screen.queryByText('Pausas activas en la oficina')).not.toBeInTheDocument());
-      expect(api.eliminarPublicacionApi).toHaveBeenCalledWith(1);
+      expect(api.eliminarPublicacionApi).toHaveBeenCalledWith(UUID_1);
       expect(screen.getByRole('status')).toHaveTextContent(/eliminado/i);
     });
 

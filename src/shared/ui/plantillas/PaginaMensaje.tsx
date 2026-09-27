@@ -18,7 +18,7 @@ export default function PaginaMensaje({ icono, titulo, descripcion }: Props) {
 
       <Link
         to={RUTAS.home}
-        className="mt-4 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-blue-700"
+        className="mt-4 rounded-lg bg-primary px-6 py-2.5 font-semibold text-white transition-colors hover:bg-marca-oscuro"
       >
         Volver al inicio
       </Link>

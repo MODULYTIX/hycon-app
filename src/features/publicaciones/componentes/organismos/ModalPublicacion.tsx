@@ -43,7 +43,7 @@ export default function ModalPublicacion({ abierto, publicacion, onCerrar, onGua
           />
 
           <FormularioPublicacion
-            key={publicacion?.postId ?? 'nueva'}
+            key={publicacion?.uuid ?? 'nueva'}
             publicacion={publicacion}
             onCambiosPendientes={setHayCambios}
             onCancelar={solicitarCierre}
