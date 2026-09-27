@@ -1,6 +1,7 @@
 // Espejo de lo que devuelve el backend en /api/v1/catalog/courses
 export interface Curso {
-  courseId: number;
+  // Identificador publico: el correlativo de la base no sale del backend
+  uuid: string;
   name: string;
   description: string | null;
   videoUrl: string | null;
