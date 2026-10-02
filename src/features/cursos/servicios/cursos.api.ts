@@ -8,10 +8,11 @@ const BASE = '/api/v1/catalog/courses';
 export const listarCursosApi = (
   estado: EstadoListado,
   pagina: number,
-  senal?: AbortSignal
+  senal?: AbortSignal,
+  porPagina = POR_PAGINA
 ): Promise<Pagina<Curso>> =>
   peticion<{ cursos: Curso[]; paginacion: Paginacion }>(
-    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${POR_PAGINA}`,
+    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}`,
     { senal }
   ).then((r) => ({ elementos: r.cursos, paginacion: r.paginacion }));
 

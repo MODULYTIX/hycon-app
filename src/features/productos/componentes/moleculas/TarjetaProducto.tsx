@@ -12,13 +12,13 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
   const referencia = [producto.brand, producto.model].filter(Boolean).join(' · ');
 
   return (
-    <li className="group flex flex-col bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
+    <li className="tarjeta-catalogo group flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
       <Link
         to={rutaProductoDetalle(producto.uuid)}
         aria-label={`Ver detalles de ${producto.name}`}
         className="flex flex-1 flex-col outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary"
       >
-        <div className="relative aspect-[4/3] overflow-hidden bg-g-5">
+        <div className="relative aspect-[4/3] max-h-[190px] overflow-hidden bg-g-5">
           {producto.imageUrl ? (
             <img
               src={producto.imageUrl}
@@ -29,12 +29,12 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
             />
           ) : (
             <span aria-hidden className="flex h-full w-full items-center justify-center bg-hy-5 text-hy-30">
-              <Icon icon="solar:box-linear" width="72" height="72" />
+              <Icon icon="solar:box-linear" width="48" height="48" />
             </span>
           )}
 
           {enOferta && (
-            <span className="absolute left-0 top-4 bg-secondary px-3 py-1.5 text-[10.5px] font-bold tracking-[0.18em] text-g-90">
+            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[9px] font-semibold tracking-[0.08em] text-g-90">
               OFERTA
             </span>
           )}
@@ -46,17 +46,17 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 border-t border-g-20 p-5">
+        <div className="flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4">
           {referencia && (
             <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">{referencia}</p>
           )}
 
-          <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-tight text-g-90">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug tracking-tight text-g-90">
             {producto.name}
           </h3>
 
           {producto.description && (
-            <p className="line-clamp-2 text-[13.5px] leading-relaxed text-g-50">{producto.description}</p>
+            <p className="line-clamp-2 text-[12px] leading-relaxed text-g-50">{producto.description}</p>
           )}
 
           <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-g-50">
@@ -69,9 +69,9 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
             {!sinStock && <span>{producto.stock} disponibles</span>}
           </div>
 
-          <div className="flex items-end justify-between gap-3 border-t border-g-20 pt-4">
+          <div className="flex items-end justify-between gap-3 border-t border-g-20 pt-3">
             <div>
-              <p className="text-[20px] font-semibold leading-none text-primary">
+              <p className="text-[19px] font-semibold leading-none text-primary">
                 {formatearPrecio(enOferta ? (producto.discountPrice as number) : producto.price)}
               </p>
               {enOferta && (
@@ -79,7 +79,7 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
               )}
             </div>
 
-            <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
+            <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
               Ver detalle
               <Icon
                 icon="solar:arrow-right-linear"

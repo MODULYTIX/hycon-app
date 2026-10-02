@@ -5,25 +5,10 @@ import { RUTAS } from '@/app/rutas/rutas';
 import { obtenerCursoApi } from '@/features/cursos/servicios/cursos.api';
 import ReproductorYoutube from '@/shared/ui/organismos/ReproductorYoutube';
 import { extraerInicioYoutube, miniaturaYoutube } from '@/shared/utilidades/youtube';
+import { agregarAlCarrito } from '@/features/carrito/servicios/carrito.almacen';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 import { formatearDuracion, formatearPrecio } from '@/shared/utilidades/formato';
 import { esUuid } from '@/shared/utilidades/identificador';
-
-const CLAVE_CARRITO = 'hycon.carrito.cursos';
-
-interface CursoEnCarrito {
-  uuid: string;
-  quantity: number;
-}
-
-// Solo se conservan las lineas con la forma actual: las guardadas con el id viejo se descartan
-const leerCarrito = (): CursoEnCarrito[] => {
-  const guardado: unknown = JSON.parse(window.localStorage.getItem(CLAVE_CARRITO) || '[]');
-  if (!Array.isArray(guardado)) return [];
-  return guardado.filter(
-    (item): item is CursoEnCarrito => typeof item?.uuid === 'string' && item.quantity === 1
-  );
-};
 
 export default function PaginaDetalleCurso() {
   const { uuid = '' } = useParams();
@@ -31,6 +16,7 @@ export default function PaginaDetalleCurso() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [agregado, setAgregado] = useState(false);
   const [imagenFallida, setImagenFallida] = useState(false);
   const [verAvance, setVerAvance] = useState(false);
 
@@ -38,6 +24,7 @@ export default function PaginaDetalleCurso() {
     setCurso(null);
     setError(null);
     setAviso(null);
+    setAgregado(false);
     setImagenFallida(false);
     setVerAvance(false);
     if (!esUuid(uuid)) {
@@ -97,38 +84,37 @@ export default function PaginaDetalleCurso() {
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
 
   const agregar = () => {
-    try {
-      const items = leerCarrito();
-      if (items.some((item) => item.uuid === curso.uuid)) {
-        setAviso('Este curso ya está en tu carrito.');
-        return;
-      }
-      window.localStorage.setItem(
-        CLAVE_CARRITO,
-        JSON.stringify([...items, { uuid: curso.uuid, quantity: 1 }])
-      );
-      setAviso('Curso agregado al carrito.');
-    } catch {
-      setAviso('No se pudo guardar el curso. Inténtalo de nuevo.');
-    }
+    // Un curso es una sola inscripcion: si ya esta, no se suma otra
+    const guardado = agregarAlCarrito({ tipo: 'curso', uuid: curso.uuid });
+    setAviso(guardado ? 'Curso agregado al carrito.' : 'Este curso ya está en tu carrito.');
+    setAgregado(guardado);
   };
 
   return (
-    <article className="mx-auto w-full max-w-[1120px] px-5 pb-16 pt-8 sm:px-7 min-[700px]:pt-10">
+    <article className="detalle-interior mx-auto w-full max-w-[1120px] px-5 pb-16 pt-8 sm:px-7 min-[700px]:pt-10">
       <header className="mb-8 flex flex-col gap-5 min-[700px]:flex-row min-[700px]:items-center min-[700px]:justify-between">
         <h1 className="min-w-0 text-[2rem] font-medium leading-[1.15] tracking-tight text-g-80 sm:text-[2.6rem]">{curso.name}</h1>
-        <button type="button" onClick={agregar} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-[2px] bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary min-[700px]:self-auto">
+        <button type="button" onClick={agregar} className="inline-flex h-11 shrink-0 items-center justify-center gap-2 self-start rounded-xl bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary min-[700px]:self-auto">
           <Icon icon="solar:cart-large-2-linear" width="18" height="18" aria-hidden />
           Agregar al carrito
         </button>
       </header>
 
-      {aviso && <p role="status" className="mb-6 border-l-2 border-primary pl-4 text-sm text-g-60">{aviso}</p>}
+      {aviso && (
+        <p role="status" className="mb-6 border-l-2 border-primary pl-4 text-sm text-g-60">
+          {aviso}
+          {agregado && (
+            <Link to={RUTAS.carrito} className="ml-2 font-medium text-primary underline underline-offset-4">
+              Ver carrito
+            </Link>
+          )}
+        </p>
+      )}
 
       <section aria-label="Presentación del curso" className="grid items-start gap-8 min-[700px]:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)]">
         {/* El avance se reproduce aqui mismo: nada lleva a youtube.com */}
         {verAvance && curso.youtubeId ? (
-          <div className="overflow-hidden rounded-[2px]">
+          <div className="overflow-hidden rounded-xl">
             <ReproductorYoutube
               key={curso.youtubeId}
               id={curso.youtubeId}
@@ -137,7 +123,7 @@ export default function PaginaDetalleCurso() {
             />
           </div>
         ) : (
-          <div className="relative aspect-video overflow-hidden rounded-[2px] bg-hy-5">
+          <div className="relative aspect-video overflow-hidden rounded-xl bg-hy-5">
             {portada && !imagenFallida ? (
               <img src={portada} alt={`Portada de ${curso.name}`} onError={() => setImagenFallida(true)} className="h-full w-full object-cover" />
             ) : (
@@ -155,7 +141,7 @@ export default function PaginaDetalleCurso() {
                 <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform group-hover:scale-105">
                   <Icon icon="solar:play-bold" width="30" height="30" aria-hidden className="ml-1" />
                 </span>
-                <span className="rounded-[2px] bg-white/95 px-3 py-1.5 text-xs font-medium text-primary">
+                <span className="rounded-xl bg-white/95 px-3 py-1.5 text-xs font-medium text-primary">
                   Ver avance del curso
                 </span>
               </button>
@@ -167,7 +153,7 @@ export default function PaginaDetalleCurso() {
           <div className="border-l-[3px] border-primary pl-4">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[11px] uppercase tracking-[0.12em] text-g-50">{precioFinal === 0 ? 'Acceso gratuito' : 'Un solo pago'}</p>
-              {enOferta && <span className="rounded-[2px] bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-g-90">Oferta</span>}
+              {enOferta && <span className="rounded-xl bg-secondary px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-g-90">Oferta</span>}
             </div>
             <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <p className="text-[2.25rem] font-medium leading-none tracking-tight text-primary">{formatearPrecio(precioFinal)}</p>
@@ -201,7 +187,7 @@ export default function PaginaDetalleCurso() {
           <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-hy-5 text-primary"><Icon icon="solar:verified-check-linear" width="28" height="28" aria-hidden /></span>
           <div><h2 className="text-base font-medium text-g-80">Obtén tu certificado</h2><p className="mt-1 max-w-[250px] text-xs leading-relaxed text-g-50">Consulta los requisitos de certificación de este curso.</p></div>
         </div>
-        <a href={consultaUrl} target="_blank" rel="noreferrer" className="group flex items-start gap-4 rounded-[2px] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:flex-col sm:items-center sm:text-center">
+        <a href={consultaUrl} target="_blank" rel="noreferrer" className="group flex items-start gap-4 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary sm:flex-col sm:items-center sm:text-center">
           <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-hy-5 text-primary transition-colors group-hover:bg-hy-10"><Icon icon="ic:baseline-whatsapp" width="28" height="28" aria-hidden /></span>
           <div><h2 className="flex items-center gap-2 text-base font-medium text-g-80 group-hover:text-primary sm:justify-center">Conversemos <Icon icon="solar:arrow-right-up-linear" width="15" height="15" aria-hidden /></h2><p className="mt-1 max-w-[250px] text-xs leading-relaxed text-g-50">Resuelve tus dudas con Hycon por WhatsApp.</p></div>
         </a>

@@ -10,23 +10,23 @@ import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tip
 export default function FilaArticulo({ publicacion }: { publicacion: Publicacion }) {
   return (
     <li className="group">
-      <article className="flex flex-col gap-3 sm:flex-row sm:gap-5">
+      <article className="flex flex-row gap-3 sm:gap-4">
         <Link
           to={rutaPublicacionDetalle(publicacion.slug)}
           tabIndex={-1}
           aria-hidden
-          className="shrink-0 sm:w-[172px]"
+          className="shrink-0 w-[112px] sm:w-[128px]"
         >
           <PortadaArticulo
             url={publicacion.coverUrl}
             titulo={publicacion.title}
-            clase="aspect-[16/9] rounded-[3px] ring-1 ring-g-20 sm:aspect-[4/3]"
+            clase="aspect-[16/9] rounded-lg ring-1 ring-g-20 sm:aspect-[4/3]"
             tamanoIcono={32}
           />
         </Link>
 
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-          <h3 className="line-clamp-2 text-[15.5px] font-semibold leading-snug text-g-90 sm:text-[16.5px]">
+          <h3 className="line-clamp-2 text-[15.5px] font-semibold leading-snug text-g-90 sm:text-[15px]">
             <Link
               to={rutaPublicacionDetalle(publicacion.slug)}
               className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"

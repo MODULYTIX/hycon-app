@@ -7,7 +7,7 @@ export default function PaginaAcercaDe() {
     <>
       <h1 className="sr-only">Acerca de Hycon</h1>
 
-      <section id="quienes_somos" className="flex items-center justify-center py-10">
+      <section id="quienes_somos" className="flex items-center justify-center py-14 sm:py-20">
         <QuienesSomos />
       </section>
 
@@ -15,7 +15,7 @@ export default function PaginaAcercaDe() {
         <PorqueElegirnos />
       </section>
 
-      <section id="alcance" className="flex items-center justify-center py-16">
+      <section id="alcance" className="flex items-center justify-center py-16 sm:py-24">
         <Alcance />
       </section>
     </>

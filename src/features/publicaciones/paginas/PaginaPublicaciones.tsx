@@ -19,15 +19,16 @@ export default function PaginaPublicaciones() {
 
   return (
     <PlantillaSeccion
+      compacto
       titulo="Publicaciones"
       descripcion="Guías de ergonomía, logística y buenas prácticas para tu operación en Arequipa."
     >
       {cargandoPrimera && (
-        <div aria-label="Cargando artículos" className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-          <div className="h-[340px] animate-pulse rounded-[3px] bg-g-10" />
-          <div className="grid gap-5">
-            <div className="h-[160px] animate-pulse rounded-[3px] bg-g-10" />
-            <div className="h-[160px] animate-pulse rounded-[3px] bg-g-10" />
+        <div aria-label="Cargando artículos" className="grid gap-4 md:grid-cols-3">
+          <div className="h-[340px] animate-pulse rounded-2xl bg-g-10" />
+          <div className="grid gap-4">
+            <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
+            <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
           </div>
         </div>
       )}
@@ -35,14 +36,14 @@ export default function PaginaPublicaciones() {
       {!cargando && error && (
         <p
           role="alert"
-          className="rounded-[3px] border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700"
+          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700"
         >
           {error}
         </p>
       )}
 
       {!cargando && !error && publicaciones.length === 0 && (
-        <div className="rounded-[3px] bg-white ring-1 ring-g-20">
+        <div className="rounded-2xl bg-white ring-1 ring-g-20">
           <EstadoVacio
             icono="solar:document-text-linear"
             titulo="Todavía no hay artículos publicados"
@@ -55,14 +56,14 @@ export default function PaginaPublicaciones() {
         <>
           {/* Sin articulos de apoyo el destacado ocupa todo el ancho, para no dejar media pagina vacia */}
           <div
-            className={`grid gap-5 ${
-              secundarios.length > 0 ? 'lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]' : ''
+            className={`grid gap-4 ${
+              secundarios.length > 0 ? 'md:grid-cols-3' : ''
             }`}
           >
             <TarjetaArticuloDestacado publicacion={destacado} horizontal={secundarios.length === 0} />
 
             {secundarios.length > 0 && (
-              <div className="flex flex-col gap-5">
+              <div className="contents">
                 {secundarios.map((publicacion) => (
                   <TarjetaArticulo key={publicacion.uuid} publicacion={publicacion} />
                 ))}
@@ -70,7 +71,7 @@ export default function PaginaPublicaciones() {
             )}
           </div>
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1fr)_252px] lg:gap-10">
+          <div className="mt-7 grid gap-6 lg:grid-cols-[minmax(0,1fr)_252px] lg:gap-10">
             <section aria-labelledby="titulo-todos">
               <h2
                 id="titulo-todos"
@@ -80,11 +81,9 @@ export default function PaginaPublicaciones() {
               </h2>
 
               {listado.length > 0 ? (
-                <ul aria-label="Listado de artículos" className="divide-y divide-g-20">
+                <ul aria-label="Listado de artículos" className="divide-y divide-g-20 [&>li]:py-4 [&>li:first-child]:pt-0 [&>li:last-child]:pb-0">
                   {listado.map((publicacion) => (
-                    <div key={publicacion.uuid} className="py-5 first:pt-0 last:pb-0">
-                      <FilaArticulo publicacion={publicacion} />
-                    </div>
+                    <FilaArticulo key={publicacion.uuid} publicacion={publicacion} />
                   ))}
                 </ul>
               ) : (
@@ -99,7 +98,7 @@ export default function PaginaPublicaciones() {
                     type="button"
                     onClick={verMas}
                     disabled={cargando}
-                    className="inline-flex h-10 items-center gap-2 rounded-[2px] border border-g-30 px-5 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-g-30 px-5 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
                   >
                     {cargando ? 'Cargando...' : 'Ver más artículos'}
                     <Icon icon="solar:alt-arrow-down-linear" width="16" height="16" aria-hidden />
@@ -108,7 +107,7 @@ export default function PaginaPublicaciones() {
               )}
             </section>
 
-            <aside className="lg:border-l lg:border-g-20 lg:pl-10">
+            <aside className="h-fit rounded-2xl border border-g-20 bg-g-5 p-6">
               <PanelMasLeidos publicaciones={masLeidos.publicaciones} cargando={masLeidos.cargandoPrimera} />
             </aside>
           </div>

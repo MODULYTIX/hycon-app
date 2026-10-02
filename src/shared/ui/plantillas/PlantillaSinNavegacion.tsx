@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Encabezado from '@/shared/ui/organismos/Encabezado';
 import PiePagina from '@/shared/ui/organismos/PiePagina';
-import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
+// import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
 
 // Layout para vistas que no deben mostrar la navegación principal,
 // pero sí el encabezado con el logo, el perfil de usuario y el pie de página.
@@ -15,7 +15,7 @@ export default function PlantillaSinNavegacion() {
       </main>
 
       <PiePagina />
-      <BotonWhatsapp />
+      {/* Botón flotante oculto temporalmente. <BotonWhatsapp /> */}
     </div>
   );
 }

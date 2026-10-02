@@ -9,13 +9,13 @@ import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tip
 // Tarjeta compacta de la columna derecha del destacado
 export default function TarjetaArticulo({ publicacion }: { publicacion: Publicacion }) {
   return (
-    <article className="group flex flex-1 flex-col overflow-hidden rounded-[3px] bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_10px_30px_rgba(28,58,57,0.09)]">
+    <article className="tarjeta-editorial group flex flex-1 flex-col overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_10px_30px_rgba(28,58,57,0.09)]">
       <Link to={rutaPublicacionDetalle(publicacion.slug)} tabIndex={-1} aria-hidden className="block">
-        <PortadaArticulo url={publicacion.coverUrl} titulo={publicacion.title} clase="aspect-[16/7]" tamanoIcono={36} />
+        <PortadaArticulo url={publicacion.coverUrl} titulo={publicacion.title} clase="aspect-[16/9]" tamanoIcono={36} />
       </Link>
 
       <div className="flex flex-1 flex-col gap-1.5 border-t border-g-20 p-4">
-        <h3 className="line-clamp-2 text-[14.5px] font-semibold leading-snug text-g-90">
+        <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-g-90">
           <Link
             to={rutaPublicacionDetalle(publicacion.slug)}
             className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
@@ -31,7 +31,7 @@ export default function TarjetaArticulo({ publicacion }: { publicacion: Publicac
           <Link
             to={rutaPublicacionDetalle(publicacion.slug)}
             aria-label={`Leer ${publicacion.title}`}
-            className="inline-flex h-8 items-center gap-1 rounded-[2px] border border-g-30 px-3 text-[12px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary"
+            className="inline-flex h-8 items-center gap-1 rounded-lg border border-g-30 px-3 text-[12px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary"
           >
             Leer
             <Icon icon="solar:arrow-right-linear" width="13" height="13" aria-hidden />

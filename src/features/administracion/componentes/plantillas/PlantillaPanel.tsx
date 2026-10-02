@@ -10,10 +10,10 @@ export default function PlantillaPanel() {
     <div className="flex min-h-screen w-full flex-col bg-hy-fondo">
       <Encabezado variante="panel" />
 
-      <div className="tema-panel flex flex-1 flex-col lg:flex-row">
+      <div className="panel-diseno tema-panel flex flex-1 flex-col lg:flex-row">
         <BarraLateral />
 
-        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 sm:py-7 lg:px-10">
+        <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-9 lg:px-10">
           <div className="mx-auto w-full max-w-[1180px]">
             <Outlet />
           </div>

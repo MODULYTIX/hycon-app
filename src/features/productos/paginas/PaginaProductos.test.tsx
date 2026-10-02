@@ -67,7 +67,7 @@ describe('PaginaProductos (publica)', () => {
     renderizar();
     await screen.findByText('Silla ergonomica Pro');
 
-    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything());
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12);
   });
 
   it('muestra una tarjeta por producto', async () => {
@@ -158,7 +158,7 @@ describe('PaginaProductos (publica)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
 
     expect(await screen.findByText('Reposapies')).toBeInTheDocument();
-    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 2, expect.anything());
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12);
     expect(screen.queryByText('Silla ergonomica Pro')).not.toBeInTheDocument();
   });
 

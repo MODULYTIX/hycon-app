@@ -16,7 +16,7 @@ interface Props {
 export default function TarjetaArticuloDestacado({ publicacion, horizontal = false }: Props) {
   return (
     <article
-      className={`group flex h-full overflow-hidden rounded-[3px] bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)] ${
+      className={`tarjeta-editorial group flex h-full overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)] ${
         horizontal ? 'flex-col md:flex-row' : 'flex-col'
       }`}
     >
@@ -24,7 +24,7 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
         to={rutaPublicacionDetalle(publicacion.slug)}
         tabIndex={-1}
         aria-hidden
-        className={horizontal ? 'block md:w-[54%]' : 'block lg:flex-1'}
+        className={horizontal ? 'block md:w-[54%]' : 'block'}
       >
         {/* En pantalla ancha la portada crece para igualar la altura de lo que tiene al lado */}
         <PortadaArticulo
@@ -33,14 +33,14 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
           clase={
             horizontal
               ? 'aspect-[16/9] md:aspect-auto md:h-full md:min-h-[230px]'
-              : 'aspect-[16/8] lg:aspect-auto lg:h-full lg:min-h-[190px]'
+              : 'aspect-[16/9]'
           }
           tamanoIcono={56}
         />
       </Link>
 
       <div
-        className={`flex flex-1 flex-col gap-2.5 border-t border-g-20 p-5 ${
+        className={`flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4 ${
           horizontal ? 'md:justify-center md:border-l md:border-t-0 md:p-7' : ''
         }`}
       >
@@ -48,7 +48,7 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
           Lo último
         </span>
 
-        <h2 className="text-[18px] font-semibold leading-snug tracking-tight text-g-90 sm:text-[21px]">
+        <h2 className="text-[15px] font-semibold leading-snug tracking-tight text-g-90 sm:text-[16px]">
           <Link
             to={rutaPublicacionDetalle(publicacion.slug)}
             className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
@@ -59,11 +59,11 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
 
         <MetaArticulo publicacion={publicacion} />
 
-        <p className="line-clamp-2 text-[13.5px] leading-relaxed text-g-60">{resumenDe(publicacion, 200)}</p>
+        <p className="line-clamp-2 text-[12px] leading-relaxed text-g-60">{resumenDe(publicacion, 200)}</p>
 
         <Link
           to={rutaPublicacionDetalle(publicacion.slug)}
-          className="mt-1 inline-flex h-9 w-fit items-center gap-1.5 rounded-[2px] bg-primary px-4 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          className="mt-1 inline-flex h-9 w-fit items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           Leer artículo completo
           <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />

@@ -1,5 +1,5 @@
 import Modal from '@/shared/ui/organismos/Modal';
-import { Icon } from '@iconify/react';
+
 import { useState } from 'react';
 
 interface Props {

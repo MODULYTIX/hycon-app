@@ -7,6 +7,7 @@ import PaginaDetalleCurso from './PaginaDetalleCurso';
 import * as api from '@/features/cursos/servicios/cursos.api';
 import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
+import { agregarAlCarrito, leerCarrito } from '@/features/carrito/servicios/carrito.almacen';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 // Los catalogos se direccionan por uuid: el correlativo no sale del backend
@@ -104,17 +105,22 @@ describe('detalle del curso', () => {
     );
   });
 
-  it('agrega una sola inscripcion al carrito y conserva otros cursos', async () => {
-    window.localStorage.setItem('hycon.carrito.cursos', JSON.stringify([{ uuid: UUID_2, quantity: 1 }]));
-    const usuario = userEvent.setup();
+  it('agrega una sola inscripcion al carrito y conserva lo que ya habia', async () => {
+    agregarAlCarrito({ tipo: 'producto', uuid: UUID_2, cantidad: 2 }, 5);
+    const usuario = userEvent.setup({ delay: null });
     renderizar();
     const boton = await screen.findByRole('button', { name: 'Agregar al carrito' });
+
     await usuario.click(boton);
     expect(screen.getByRole('status')).toHaveTextContent('Curso agregado al carrito.');
+    expect(screen.getByRole('link', { name: 'Ver carrito' })).toHaveAttribute('href', '/carrito');
+
+    // Un curso es una sola inscripcion: repetirlo no suma otra linea
     await usuario.click(boton);
     expect(screen.getByRole('status')).toHaveTextContent('Este curso ya está en tu carrito.');
-    expect(JSON.parse(window.localStorage.getItem('hycon.carrito.cursos')!)).toEqual([
-      { uuid: UUID_2, quantity: 1 }, { uuid: UUID_7, quantity: 1 },
+    expect(leerCarrito()).toEqual([
+      { tipo: 'producto', uuid: UUID_2, cantidad: 2 },
+      { tipo: 'curso', uuid: UUID_7, cantidad: 1 },
     ]);
   });
 

@@ -13,7 +13,7 @@ export default function PieFormulario({
   onCancelar: () => void;
 }) {
   return (
-    <div className="flex flex-col-reverse gap-2 border-t border-hy-10 bg-white px-5 py-3.5 sm:flex-row sm:items-center sm:justify-end sm:px-7">
+    <div className="flex flex-col-reverse gap-2 border-t border-hy-20 bg-hy-5 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7">
       <Boton variante="secundario" onClick={onCancelar} disabled={enviando}>
         Cancelar
       </Boton>

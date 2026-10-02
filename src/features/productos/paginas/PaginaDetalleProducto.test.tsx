@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PaginaProductos from './PaginaProductos';
 import PaginaDetalleProducto from './PaginaDetalleProducto';
 import * as api from '@/features/productos/servicios/productos.api';
+import { leerCarrito } from '@/features/carrito/servicios/carrito.almacen';
 import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos';
 
 // Los catalogos se direccionan por uuid: el correlativo no sale del backend
@@ -81,10 +82,9 @@ describe('detalle de producto', () => {
     await usuario.click(screen.getByRole('button', { name: 'Aumentar cantidad' }));
     await usuario.click(screen.getByRole('button', { name: 'Agregar al carrito' }));
 
-    expect(JSON.parse(window.localStorage.getItem('hycon.carrito.productos') || '[]')).toEqual([
-      { uuid: UUID_7, quantity: 2 },
-    ]);
+    expect(leerCarrito()).toEqual([{ tipo: 'producto', uuid: UUID_7, cantidad: 2 }]);
     expect(screen.getByRole('status')).toHaveTextContent('2 unidades agregadas');
+    expect(screen.getByRole('link', { name: 'Ver carrito' })).toHaveAttribute('href', '/carrito');
   });
 
   it('muestra las fotos distintas y permite cambiar la imagen de la galería', async () => {

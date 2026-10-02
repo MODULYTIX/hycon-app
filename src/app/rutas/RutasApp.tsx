@@ -17,6 +17,7 @@ import PaginaDetalleCurso from '@/features/cursos/paginas/PaginaDetalleCurso';
 import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
 import PaginaDetallePublicacion from '@/features/publicaciones/paginas/PaginaDetallePublicacion';
 import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
+import PaginaCarrito from '@/features/carrito/paginas/PaginaCarrito';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
 import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
@@ -41,8 +42,9 @@ export default function RutasApp() {
           <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
           <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
 
+          <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
+
           {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
-          <Route path={RUTAS.carrito} element={<PaginaEnConstruccion />} />
           <Route path={RUTAS.perfil} element={<PaginaEnConstruccion />} />
           <Route path={RUTAS.historial} element={<PaginaEnConstruccion />} />
           <Route path={RUTAS.panelCursos} element={<PaginaEnConstruccion />} />

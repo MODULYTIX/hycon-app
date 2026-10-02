@@ -9,7 +9,7 @@ import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 export default function PaginaCursos() {
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarCursosApi('active', pagina, senal),
+    (pagina: number, senal: AbortSignal) => listarCursosApi('active', pagina, senal, 12),
     []
   );
   const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
@@ -26,6 +26,7 @@ export default function PaginaCursos() {
 
   return (
     <PlantillaSeccion
+      compacto
       titulo="Cursos"
       descripcion="Formacion en logistica de ultima milla, atencion al cliente y ergonomia laboral."
     >

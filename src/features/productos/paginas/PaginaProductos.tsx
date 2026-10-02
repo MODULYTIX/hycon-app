@@ -8,7 +8,7 @@ import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
 export default function PaginaProductos() {
   // El catalogo publico solo pide los activos
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal),
+    (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal, 12),
     []
   );
   const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
@@ -24,6 +24,7 @@ export default function PaginaProductos() {
 
   return (
     <PlantillaSeccion
+      compacto
       titulo="Productos"
       descripcion="Insumos y equipamiento para tu operacion logistica, listos para despacho en Arequipa."
     >

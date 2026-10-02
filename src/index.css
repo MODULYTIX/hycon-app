@@ -227,3 +227,80 @@ html::-webkit-scrollbar,
 body::-webkit-scrollbar {
   display: none;
 }
+
+/* Diseño de páginas internas. El home conserva sus componentes y estilos. */
+.pagina-interior, .detalle-interior {
+  --sombra-superficie: 0 12px 36px color-mix(in srgb, var(--color-hy-90) 7%, transparent);
+}
+.cabecera-interior { position: relative; }
+.cabecera-interior > div > [aria-hidden] { width: 48px; height: 4px; border-radius: 4px; }
+.cabecera-interior h1 {
+  font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+  line-height: 1.08; letter-spacing: -0.045em; font-weight: 650;
+}
+.cabecera-interior p { max-width: 640px; line-height: 1.7; }
+.tarjeta-catalogo, .tarjeta-editorial {
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-hy-90) 4%, transparent);
+  transition: transform 250ms ease, box-shadow 250ms ease;
+}
+@media (hover: hover) {
+  .tarjeta-catalogo:hover, .tarjeta-editorial:hover { transform: translateY(-4px); }
+}
+.pagina-interior :is(button, a):focus-visible,
+.detalle-interior :is(button, a):focus-visible {
+  outline: 2px solid var(--color-primary); outline-offset: 4px;
+}
+.detalle-interior > header { padding-bottom: 24px; border-bottom: 1px solid var(--color-g-20); }
+.detalle-interior h1 { letter-spacing: -0.035em; }
+.lectura-interior .contenido-articulo { line-height: 1.9; }
+.lectura-interior article > p { border-radius: 0 12px 12px 0; }
+.resumen-carrito { box-shadow: var(--sombra-superficie); border-top: 4px solid var(--color-primary); }
+.resumen-carrito h2 { font-size: 20px; }
+.panel-diseno .tabla-diseno { box-shadow: 0 6px 24px color-mix(in srgb, var(--color-hy-90) 4%, transparent); }
+.panel-diseno .tabla-diseno ul > li { transition: background-color 180ms ease; }
+.panel-diseno .tabla-diseno ul > li:hover { background-color: var(--color-hy-5); }
+.formulario-catalogo { background: var(--color-hy-fondo); }
+.formulario-catalogo input, .formulario-catalogo textarea { line-height: 1.6; }
+.formulario-catalogo label { letter-spacing: 0.005em; }
+@media (min-width: 1024px) {
+  .panel-diseno > aside > nav { position: sticky; top: 24px; }
+}
+@media (max-width: 639px) {
+  .cabecera-interior { gap: 14px; }
+  .tarjeta-catalogo h3 { font-size: 17px; }
+  .detalle-interior > header { padding-bottom: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tarjeta-catalogo:hover, .tarjeta-editorial:hover { transform: none; }
+}
+
+/* Catalogues: typography and density independent of the home and detail pages. */
+.cabecera-catalogo {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 24px; padding: 0 0 20px;
+  border-bottom: 1px solid var(--color-g-20);
+}
+.cabecera-catalogo h1 {
+  font-size: clamp(1.65rem, 2.5vw, 2rem); line-height: 1.2;
+  font-weight: 600; letter-spacing: -0.025em; color: var(--color-g-80);
+}
+.cabecera-catalogo p {
+  max-width: 760px; font-size: 13px; line-height: 1.65;
+}
+.catalogo-compacto .tarjeta-catalogo,
+.catalogo-compacto .tarjeta-editorial {
+  border: 1px solid var(--color-g-20);
+  box-shadow: none;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.catalogo-compacto .tarjeta-catalogo h3 { font-size: 15px; }
+.catalogo-compacto .tarjeta-catalogo:hover,
+.catalogo-compacto .tarjeta-editorial:hover {
+  transform: none;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-hy-90) 8%, transparent);
+}
+.catalogo-compacto .tarjeta-catalogo h3 { min-height: 2.6em; }
+.catalogo-compacto .tarjeta-editorial h3 { min-height: 2.6em; }
+@media (min-width: 768px) {
+  .catalogo-compacto .tarjeta-editorial > a > div { width: 100%; height: 160px; aspect-ratio: auto; }
+}

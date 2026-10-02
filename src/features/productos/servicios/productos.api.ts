@@ -17,10 +17,11 @@ export const POR_PAGINA = 6;
 export const listarProductosApi = (
   estado: EstadoListado,
   pagina: number,
-  senal?: AbortSignal
+  senal?: AbortSignal,
+  porPagina = POR_PAGINA
 ): Promise<Pagina<Producto>> =>
   peticion<{ productos: Producto[]; paginacion: Paginacion }>(
-    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${POR_PAGINA}`,
+    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}`,
     { senal }
   ).then((r) => ({ elementos: r.productos, paginacion: r.paginacion }));
 

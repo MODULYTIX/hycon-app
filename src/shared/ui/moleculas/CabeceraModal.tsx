@@ -13,7 +13,7 @@ export default function CabeceraModal({
   descripcion: string;
 }) {
   return (
-    <header className="flex items-center gap-3.5 border-b border-hy-10 px-5 py-4 pr-14 sm:px-7 sm:py-5">
+    <header className="flex items-center gap-4 border-b border-hy-10 bg-hy-5 px-5 py-4 pr-14 sm:px-7 sm:py-6">
       <span
         aria-hidden
         className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-hy-10 text-hy-60 sm:flex"
@@ -21,7 +21,7 @@ export default function CabeceraModal({
         <Icon icon={icono} width="22" height="22" />
       </span>
       <div className="min-w-0">
-        <h2 id={id} className="text-[19px] font-semibold leading-tight text-hy-tinta sm:text-[21px]">
+        <h2 id={id} className="text-[21px] font-semibold leading-tight text-hy-tinta sm:text-[24px]">
           {titulo}
         </h2>
         <p className="mt-0.5 text-[13.5px] text-g-50">{descripcion}</p>

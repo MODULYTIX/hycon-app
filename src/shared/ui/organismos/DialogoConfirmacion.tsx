@@ -34,7 +34,7 @@ export default function DialogoConfirmacion({
       idTitulo={ID_TITULO}
       ancho="max-w-[440px]"
     >
-      <div className="p-6 sm:p-7">
+      <div className="p-7 sm:p-8">
         <span
           aria-hidden
           className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-50 text-red-600"
@@ -63,7 +63,7 @@ export default function DialogoConfirmacion({
           </p>
         )}
 
-        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div className="mt-7 border-t border-g-20 pt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Boton variante="secundario" onClick={onCancelar} disabled={procesando}>
             Cancelar
           </Boton>

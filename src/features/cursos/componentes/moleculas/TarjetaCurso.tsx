@@ -18,7 +18,7 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
   const conAvance = Boolean(curso.videoUrl && onVerAvance);
 
   return (
-    <li className="group flex flex-col bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
+    <li className="tarjeta-catalogo group flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
       <Link
         to={rutaCursoDetalle(curso.uuid)}
         aria-label={`Ver detalles de ${curso.name}`}
@@ -35,12 +35,12 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
             />
           ) : (
             <span aria-hidden className="flex h-full w-full items-center justify-center bg-hy-5 text-hy-30">
-              <Icon icon="solar:diploma-linear" width="72" height="72" />
+              <Icon icon="solar:diploma-linear" width="48" height="48" />
             </span>
           )}
 
           {enOferta && (
-            <span className="absolute left-0 top-4 bg-secondary px-3 py-1.5 text-[10.5px] font-bold tracking-[0.18em] text-g-90">
+            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[9px] font-semibold tracking-[0.08em] text-g-90">
               OFERTA
             </span>
           )}
@@ -53,20 +53,20 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col gap-3 border-t border-g-20 p-5">
+        <div className="flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4">
           <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">Curso</p>
 
-          <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug tracking-tight text-g-90">
+          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug tracking-tight text-g-90">
             {curso.name}
           </h3>
 
           {curso.description && (
-            <p className="line-clamp-2 text-[13.5px] leading-relaxed text-g-50">{curso.description}</p>
+            <p className="line-clamp-2 text-[12px] leading-relaxed text-g-50">{curso.description}</p>
           )}
 
-          <div className="mt-auto flex items-end justify-between gap-3 border-t border-g-20 pt-4">
+          <div className="mt-auto flex items-end justify-between gap-3 border-t border-g-20 pt-3">
             <div>
-              <p className="text-[20px] font-semibold leading-none text-primary">
+              <p className="text-[19px] font-semibold leading-none text-primary">
                 {formatearPrecio(enOferta ? (curso.discountPrice as number) : curso.price)}
               </p>
               {enOferta && (
@@ -74,7 +74,7 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
               )}
             </div>
 
-            <span className="inline-flex items-center gap-1 text-[12.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
+            <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
               Ver detalle
               <Icon
                 icon="solar:arrow-right-linear"
@@ -93,7 +93,7 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
         <button
           type="button"
           onClick={() => onVerAvance?.(curso)}
-          className="flex items-center justify-center gap-2 border-t border-g-20 bg-g-5 py-3 text-[13px] font-medium text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
+          className="flex items-center justify-center gap-2 border-t border-g-20 bg-g-5 py-2.5 text-[12px] font-medium text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
         >
           <Icon icon="solar:play-circle-linear" width="16" height="16" aria-hidden />
           Ver avance

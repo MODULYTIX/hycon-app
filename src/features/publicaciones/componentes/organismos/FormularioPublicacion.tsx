@@ -117,7 +117,7 @@ export default function FormularioPublicacion({
     }`;
 
   return (
-    <form className="flex min-h-0 flex-1 flex-col" onSubmit={enviar} noValidate>
+    <form className="formulario-catalogo flex min-h-0 flex-1 flex-col" onSubmit={enviar} noValidate>
       <div className="flex items-center justify-between gap-3 border-b border-hy-10 px-5 py-2.5 sm:px-7">
         <div role="tablist" aria-label="Modo del editor" className="flex gap-1 rounded-lg bg-hy-5 p-1">
           <button
@@ -193,7 +193,7 @@ export default function FormularioPublicacion({
               />
             </div>
 
-            <aside className="space-y-5">
+            <aside className="h-fit space-y-5 rounded-2xl border border-hy-10 bg-hy-5 p-5">
               <ZonaImagen
                 etiqueta="Portada"
                 proporcion="video"

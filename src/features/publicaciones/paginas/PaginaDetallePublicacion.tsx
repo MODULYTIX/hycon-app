@@ -54,7 +54,7 @@ export default function PaginaDetallePublicacion() {
         </p>
         <Link
           to={RUTAS.publicaciones}
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-[2px] bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro"
+          className="mt-6 inline-flex h-11 items-center gap-2 rounded-xl bg-primary px-5 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro"
         >
           Ver todos los artículos
         </Link>
@@ -66,7 +66,7 @@ export default function PaginaDetallePublicacion() {
   const relacionados = otros.publicaciones.filter((otra) => otra.uuid !== publicacion.uuid).slice(0, 3);
 
   return (
-    <div className="mx-auto w-full max-w-[1180px] px-4 py-9 sm:px-6 md:px-10">
+    <div className="detalle-interior lectura-interior mx-auto w-full max-w-[1180px] px-4 py-9 sm:px-6 md:px-10">
       <Link
         to={RUTAS.publicaciones}
         className="inline-flex items-center gap-2 text-xs text-g-50 transition-colors hover:text-primary"
@@ -77,7 +77,7 @@ export default function PaginaDetallePublicacion() {
 
       <div className="mt-5 grid gap-8 lg:grid-cols-[minmax(0,1fr)_268px] lg:gap-12">
         <article>
-          <h1 className="text-[24px] font-medium uppercase leading-[1.12] tracking-tight text-g-90 sm:text-[31px]">
+          <h1 className="text-[30px] font-semibold leading-[1.12] tracking-tight text-g-90 sm:text-[42px]">
             {publicacion.title}
           </h1>
 
@@ -102,7 +102,7 @@ export default function PaginaDetallePublicacion() {
 
           {/* El backend ya limpia este HTML al guardarlo: solo deja el formato del editor */}
           <div
-            className="contenido-articulo mt-6 text-[14.5px]"
+            className="contenido-articulo mt-8 text-[16px]"
             dangerouslySetInnerHTML={{ __html: publicacion.content }}
           />
 
@@ -114,7 +114,7 @@ export default function PaginaDetallePublicacion() {
               href={`https://wa.me/51902665565?text=${encodeURIComponent(`Hola Hycon, leí el artículo "${publicacion.title}" y quisiera más información.`)}`}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex h-10 items-center gap-2 rounded-[2px] bg-primary px-4 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
+              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-4 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
             >
               <Icon icon="ic:baseline-whatsapp" width="18" height="18" aria-hidden />
               Conversemos sobre esto
@@ -160,7 +160,7 @@ export default function PaginaDetallePublicacion() {
 
             <Link
               to={RUTAS.publicaciones}
-              className="mt-5 inline-flex h-9 w-full items-center justify-center gap-2 rounded-[2px] border border-g-30 text-[12.5px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary"
+              className="mt-5 inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-g-30 text-[12.5px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary"
             >
               Ver más artículos
             </Link>

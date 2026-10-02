@@ -40,9 +40,9 @@ export default function TablaPanel({
   const hayFilas = !error && cantidadFilas > 0;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-hy-20/70 bg-white">
-      <header className="flex items-center justify-between gap-3 px-4 py-4 sm:px-5">
-        <h2 className="text-[16px] font-semibold text-hy-tinta">{titulo}</h2>
+    <section className="tabla-diseno overflow-hidden rounded-2xl border border-hy-20/70 bg-white">
+      <header className="flex items-center justify-between gap-3 px-5 py-5 sm:px-7 sm:py-6">
+        <h2 className="text-[18px] font-semibold text-hy-tinta">{titulo}</h2>
         {!primeraCarga && !error && (
           <span className="rounded-full bg-hy-10 px-2.5 py-0.5 text-[12.5px] font-semibold text-hy-70">
             {paginacion.total} {paginacion.total === 1 ? entidadSingular : entidad}

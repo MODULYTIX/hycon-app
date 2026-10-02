@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Encabezado from '@/shared/ui/organismos/Encabezado';
 import PiePagina from '@/shared/ui/organismos/PiePagina';
-import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
+// import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
 
 // Layout del sitio publico. Se monta una vez: al cambiar de seccion solo
 // se sustituye lo que hay dentro del Outlet.
@@ -15,7 +15,7 @@ export default function PlantillaPublica() {
       </main>
 
       <PiePagina />
-      <BotonWhatsapp />
+      {/* Botón flotante oculto temporalmente. <BotonWhatsapp /> */}
     </div>
   );
 }

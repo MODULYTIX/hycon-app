@@ -6,33 +6,7 @@ import { obtenerProductoApi } from '@/features/productos/servicios/productos.api
 import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos';
 import { formatearPrecio } from '@/shared/utilidades/formato';
 import { esUuid } from '@/shared/utilidades/identificador';
-
-const CLAVE_CARRITO = 'hycon.carrito.productos';
-
-interface ItemCarrito {
-  uuid: string;
-  quantity: number;
-}
-
-// Solo se conservan las lineas con la forma actual: las guardadas con el id viejo se descartan
-const leerCarrito = (): ItemCarrito[] => {
-  const guardado: unknown = JSON.parse(window.localStorage.getItem(CLAVE_CARRITO) || '[]');
-  if (!Array.isArray(guardado)) return [];
-  return guardado.filter(
-    (item): item is ItemCarrito =>
-      typeof item?.uuid === 'string' && Number.isSafeInteger(item.quantity) && item.quantity > 0
-  );
-};
-
-function agregarAlCarrito(uuid: string, quantity: number, stock: number): boolean {
-  const items = leerCarrito();
-  const existente = items.find((item) => item.uuid === uuid);
-  if ((existente?.quantity ?? 0) + quantity > stock) return false;
-  if (existente) existente.quantity += quantity;
-  else items.push({ uuid, quantity });
-  window.localStorage.setItem(CLAVE_CARRITO, JSON.stringify(items));
-  return true;
-}
+import { agregarAlCarrito } from '@/features/carrito/servicios/carrito.almacen';
 
 export default function PaginaDetalleProducto() {
   const { uuid = '' } = useParams();
@@ -42,6 +16,7 @@ export default function PaginaDetalleProducto() {
   const [cantidad, setCantidad] = useState(1);
   const [imagenActiva, setImagenActiva] = useState(0);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [agregado, setAgregado] = useState(false);
   const [imagenFallida, setImagenFallida] = useState(false);
 
   useEffect(() => {
@@ -59,6 +34,7 @@ export default function PaginaDetalleProducto() {
     setCantidad(1);
     setImagenActiva(0);
     setAviso(null);
+    setAgregado(false);
     setImagenFallida(false);
 
     obtenerProductoApi(uuid, controlador.signal)
@@ -124,19 +100,20 @@ export default function PaginaDetalleProducto() {
   const agencias = producto.shippingAgencies ?? [];
 
   const agregar = () => {
-    try {
-      if (agregarAlCarrito(producto.uuid, cantidad, producto.stock)) {
-        setAviso(`${cantidad} ${cantidad === 1 ? 'unidad agregada' : 'unidades agregadas'} al carrito.`);
-      } else {
-        setAviso('Ya tienes en el carrito la cantidad disponible de este producto.');
-      }
-    } catch {
-      setAviso('No se pudo guardar el producto en este navegador.');
-    }
+    const guardado = agregarAlCarrito(
+      { tipo: 'producto', uuid: producto.uuid, cantidad },
+      producto.stock
+    );
+    setAviso(
+      guardado
+        ? `${cantidad} ${cantidad === 1 ? 'unidad agregada' : 'unidades agregadas'} al carrito.`
+        : 'Ya tienes en el carrito la cantidad disponible de este producto.'
+    );
+    setAgregado(guardado);
   };
 
   return (
-    <article className="mx-auto w-full max-w-[1180px] px-5 pb-16 pt-7 sm:px-8 sm:pt-9">
+    <article className="detalle-interior mx-auto w-full max-w-[1180px] px-5 pb-16 pt-7 sm:px-8 sm:pt-9">
       <Link to={RUTAS.productos} className="inline-flex items-center gap-2 text-xs text-g-50 transition-colors hover:text-primary">
         <Icon icon="solar:arrow-left-linear" width="15" height="15" aria-hidden />
         Volver a productos
@@ -147,7 +124,7 @@ export default function PaginaDetalleProducto() {
 
       <section aria-label="Imagen e información principal" className="grid items-start gap-x-10 gap-y-8 min-[700px]:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-x-14">
         <div className="min-w-0">
-          <div className="relative aspect-[6/5] overflow-hidden rounded-[2px] bg-g-10">
+          <div className="relative aspect-[6/5] overflow-hidden rounded-xl bg-g-10">
             {imagenPrincipal && !imagenFallida ? (
               <img src={imagenPrincipal} alt={producto.name} onError={() => setImagenFallida(true)} className="h-full w-full object-cover" />
             ) : (
@@ -157,7 +134,7 @@ export default function PaginaDetalleProducto() {
               </div>
             )}
             {imagenPrincipal && !imagenFallida && (
-              <a href={imagenPrincipal} target="_blank" rel="noreferrer" aria-label="Ampliar imagen" className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-[2px] bg-white/95 text-g-80 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+              <a href={imagenPrincipal} target="_blank" rel="noreferrer" aria-label="Ampliar imagen" className="absolute bottom-4 right-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white/95 text-g-80 transition-colors hover:text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
                 <Icon icon="solar:magnifer-zoom-in-linear" width="19" height="19" aria-hidden />
               </a>
             )}
@@ -172,7 +149,7 @@ export default function PaginaDetalleProducto() {
                   aria-label={`Ver imagen ${indice + 1}`}
                   aria-pressed={imagenActiva === indice}
                   onClick={() => { setImagenActiva(indice); setImagenFallida(false); }}
-                  className={`h-14 w-14 shrink-0 overflow-hidden rounded-[2px] border-2 p-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${imagenActiva === indice ? 'border-primary' : 'border-transparent hover:border-g-30'}`}
+                  className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 p-0.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${imagenActiva === indice ? 'border-primary' : 'border-transparent hover:border-g-30'}`}
                 >
                   <img src={imagen} alt="" className="h-full w-full object-cover" />
                 </button>
@@ -186,13 +163,13 @@ export default function PaginaDetalleProducto() {
           </div>
         </div>
 
-        <div className="min-w-0 sm:pt-1">
+        <div className="min-w-0 rounded-2xl border border-g-20 bg-white p-5 sm:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
             <p className="inline-flex items-center gap-2 text-g-60">
               <span className={`h-1.5 w-1.5 rounded-full ${sinStock ? 'bg-g-40' : 'bg-primary'}`} aria-hidden />
               {sinStock ? 'Agotado por el momento' : `${producto.stock} unidades disponibles`}
             </p>
-            {enOferta && <span className="rounded-[2px] bg-secondary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-g-80">Oferta</span>}
+            {enOferta && <span className="rounded-xl bg-secondary/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] text-g-80">Oferta</span>}
           </div>
           <div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-1">
             <p className="text-[2.75rem] font-medium leading-none tracking-tight text-primary">{formatearPrecio(precioFinal)}</p>
@@ -220,17 +197,26 @@ export default function PaginaDetalleProducto() {
           <div className="mt-6">
             <p className="mb-2 text-xs text-g-50">Cantidad</p>
             <div className="flex flex-wrap gap-3">
-              <div className="flex h-12 shrink-0 items-center rounded-[2px] border border-g-30" aria-label="Cantidad">
+              <div className="flex h-12 shrink-0 items-center rounded-xl border border-g-30" aria-label="Cantidad">
                 <button type="button" aria-label="Reducir cantidad" disabled={cantidad <= 1 || sinStock} onClick={() => setCantidad((valor) => Math.max(1, valor - 1))} className="h-full w-10 text-lg text-g-80 hover:bg-g-5 disabled:opacity-35">−</button>
                 <span className="min-w-7 text-center text-sm tabular-nums" aria-live="polite">{cantidad}</span>
                 <button type="button" aria-label="Aumentar cantidad" disabled={cantidad >= producto.stock || sinStock} onClick={() => setCantidad((valor) => Math.min(producto.stock, valor + 1))} className="h-full w-10 text-lg text-g-80 hover:bg-g-5 disabled:opacity-35">+</button>
               </div>
-              <button type="button" disabled={sinStock} onClick={agregar} className="inline-flex h-12 min-w-[175px] flex-1 items-center justify-center gap-2 rounded-[2px] bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
+              <button type="button" disabled={sinStock} onClick={agregar} className="inline-flex h-12 min-w-[175px] flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
                 <Icon icon="solar:cart-large-2-linear" width="19" height="19" aria-hidden />
                 {sinStock ? 'Sin stock' : 'Agregar al carrito'}
               </button>
             </div>
-            {aviso && <p role="status" className="mt-3 text-sm text-primary">{aviso}</p>}
+            {aviso && (
+              <p role="status" className="mt-3 text-sm text-primary">
+                {aviso}
+                {agregado && (
+                  <Link to={RUTAS.carrito} className="ml-2 font-medium underline underline-offset-4">
+                    Ver carrito
+                  </Link>
+                )}
+              </p>
+            )}
           </div>
 
           <a href={consultaUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-xs text-g-60 transition-colors hover:text-primary">
@@ -250,7 +236,7 @@ export default function PaginaDetalleProducto() {
         </div>
 
         {imagenes.length > 1 ? (
-          <div className="aspect-[4/3] max-h-[340px] min-w-0 overflow-hidden rounded-[2px] bg-g-10">
+          <div className="aspect-[4/3] max-h-[340px] min-w-0 overflow-hidden rounded-xl bg-g-10">
             <img src={imagenes[1]} alt={`Vista adicional de ${producto.name}`} className="h-full w-full object-cover" loading="lazy" />
           </div>
         ) : (

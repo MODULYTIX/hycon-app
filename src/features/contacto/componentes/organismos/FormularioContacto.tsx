@@ -204,34 +204,34 @@ export default function FormularioContacto() {
   };
 
   return (
-    <div className="w-full max-w-[1340px] mx-auto min-h-screen px-4">
+    <div className="w-full max-w-[1340px] mx-auto min-h-screen px-5 py-8 sm:px-8 md:px-12">
       <header className="mt-8">
         <Titulo>Contactanos</Titulo>
       </header>
 
       {/* Layout principal */}
-      <div className="flex flex-col lg:flex-row items-center justify-center lg:items-start gap-12 my-6">
+      <div className="flex flex-col lg:flex-row items-center justify-center lg:items-start gap-8 my-10">
         {/* Imagen solo visible en PC/Laptop */}
-        <div className="flex-shrink-0 hidden lg:block">
+        <div className="min-w-0 flex-1 hidden lg:block">
           <img
             src={ContactanosPeople}
             alt="Contactanos"
-            className="w-[700px] h-[568px] object-cover rounded-2xl"
+            className="w-full h-[640px] object-cover rounded-2xl"
           />
         </div>
 
         {/* Formulario centrado en tablet/móvil */}
-        <div className="w-full max-w-lg bg-white rounded-2xl mx-auto">
+        <div className="w-full max-w-lg bg-white rounded-2xl mx-auto border border-g-20 p-5 sm:p-8 shadow-sm">
           <p className="mb-3 text-[28px] font-medium text-g-70">
             Envíenos sus datos como:
           </p>
 
-          <div className="flex mb-4">
+          <div className="flex mb-5 overflow-hidden rounded-xl border border-g-20">
             {(['ECOMMERCE', 'REPARTIDOR'] as Tab[]).map((tab, index) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-2 font-semibold shadow-lg transition-all duration-300 ease-in-out
+                className={`flex-1 py-2 font-semibold transition-all duration-300 ease-in-out
                   ${index === 0 ? 'rounded-l-lg' : ''} 
                   ${index === 1 ? 'rounded-r-lg' : ''} 
                   ${
@@ -267,7 +267,7 @@ export default function FormularioContacto() {
                             name={rf.key}
                             value={rep.unidad}
                             onChange={handleChangeRep}
-                            className="w-full border p-2 rounded-lg border-g-40 text-g-40">
+                            className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20 text-g-40">
                             <option value="">Seleccione unidad</option>
                             <option value="moto">Moto</option>
                             <option value="auto">Auto</option>
@@ -292,7 +292,7 @@ export default function FormularioContacto() {
                                 ? handleChangeEcom
                                 : handleChangeRep
                             }
-                            className="w-full border p-2 rounded-lg border-g-40"
+                            className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20"
                           />
                         )}
                       </div>
@@ -319,7 +319,7 @@ export default function FormularioContacto() {
                           ? handleChangeEcom
                           : handleChangeRep
                       }
-                      className="w-full border p-2 rounded-lg border-g-40"
+                      className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20"
                     />
                   </div>
                 )
@@ -329,7 +329,7 @@ export default function FormularioContacto() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300 mt-11">
+                  className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300 mt-11">
                   <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>
@@ -339,7 +339,7 @@ export default function FormularioContacto() {
                 <button
                   type="submit"
                   disabled={sending}
-                  className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300">
+                  className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-marca-oscuro flex gap-2 items-center justify-center transition-colors duration-300">
                   <p>{sending ? 'Enviando...' : 'Enviar datos'}</p>
                   <Icon icon="fluent:send-16-filled" width="16" height="16" />
                 </button>

@@ -8,7 +8,7 @@ interface Props {
   error: string | null;
 }
 
-const REJILLA = 'grid gap-6 sm:grid-cols-2 xl:grid-cols-3';
+const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
 // Rejilla del catalogo publico
 export default function RejillaProductos({ productos, cargando, error }: Props) {
@@ -31,7 +31,7 @@ export default function RejillaProductos({ productos, cargando, error }: Props) 
 
   if (error) {
     return (
-      <p role="alert" className="rounded-[3px] border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700">
+      <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700">
         {error}
       </p>
     );
@@ -39,7 +39,7 @@ export default function RejillaProductos({ productos, cargando, error }: Props) 
 
   if (productos.length === 0) {
     return (
-      <div className="rounded-[3px] bg-white ring-1 ring-g-20">
+      <div className="rounded-xl bg-white ring-1 ring-g-20">
         <EstadoVacio
           icono="solar:box-linear"
           titulo="Todavia no hay productos publicados"
