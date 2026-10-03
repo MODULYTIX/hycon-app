@@ -19,8 +19,9 @@ interface Resultado<T> {
  * Lista paginada por el backend. Cancela la peticion anterior al cambiar de pagina
  * o al desmontar, asi una respuesta lenta nunca pisa a una mas reciente.
  */
-export function useListadoPaginado<T>(cargar: CargarPagina<T>, mensajeError: string): Resultado<T> {
-  const [pagina, setPagina] = useState(1);
+export function useListadoPaginado<T>(cargar: CargarPagina<T>, mensajeError: string, clave = ''): Resultado<T> {
+  const [seleccion, setSeleccion] = useState({ pagina: 1, clave });
+  const pagina = seleccion.clave === clave ? seleccion.pagina : 1;
   const [version, setVersion] = useState(0);
   const [elementos, setElementos] = useState<T[]>([]);
   const [paginacion, setPaginacion] = useState<Paginacion>(PAGINACION_INICIAL);
@@ -29,10 +30,16 @@ export function useListadoPaginado<T>(cargar: CargarPagina<T>, mensajeError: str
 
   // La funcion de carga puede cambiar de identidad entre renders sin disparar otra peticion
   const cargarRef = useRef(cargar);
+  const ultimaClave = useRef(clave);
   cargarRef.current = cargar;
 
   useEffect(() => {
     const controlador = new AbortController();
+    if (ultimaClave.current !== clave) {
+      ultimaClave.current = clave;
+      setSeleccion({ pagina: 1, clave });
+      setElementos([]);
+    }
     let vigente = true;
 
     setCargando(true);
@@ -44,7 +51,7 @@ export function useListadoPaginado<T>(cargar: CargarPagina<T>, mensajeError: str
         if (!vigente) return;
         // Si se borro lo ultimo de la ultima pagina, se retrocede a la que ahora existe
         if (pagina > resultado.paginacion.totalPaginas) {
-          setPagina(resultado.paginacion.totalPaginas);
+          setSeleccion({ pagina: resultado.paginacion.totalPaginas, clave });
           return;
         }
         setElementos(resultado.elementos);
@@ -62,16 +69,16 @@ export function useListadoPaginado<T>(cargar: CargarPagina<T>, mensajeError: str
       vigente = false;
       controlador.abort();
     };
-  }, [pagina, version, mensajeError]);
+  }, [pagina, version, mensajeError, clave]);
 
   const irAPagina = useCallback((destino: number) => {
-    setPagina(Math.max(1, destino));
-  }, []);
+    setSeleccion({ pagina: Math.max(1, destino), clave });
+  }, [clave]);
 
   const recargar = useCallback((opciones: { aLaPrimera?: boolean } = {}) => {
-    if (opciones.aLaPrimera) setPagina(1);
+    if (opciones.aLaPrimera) setSeleccion({ pagina: 1, clave });
     setVersion((previa) => previa + 1);
-  }, []);
+  }, [clave]);
 
   const reemplazar = useCallback((esElMismo: (elemento: T) => boolean, nuevo: T) => {
     setElementos((previos) => previos.map((elemento) => (esElMismo(elemento) ? nuevo : elemento)));

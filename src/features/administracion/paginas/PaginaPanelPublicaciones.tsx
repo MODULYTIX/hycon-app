@@ -1,3 +1,5 @@
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { useCallback } from 'react';
 import CabeceraSeccion from '@/features/administracion/componentes/moleculas/CabeceraSeccion';
 import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPanel';
@@ -12,14 +14,16 @@ import {
 import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tipos';
 
 export default function PaginaPanelPublicaciones() {
+  const { filtros, clave, aplicar } = useFiltrosListado();
   // El panel ve tambien los borradores
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarPublicacionesApi('todos', { pagina, senal }),
-    []
+    (pagina: number, senal: AbortSignal) => listarPublicacionesApi(filtros.estado ?? 'todos', { pagina, senal, filtros }),
+    [filtros]
   );
 
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Publicacion>({
     cargar,
+    claveListado: clave,
     eliminar: eliminarPublicacionApi,
     obtenerId: (publicacion) => publicacion.uuid,
     obtenerNombre: (publicacion) => publicacion.title,
@@ -37,6 +41,7 @@ export default function PaginaPanelPublicaciones() {
         onAgregar={modal.abrirAlta}
       />
 
+      <FiltrosListado modulo="publicaciones" admin onAplicar={aplicar} />
       <div className="space-y-4">
         <AvisoPanel mensaje={aviso} onCerrar={cerrarAviso} />
         <ListaPublicaciones

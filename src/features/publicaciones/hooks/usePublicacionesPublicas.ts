@@ -1,66 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  listarPublicacionesApi,
-  type OrdenPublicaciones,
-} from '@/features/publicaciones/servicios/publicaciones.api';
+import { useCallback, useEffect, useState } from 'react';
+import { listarPublicacionesApi, type OrdenPublicaciones } from '@/features/publicaciones/servicios/publicaciones.api';
 import type { Publicacion } from '@/features/publicaciones/tipos/publicacion.tipos';
-
-interface Opciones {
-  orden?: OrdenPublicaciones;
-  porPagina?: number;
-}
-
-/**
- * Listado publico de articulos que crece con "Ver mas": cada pagina se anade
- * a la anterior en lugar de sustituirla.
- */
-export function usePublicacionesPublicas({ orden = 'recientes', porPagina = 6 }: Opciones = {}) {
+import type { FiltrosListado } from '@/shared/utilidades/filtros-listado';
+interface Opciones { orden?: OrdenPublicaciones; porPagina?: number; filtros?: FiltrosListado; }
+export function usePublicacionesPublicas({ orden = 'recientes', porPagina = 6, filtros }: Opciones = {}) {
+  const clave = JSON.stringify({ orden, porPagina, filtros });
+  const [seleccion, setSeleccion] = useState({ pagina: 1, clave });
+  const pagina = seleccion.clave === clave ? seleccion.pagina : 1;
   const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
-  const [pagina, setPagina] = useState(1);
   const [totalPaginas, setTotalPaginas] = useState(1);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const vigente = useRef(true);
-
-  useEffect(() => {
-    vigente.current = true;
-    return () => {
-      vigente.current = false;
-    };
-  }, []);
-
+  const [version, setVersion] = useState(0);
   useEffect(() => {
     const controlador = new AbortController();
-    setCargando(true);
-    setError(null);
-
-    listarPublicacionesApi('active', { pagina, porPagina, orden, senal: controlador.signal })
+    let vigente = true;
+    const opciones = JSON.parse(clave) as Opciones;
+    setSeleccion({ pagina, clave });
+    if (pagina === 1) setPublicaciones([]);
+    setCargando(true); setError(null);
+    listarPublicacionesApi('active', { ...opciones, pagina, senal: controlador.signal })
       .then(({ elementos, paginacion }) => {
-        if (!vigente.current) return;
-        // La primera pagina reemplaza; las siguientes se suman al final
-        setPublicaciones((previas) => (pagina === 1 ? elementos : [...previas, ...elementos]));
+        if (!vigente) return;
+        setPublicaciones((previas) => pagina === 1 ? elementos : [...previas, ...elementos]);
         setTotalPaginas(paginacion.totalPaginas);
       })
       .catch((fallo: unknown) => {
-        if (!vigente.current || controlador.signal.aborted) return;
+        if (!vigente) return;
         setError(fallo instanceof Error ? fallo.message : 'No se pudieron cargar las publicaciones');
       })
-      .finally(() => {
-        if (vigente.current) setCargando(false);
-      });
-
-    return () => controlador.abort();
-  }, [pagina, porPagina, orden]);
-
-  const verMas = useCallback(() => setPagina((actual) => actual + 1), []);
-
-  return {
-    publicaciones,
-    cargando,
-    error,
-    hayMas: pagina < totalPaginas,
-    verMas,
-    // true solo mientras llega la primera pagina, para no tapar lo ya mostrado
-    cargandoPrimera: cargando && publicaciones.length === 0,
-  };
+      .finally(() => { if (vigente) setCargando(false); });
+    return () => { vigente = false; controlador.abort(); };
+  }, [pagina, clave, version]);
+  const verMas = useCallback(() => {
+    if (cargando) return;
+    if (error) setVersion((v) => v + 1);
+    else if (pagina < totalPaginas) setSeleccion({ pagina: pagina + 1, clave });
+  }, [cargando, error, pagina, totalPaginas, clave]);
+  return { publicaciones, cargando, error, hayMas: Boolean(error) || pagina < totalPaginas, verMas, cargandoPrimera: cargando && publicaciones.length === 0 };
 }

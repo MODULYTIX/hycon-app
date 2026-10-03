@@ -6,12 +6,13 @@ interface Props {
   productos: Producto[];
   cargando: boolean;
   error: string | null;
+  filtrado?: boolean;
 }
 
 const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
 // Rejilla del catalogo publico
-export default function RejillaProductos({ productos, cargando, error }: Props) {
+export default function RejillaProductos({ productos, cargando, error, filtrado = false }: Props) {
   if (cargando) {
     return (
       <ul aria-label="Cargando productos" className={REJILLA}>
@@ -42,8 +43,8 @@ export default function RejillaProductos({ productos, cargando, error }: Props) 
       <div className="rounded-xl bg-white ring-1 ring-g-20">
         <EstadoVacio
           icono="solar:box-linear"
-          titulo="Todavia no hay productos publicados"
-          descripcion="Estamos preparando el catalogo. Vuelve pronto o escribenos por WhatsApp."
+          titulo={filtrado ? "No encontramos productos" : "Todavia no hay productos publicados"}
+          descripcion={filtrado ? "Prueba otros filtros o pulsa Limpiar para ver todo el catálogo." : "Estamos preparando el catalogo. Vuelve pronto o escribenos por WhatsApp."}
         />
       </div>
     );

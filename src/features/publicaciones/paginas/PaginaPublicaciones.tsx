@@ -1,3 +1,6 @@
+import CatalogoConFiltros from '@/shared/ui/plantillas/CatalogoConFiltros';
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { Icon } from '@iconify/react';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
@@ -8,8 +11,9 @@ import PanelMasLeidos from '@/features/publicaciones/componentes/organismos/Pane
 import { usePublicacionesPublicas } from '@/features/publicaciones/hooks/usePublicacionesPublicas';
 
 export default function PaginaPublicaciones() {
+  const { filtros, aplicar } = useFiltrosListado();
   const { publicaciones, cargando, cargandoPrimera, error, hayMas, verMas } =
-    usePublicacionesPublicas({ porPagina: 9 });
+    usePublicacionesPublicas({ porPagina: 9, filtros });
   const masLeidos = usePublicacionesPublicas({ orden: 'leidos', porPagina: 3 });
 
   // El primero encabeza la pagina, los dos siguientes lo acompanan y el resto va al listado
@@ -23,6 +27,7 @@ export default function PaginaPublicaciones() {
       titulo="Publicaciones"
       descripcion="Guías de ergonomía, logística y buenas prácticas para tu operación en Arequipa."
     >
+      <CatalogoConFiltros filtros={<FiltrosListado modulo="publicaciones" onAplicar={aplicar} />}>
       {cargandoPrimera && (
         <div aria-label="Cargando artículos" className="grid gap-4 md:grid-cols-3">
           <div className="h-[340px] animate-pulse rounded-2xl bg-g-10" />
@@ -42,12 +47,13 @@ export default function PaginaPublicaciones() {
         </p>
       )}
 
+      {!cargando && error && <button type="button" onClick={verMas} className="mb-5 mt-3 rounded-lg border border-g-20 px-4 py-2 text-[12px] text-primary">Reintentar carga</button>}
       {!cargando && !error && publicaciones.length === 0 && (
         <div className="rounded-2xl bg-white ring-1 ring-g-20">
           <EstadoVacio
             icono="solar:document-text-linear"
-            titulo="Todavía no hay artículos publicados"
-            descripcion="Estamos preparando los primeros. Vuelve pronto o escríbenos por WhatsApp."
+            titulo={Object.keys(filtros).length ? "No encontramos publicaciones" : "Todavía no hay artículos publicados"}
+            descripcion={Object.keys(filtros).length ? "Prueba otros filtros o pulsa Limpiar para ver todas las publicaciones." : "Estamos preparando los primeros. Vuelve pronto o escríbenos por WhatsApp."}
           />
         </div>
       )}
@@ -57,10 +63,10 @@ export default function PaginaPublicaciones() {
           {/* Sin articulos de apoyo el destacado ocupa todo el ancho, para no dejar media pagina vacia */}
           <div
             className={`grid gap-4 ${
-              secundarios.length > 0 ? 'md:grid-cols-3' : ''
+              secundarios.length > 0 ? 'md:grid-cols-2 xl:grid-cols-3' : ''
             }`}
           >
-            <TarjetaArticuloDestacado publicacion={destacado} horizontal={secundarios.length === 0} />
+            <TarjetaArticuloDestacado etiqueta={filtros.orden === 'leidos' ? 'Más leído' : filtros.orden && filtros.orden !== 'recientes' ? 'Selección' : 'Lo último'} publicacion={destacado} horizontal={secundarios.length === 0} />
 
             {secundarios.length > 0 && (
               <div className="contents">
@@ -71,7 +77,7 @@ export default function PaginaPublicaciones() {
             )}
           </div>
 
-          <div className="mt-7 grid gap-6 lg:grid-cols-[minmax(0,1fr)_252px] lg:gap-10">
+          <div className="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px] xl:gap-6">
             <section aria-labelledby="titulo-todos">
               <h2
                 id="titulo-todos"
@@ -113,6 +119,7 @@ export default function PaginaPublicaciones() {
           </div>
         </>
       )}
+      </CatalogoConFiltros>
     </PlantillaSeccion>
   );
 }

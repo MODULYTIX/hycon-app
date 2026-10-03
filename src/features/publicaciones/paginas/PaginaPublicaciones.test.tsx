@@ -161,4 +161,15 @@ describe('PaginaPublicaciones (publica)', () => {
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/servidor no disponible/i);
   });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('active', expect.objectContaining({ pagina: 1, filtros: { buscar: 'prueba' } }));
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarPublicacionesApi).toHaveBeenCalledWith("active", expect.objectContaining({ pagina: 1, filtros: {} }));
+  });
 });

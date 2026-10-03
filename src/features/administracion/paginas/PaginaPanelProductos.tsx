@@ -1,3 +1,5 @@
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { useCallback } from 'react';
 import CabeceraSeccion from '@/features/administracion/componentes/moleculas/CabeceraSeccion';
 import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPanel';
@@ -12,14 +14,16 @@ import {
 import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 export default function PaginaPanelProductos() {
+  const { filtros, clave, aplicar } = useFiltrosListado();
   // El panel ve tambien los inactivos, no solo lo que esta publicado
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarProductosApi('todos', pagina, senal),
-    []
+    (pagina: number, senal: AbortSignal) => listarProductosApi(filtros.estado ?? 'todos', pagina, senal, undefined, filtros),
+    [filtros]
   );
 
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Producto>({
     cargar,
+    claveListado: clave,
     eliminar: eliminarProductoApi,
     obtenerId: (producto) => producto.uuid,
     obtenerNombre: (producto) => producto.name,
@@ -36,6 +40,7 @@ export default function PaginaPanelProductos() {
         onAgregar={modal.abrirAlta}
       />
 
+      <FiltrosListado modulo="productos" admin onAplicar={aplicar} />
       <div className="space-y-4">
         <AvisoPanel mensaje={aviso} onCerrar={cerrarAviso} />
         <ListaProductos

@@ -367,4 +367,15 @@ describe('PaginaPanelPublicaciones', () => {
       expect(api.eliminarPublicacionApi).not.toHaveBeenCalled();
     });
   });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+    await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('inactive', expect.objectContaining({ pagina: 1, filtros: { buscar: 'prueba', estado: 'inactive' } }));
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarPublicacionesApi).toHaveBeenCalledWith("todos", expect.objectContaining({ pagina: 1, filtros: {} }));
+  });
 });

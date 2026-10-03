@@ -1,3 +1,6 @@
+import CatalogoConFiltros from '@/shared/ui/plantillas/CatalogoConFiltros';
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { useCallback } from 'react';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import Paginador from '@/shared/ui/moleculas/Paginador';
@@ -6,14 +9,16 @@ import { listarProductosApi } from '@/features/productos/servicios/productos.api
 import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
 
 export default function PaginaProductos() {
+  const { filtros, clave, aplicar } = useFiltrosListado();
   // El catalogo publico solo pide los activos
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal, 12),
-    []
+    (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal, 12, filtros),
+    [filtros]
   );
   const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
     cargar,
-    'No se pudieron cargar los productos'
+    'No se pudieron cargar los productos',
+    clave
   );
 
   const cambiarPagina = (pagina: number) => {
@@ -28,7 +33,9 @@ export default function PaginaProductos() {
       titulo="Productos"
       descripcion="Insumos y equipamiento para tu operacion logistica, listos para despacho en Arequipa."
     >
+      <CatalogoConFiltros filtros={<FiltrosListado modulo="productos" onAplicar={aplicar} />}>
       <RejillaProductos
+        filtrado={Boolean(clave)}
         productos={elementos}
         // Al pasar de pagina se mantienen las tarjetas actuales en lugar del esqueleto
         cargando={cargando && elementos.length === 0}
@@ -43,6 +50,7 @@ export default function PaginaProductos() {
           deshabilitado={cargando}
         />
       </div>
+      </CatalogoConFiltros>
     </PlantillaSeccion>
   );
 }

@@ -1,3 +1,4 @@
+import { parametrosFiltros, type FiltrosListado } from '@/shared/utilidades/filtros-listado';
 import { peticion } from '@/shared/utilidades/cliente-http';
 import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
 import type { Curso, DatosCurso } from '@/features/cursos/tipos/curso.tipos';
@@ -9,10 +10,11 @@ export const listarCursosApi = (
   estado: EstadoListado,
   pagina: number,
   senal?: AbortSignal,
-  porPagina = POR_PAGINA
+  porPagina = POR_PAGINA,
+  filtros: FiltrosListado = {}
 ): Promise<Pagina<Curso>> =>
   peticion<{ cursos: Curso[]; paginacion: Paginacion }>(
-    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}`,
+    `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}${parametrosFiltros(filtros)}`,
     { senal }
   ).then((r) => ({ elementos: r.cursos, paginacion: r.paginacion }));
 

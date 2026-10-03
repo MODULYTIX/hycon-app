@@ -1,3 +1,6 @@
+import CatalogoConFiltros from '@/shared/ui/plantillas/CatalogoConFiltros';
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { useCallback, useState } from 'react';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import Paginador from '@/shared/ui/moleculas/Paginador';
@@ -8,13 +11,15 @@ import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 export default function PaginaCursos() {
+  const { filtros, clave, aplicar } = useFiltrosListado();
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarCursosApi('active', pagina, senal, 12),
-    []
+    (pagina: number, senal: AbortSignal) => listarCursosApi('active', pagina, senal, 12, filtros),
+    [filtros]
   );
   const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
     cargar,
-    'No se pudieron cargar los cursos'
+    'No se pudieron cargar los cursos',
+    clave
   );
 
   const [enReproduccion, setEnReproduccion] = useState<Curso | null>(null);
@@ -30,7 +35,9 @@ export default function PaginaCursos() {
       titulo="Cursos"
       descripcion="Formacion en logistica de ultima milla, atencion al cliente y ergonomia laboral."
     >
+      <CatalogoConFiltros filtros={<FiltrosListado modulo="cursos" onAplicar={aplicar} />}>
       <RejillaCursos
+        filtrado={Boolean(clave)}
         cursos={elementos}
         cargando={cargando && elementos.length === 0}
         error={error}
@@ -47,6 +54,7 @@ export default function PaginaCursos() {
       </div>
 
       <ModalVideoCurso curso={enReproduccion} onCerrar={() => setEnReproduccion(null)} />
+      </CatalogoConFiltros>
     </PlantillaSeccion>
   );
 }

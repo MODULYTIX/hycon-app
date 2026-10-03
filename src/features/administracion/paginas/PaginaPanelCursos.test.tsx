@@ -87,7 +87,7 @@ describe('PaginaPanelCursos', () => {
     );
     expect(fila).toHaveTextContent('1 h 30 min');
     expect(within(fila).getByRole('button', { name: /ver video/i })).toBeInTheDocument();
-    expect(api.listarCursosApi).toHaveBeenCalledWith('todos', 1, expect.anything());
+    expect(api.listarCursosApi).toHaveBeenCalledWith('todos', 1, expect.anything(), undefined, {});
   });
 
   it('muestra un estado vacio cuando no hay cursos', async () => {
@@ -175,7 +175,7 @@ describe('PaginaPanelCursos', () => {
       })
     );
     expect(await screen.findByRole('status')).toHaveTextContent(/agregado/i);
-    expect(api.listarCursosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything());
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything(), undefined, {});
   });
 
   it('edita un curso y actualiza su fila', async () => {
@@ -225,5 +225,16 @@ describe('PaginaPanelCursos', () => {
 
     expect(await screen.findByText(/todav[ií]a no hay cursos/i)).toBeInTheDocument();
     expect(api.eliminarCursoApi).toHaveBeenCalledWith(UUID_1);
+  });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+    await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('inactive', 1, expect.anything(), undefined, { buscar: 'prueba', estado: 'inactive' });
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith("todos", 1, expect.anything(), undefined, {});
   });
 });

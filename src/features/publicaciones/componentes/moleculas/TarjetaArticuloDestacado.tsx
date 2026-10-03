@@ -10,10 +10,11 @@ interface Props {
   publicacion: Publicacion;
   // Cuando no hay articulos de apoyo ocupa todo el ancho: portada y texto van uno al lado del otro
   horizontal?: boolean;
+  etiqueta?: string;
 }
 
 // El articulo mas reciente, encabezando la pagina
-export default function TarjetaArticuloDestacado({ publicacion, horizontal = false }: Props) {
+export default function TarjetaArticuloDestacado({ publicacion, horizontal = false, etiqueta = 'Lo último' }: Props) {
   return (
     <article
       className={`tarjeta-editorial group flex h-full overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)] ${
@@ -45,7 +46,7 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
         }`}
       >
         <span className="w-fit bg-hy-10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
-          Lo último
+          {etiqueta}
         </span>
 
         <h2 className="text-[15px] font-semibold leading-snug tracking-tight text-g-90 sm:text-[16px]">

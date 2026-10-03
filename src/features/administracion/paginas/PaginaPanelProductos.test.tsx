@@ -114,7 +114,7 @@ describe('PaginaPanelProductos', () => {
       renderizar();
       await esperarListado();
 
-      expect(api.listarProductosApi).toHaveBeenCalledWith('todos', 1, expect.anything());
+      expect(api.listarProductosApi).toHaveBeenCalledWith('todos', 1, expect.anything(), undefined, {});
     });
 
     it('muestra marca, modelo, color, agencias, cantidad y precio con oferta', async () => {
@@ -183,7 +183,7 @@ describe('PaginaPanelProductos', () => {
       await usuario.click(within(paginador).getByRole('button', { name: 'Pagina 3' }));
 
       expect(await screen.findByText('Producto de la pagina 3')).toBeInTheDocument();
-      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 3, expect.anything());
+      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 3, expect.anything(), undefined, {});
     });
 
     it('el panel no ofrece filtros de busqueda', async () => {
@@ -268,7 +268,7 @@ describe('PaginaPanelProductos', () => {
       expect(await screen.findByRole('status')).toHaveTextContent(/cojin lumbar.*agregado/i);
       // Se recarga desde el backend para respetar su orden y su paginacion
       expect(api.listarProductosApi).toHaveBeenCalledTimes(2);
-      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything());
+      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything(), undefined, {});
     });
 
     it('sube la imagen arrastrada y guarda el producto con su URL', async () => {
@@ -518,7 +518,18 @@ describe('PaginaPanelProductos', () => {
       await usuario.click(within(dialogo).getByRole('button', { name: /s[ií], eliminar/i }));
 
       expect(await screen.findByText('Silla ergonomica Pro')).toBeInTheDocument();
-      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything());
+      expect(api.listarProductosApi).toHaveBeenLastCalledWith('todos', 1, expect.anything(), undefined, {});
     });
+  });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+    await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith('inactive', 1, expect.anything(), undefined, { buscar: 'prueba', estado: 'inactive' });
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith("todos", 1, expect.anything(), undefined, {});
   });
 });

@@ -7,11 +7,12 @@ interface Props {
   onVerAvance: (curso: Curso) => void;
   cargando: boolean;
   error: string | null;
+  filtrado?: boolean;
 }
 
 const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
-export default function RejillaCursos({ cursos, cargando, error, onVerAvance }: Props) {
+export default function RejillaCursos({ cursos, cargando, error, onVerAvance, filtrado = false }: Props) {
   if (cargando) {
     return (
       <ul aria-label="Cargando cursos" className={REJILLA}>
@@ -42,8 +43,8 @@ export default function RejillaCursos({ cursos, cargando, error, onVerAvance }: 
       <div className="rounded-xl bg-white ring-1 ring-g-20">
         <EstadoVacio
           icono="solar:diploma-linear"
-          titulo="Todavia no hay cursos publicados"
-          descripcion="Estamos preparando la primera tanda de cursos. Vuelve pronto."
+          titulo={filtrado ? "No encontramos cursos" : "Todavia no hay cursos publicados"}
+          descripcion={filtrado ? "Prueba otros filtros o pulsa Limpiar para ver todo el catálogo." : "Estamos preparando la primera tanda de cursos. Vuelve pronto."}
         />
       </div>
     );

@@ -55,7 +55,7 @@ describe('PaginaCursos (publica)', () => {
     renderizar();
     await screen.findByText('Logistica de ultima milla');
 
-    expect(api.listarCursosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12);
+    expect(api.listarCursosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, {});
   });
 
   it('muestra duracion, precio de oferta y enlace al detalle', async () => {
@@ -157,6 +157,17 @@ describe('PaginaCursos (publica)', () => {
     await usuario.click(screen.getByRole('button', { name: /pagina siguiente/i }));
 
     expect(await screen.findByText('Pausas activas')).toBeInTheDocument();
-    expect(api.listarCursosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12);
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12, {});
+  });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith('active', 1, expect.anything(), 12, { buscar: 'prueba' });
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarCursosApi).toHaveBeenLastCalledWith("active", 1, expect.anything(), 12, {});
   });
 });

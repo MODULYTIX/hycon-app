@@ -1,3 +1,5 @@
+import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
+import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { useCallback, useState } from 'react';
 import CabeceraSeccion from '@/features/administracion/componentes/moleculas/CabeceraSeccion';
 import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPanel';
@@ -10,13 +12,15 @@ import { eliminarCursoApi, listarCursosApi } from '@/features/cursos/servicios/c
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 export default function PaginaPanelCursos() {
+  const { filtros, clave, aplicar } = useFiltrosListado();
   const cargar = useCallback(
-    (pagina: number, senal: AbortSignal) => listarCursosApi('todos', pagina, senal),
-    []
+    (pagina: number, senal: AbortSignal) => listarCursosApi(filtros.estado ?? 'todos', pagina, senal, undefined, filtros),
+    [filtros]
   );
 
   const { listado, modal, borrado, aviso, cerrarAviso } = useGestionCatalogo<Curso>({
     cargar,
+    claveListado: clave,
     eliminar: eliminarCursoApi,
     obtenerId: (curso) => curso.uuid,
     obtenerNombre: (curso) => curso.name,
@@ -35,6 +39,7 @@ export default function PaginaPanelCursos() {
         onAgregar={modal.abrirAlta}
       />
 
+      <FiltrosListado modulo="cursos" admin onAplicar={aplicar} />
       <div className="space-y-4">
         <AvisoPanel mensaje={aviso} onCerrar={cerrarAviso} />
         <ListaCursos

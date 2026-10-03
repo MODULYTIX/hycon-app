@@ -67,7 +67,7 @@ describe('PaginaProductos (publica)', () => {
     renderizar();
     await screen.findByText('Silla ergonomica Pro');
 
-    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12);
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, {});
   });
 
   it('muestra una tarjeta por producto', async () => {
@@ -158,7 +158,7 @@ describe('PaginaProductos (publica)', () => {
     await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
 
     expect(await screen.findByText('Reposapies')).toBeInTheDocument();
-    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12);
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12, {});
     expect(screen.queryByText('Silla ergonomica Pro')).not.toBeInTheDocument();
   });
 
@@ -168,5 +168,16 @@ describe('PaginaProductos (publica)', () => {
 
     expect(screen.queryByRole('button', { name: /agregar producto/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /editar/i })).not.toBeInTheDocument();
+  });
+
+  it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
+
+    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 1, expect.anything(), 12, { buscar: 'prueba' });
+    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith("active", 1, expect.anything(), 12, {});
   });
 });

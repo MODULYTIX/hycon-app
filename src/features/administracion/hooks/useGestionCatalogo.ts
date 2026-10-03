@@ -9,6 +9,7 @@ interface Opciones<T> {
   // Como se nombra en los avisos: "Producto", "Curso"
   etiqueta: string;
   mensajeError: string;
+  claveListado?: string;
   // Aviso tras crear; por defecto: Producto "X" agregado al catalogo
   mensajeCreado?: (nombre: string) => string;
 }
@@ -25,8 +26,9 @@ export function useGestionCatalogo<T>({
   etiqueta,
   mensajeError,
   mensajeCreado,
+  claveListado = '',
 }: Opciones<T>) {
-  const listado = useListadoPaginado(cargar, mensajeError);
+  const listado = useListadoPaginado(cargar, mensajeError, claveListado);
   const { recargar, reemplazar } = listado;
 
   // undefined: modal cerrado; null: creando; un elemento: editandolo
@@ -52,7 +54,8 @@ export function useGestionCatalogo<T>({
     const nombre = obtenerNombre(guardado);
     if (enEdicion) {
       // Editar no cambia el orden: basta con sustituir la fila
-      reemplazar((elemento) => obtenerId(elemento) === obtenerId(guardado), guardado);
+      if (claveListado) recargar();
+      else reemplazar((elemento) => obtenerId(elemento) === obtenerId(guardado), guardado);
       setAviso(`Cambios guardados en "${nombre}"`);
     } else {
       // Lo nuevo aparece primero: se vuelve a la primera pagina ordenada por el backend
