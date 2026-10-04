@@ -371,6 +371,7 @@ describe('PaginaPanelPublicaciones', () => {
   it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
     const usuario = userEvent.setup();
     renderizar();
+    await usuario.click(screen.getByRole('button', { name: /Filtrar publicaciones/ }));
     await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
     await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
     await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));

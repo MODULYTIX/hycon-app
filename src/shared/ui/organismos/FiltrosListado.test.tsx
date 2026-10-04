@@ -3,9 +3,29 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import FiltrosListado from './FiltrosListado';
 describe('Filtros del listado', () => {
+  it.each(['productos', 'cursos', 'publicaciones'] as const)('despliega y contrae %s conservando la búsqueda', async (modulo) => {
+    const aplicar = vi.fn(); const u = userEvent.setup();
+    render(<FiltrosListado modulo={modulo} admin onAplicar={aplicar} />);
+    const toggle = screen.getByRole('button', { name: new RegExp(`Filtrar ${modulo}`) });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByRole('button', { name: 'Aplicar filtros' })).not.toBeInTheDocument();
+    await u.click(toggle);
+    await u.type(screen.getByLabelText('Buscar'), 'logistica');
+    await u.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
+    await u.click(toggle);
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByText('Filtros aplicados')).toBeVisible();
+    expect(aplicar).toHaveBeenCalledTimes(1);
+    await u.click(toggle);
+    expect(screen.getByLabelText('Buscar')).toHaveValue('logistica');
+    await u.click(screen.getByRole('button', { name: 'Limpiar' }));
+    expect(aplicar).toHaveBeenLastCalledWith({});
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  });
   it('envía la búsqueda y el precio seleccionado con los deslizadores', async () => {
     const aplicar = vi.fn(); const u = userEvent.setup();
     render(<FiltrosListado modulo="productos" admin onAplicar={aplicar} />);
+    await u.click(screen.getByRole('button', { name: /Filtrar productos/ }));
     await u.type(screen.getByLabelText('Buscar'), '  Caja  ');
     fireEvent.change(screen.getByRole('slider', { name: 'Precio mínimo' }), { target: { value: '20' } });
     fireEvent.change(screen.getByRole('slider', { name: 'Precio máximo' }), { target: { value: '100' } });
