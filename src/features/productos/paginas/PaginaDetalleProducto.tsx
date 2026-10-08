@@ -88,7 +88,9 @@ export default function PaginaDetalleProducto() {
   const precioFinal = producto.discountPrice ?? producto.price;
   const enOferta = producto.discountPrice !== null && producto.discountPrice < producto.price;
   const sinStock = producto.stock === 0;
-  const codigo = `HY-${producto.uuid.slice(0, 6).toUpperCase()}`;
+  // Del final del uuid: su cabecera es la hora de alta y dos productos creados
+  // el mismo dia compartirian referencia
+  const codigo = `HY-${producto.uuid.slice(-6).toUpperCase()}`;
   const consultaUrl = `https://wa.me/51902665565?text=${encodeURIComponent(`Hola, quisiera más información sobre ${producto.name} (${codigo}).`)}`;
   const datosProducto = [
     { etiqueta: 'Marca', valor: producto.brand || 'Por confirmar' },

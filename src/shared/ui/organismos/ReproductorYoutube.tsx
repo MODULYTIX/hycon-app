@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Icon } from '@iconify/react';
 import { useReproductorYoutube } from '@/shared/hooks/useReproductorYoutube';
 import { formatearTiempo } from '@/shared/utilidades/youtube';
@@ -7,6 +7,10 @@ interface Props {
   id: string;
   titulo: string;
   inicio?: number;
+  // Corta la reproduccion al llegar a este segundo (muestra gratuita)
+  limiteSegundos?: number | null;
+  // Que mostrar cuando la muestra termina
+  alTerminarMuestra?: ReactNode;
 }
 
 // Tras este tiempo sin mover el raton, los controles se esconden mientras se reproduce
@@ -23,7 +27,13 @@ const BOTON_CONTROL =
  * Reproductor con los controles de la web. YouTube pone la imagen; la barra, los botones
  * y los clics los gestiona Hycon, asi nada en el reproductor lleva a youtube.com.
  */
-export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
+export default function ReproductorYoutube({
+  id,
+  titulo,
+  inicio = 0,
+  limiteSegundos = null,
+  alTerminarMuestra,
+}: Props) {
   const marcoRef = useRef<HTMLDivElement>(null);
   const contenedorRef = useRef<HTMLDivElement>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -82,6 +92,13 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
     accion();
   };
 
+  // La muestra se detiene sola al llegar al limite; lo que sigue solo lo tiene quien compro
+  const muestraAgotada = limiteSegundos !== null && actual >= limiteSegundos;
+
+  useEffect(() => {
+    if (muestraAgotada && reproduciendo) alternarReproduccion();
+  }, [muestraAgotada, reproduciendo, alternarReproduccion]);
+
   const visibles = controlesVisibles || !reproduciendo;
   const progreso = duracion > 0 ? (actual / duracion) * 100 : 0;
 
@@ -134,6 +151,14 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
         )}
       </div>
 
+      {muestraAgotada && !error && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-g-90/95 px-6 text-center text-white">
+          <Icon icon="solar:lock-keyhole-minimalistic-bold" width="34" height="34" aria-hidden className="text-white/70" />
+          <p className="text-[15px] font-medium">Terminó la vista previa</p>
+          {alTerminarMuestra}
+        </div>
+      )}
+
       {error && (
         <div
           role="alert"
@@ -164,7 +189,7 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
             aria-label="Progreso del video"
             aria-valuetext={`${formatearTiempo(actual)} de ${formatearTiempo(duracion)}`}
             min={0}
-            max={duracion || 0}
+            max={limiteSegundos ?? duracion ?? 0}
             step={0.1}
             value={Math.min(actual, duracion || 0)}
             disabled={!listo}
@@ -243,8 +268,9 @@ export default function ReproductorYoutube({ id, titulo, inicio = 0 }: Props) {
             className="hidden h-1 w-20 cursor-pointer accent-white sm:block"
           />
 
+          {/* En una muestra el total que se anuncia es el del recorte, no el del video entero */}
           <span className="ml-2 text-[12.5px] font-medium tabular-nums text-white/90">
-            {formatearTiempo(actual)} / {formatearTiempo(duracion)}
+            {formatearTiempo(actual)} / {formatearTiempo(limiteSegundos ?? duracion)}
           </span>
 
           <button

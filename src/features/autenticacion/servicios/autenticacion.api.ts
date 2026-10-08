@@ -1,6 +1,8 @@
 import { peticion, renovarSesion } from '@/shared/utilidades/cliente-http';
 import type {
+  CambioPassword,
   CredencialesLogin,
+  DatosPerfil,
   DatosRegistro,
   Sesion,
   Usuario,
@@ -19,3 +21,29 @@ export const restaurarSesionApi = () => renovarSesion<Usuario>();
 
 // Revoca la sesion en el servidor; olvidar el token en el navegador no basta
 export const cerrarSesionApi = () => peticion<void>(`${BASE}/logout`, { metodo: 'POST' });
+
+export const actualizarPerfilApi = (datos: DatosPerfil) =>
+  peticion<{ usuario: Usuario }>(`${BASE}/me`, {
+    metodo: 'PUT',
+    cuerpo: datos,
+    autenticada: true,
+  }).then((r) => r.usuario);
+
+// Cambiar la contrasena cierra las demas sesiones en el servidor
+export const cambiarPasswordApi = (datos: CambioPassword) =>
+  peticion<void>(`${BASE}/me/password`, { metodo: 'PUT', cuerpo: datos, autenticada: true });
+
+export const subirAvatarApi = (archivo: File) => {
+  const cuerpo = new FormData();
+  cuerpo.append('imagen', archivo);
+  return peticion<{ usuario: Usuario }>(`${BASE}/me/avatar`, {
+    metodo: 'POST',
+    cuerpo,
+    autenticada: true,
+  }).then((r) => r.usuario);
+};
+
+export const quitarAvatarApi = () =>
+  peticion<{ usuario: Usuario }>(`${BASE}/me/avatar`, { metodo: 'DELETE', autenticada: true }).then(
+    (r) => r.usuario
+  );

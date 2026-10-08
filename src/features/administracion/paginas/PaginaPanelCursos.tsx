@@ -6,6 +6,7 @@ import AvisoPanel from '@/features/administracion/componentes/moleculas/AvisoPan
 import ModalCurso from '@/features/cursos/componentes/organismos/ModalCurso';
 import ListaCursos from '@/features/cursos/componentes/organismos/ListaCursos';
 import ModalVideoCurso from '@/features/cursos/componentes/organismos/ModalVideoCurso';
+import ModalTemario from '@/features/cursos/componentes/organismos/ModalTemario';
 import DialogoConfirmacion from '@/shared/ui/organismos/DialogoConfirmacion';
 import { useGestionCatalogo } from '@/features/administracion/hooks/useGestionCatalogo';
 import { eliminarCursoApi, listarCursosApi } from '@/features/cursos/servicios/cursos.api';
@@ -29,6 +30,8 @@ export default function PaginaPanelCursos() {
   });
 
   const [enReproduccion, setEnReproduccion] = useState<Curso | null>(null);
+  // Curso cuyo temario se esta administrando
+  const [conTemario, setConTemario] = useState<Curso | null>(null);
 
   return (
     <>
@@ -51,6 +54,7 @@ export default function PaginaPanelCursos() {
           onEditar={modal.abrirEdicion}
           onEliminar={borrado.pedir}
           onVerVideo={setEnReproduccion}
+          onVerTemario={setConTemario}
         />
       </div>
 
@@ -62,6 +66,12 @@ export default function PaginaPanelCursos() {
       />
 
       <ModalVideoCurso curso={enReproduccion} onCerrar={() => setEnReproduccion(null)} />
+
+      <ModalTemario
+        abierto={conTemario !== null}
+        curso={conTemario}
+        onCerrar={() => setConTemario(null)}
+      />
 
       <DialogoConfirmacion
         abierto={borrado.elemento !== null}

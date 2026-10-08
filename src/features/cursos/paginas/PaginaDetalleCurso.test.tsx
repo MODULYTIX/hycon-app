@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PaginaCursos from './PaginaCursos';
@@ -8,6 +8,11 @@ import * as api from '@/features/cursos/servicios/cursos.api';
 import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import { agregarAlCarrito, leerCarrito } from '@/features/carrito/servicios/carrito.almacen';
+import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
+import * as leccionesApi from '@/features/cursos/servicios/lecciones.api';
+import * as autenticacionApi from '@/features/autenticacion/servicios/autenticacion.api';
+import { marcarSesionActiva } from '@/shared/utilidades/almacenamiento-sesion';
+import type { Sesion } from '@/features/autenticacion/tipos/autenticacion.tipos';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 // Los catalogos se direccionan por uuid: el correlativo no sale del backend
@@ -16,6 +21,8 @@ const UUID_7 = '00000007-0000-4000-8000-000000000000';
 
 vi.mock('@/features/cursos/servicios/cursos.api');
 vi.mock('@/shared/servicios/youtube-api');
+vi.mock('@/features/cursos/servicios/lecciones.api');
+vi.mock('@/features/autenticacion/servicios/autenticacion.api');
 
 let jugadores: JugadorFalso[];
 
@@ -27,25 +34,60 @@ const curso: Curso = {
   youtubeId: null,
   videoUrl: 'https://example.com/avance.mp4',
   durationMinutes: 150,
+  previewSegundos: 60,
   price: 150,
   discountPrice: 120,
   status: 'active',
   createdAt: '2026-09-17T12:00:00.000Z',
 };
 
+const sesion: Sesion = {
+  token: 'token-de-prueba',
+  expiraEn: 900,
+  usuario: {
+    userId: 7,
+    name: 'Ana',
+    lastname: 'Quispe',
+    email: 'ana@hycon.com',
+    phone: null,
+    avatarUrl: null,
+    roleId: 2,
+    rol: 'CLIENTE',
+  },
+};
+
+// Sesion abierta y con este curso ya comprado
+const temario = (tieneAcceso: boolean) => ({
+  cursoUuid: UUID_7,
+  tieneAcceso,
+  previewSegundos: 60,
+  lecciones: [],
+});
+
+const conAcceso = () => {
+  marcarSesionActiva(true);
+  vi.mocked(autenticacionApi.restaurarSesionApi).mockResolvedValue(sesion);
+  vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temario(true));
+};
+
 const renderizar = (ruta = `/cursos/${UUID_7}`) => render(
-  <MemoryRouter initialEntries={[ruta]}>
-    <Routes>
-      <Route path="/cursos" element={<PaginaCursos />} />
-      <Route path="/cursos/:uuid" element={<PaginaDetalleCurso />} />
-    </Routes>
-  </MemoryRouter>
+  <AutenticacionProveedor>
+    <MemoryRouter initialEntries={[ruta]}>
+      <Routes>
+        <Route path="/cursos" element={<PaginaCursos />} />
+        <Route path="/cursos/:uuid" element={<PaginaDetalleCurso />} />
+      </Routes>
+    </MemoryRouter>
+  </AutenticacionProveedor>
 );
 
 describe('detalle del curso', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.localStorage.clear();
+    // Por defecto: visitante sin sesion, nadie tiene el curso comprado
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockRejectedValue(new Error('sin sesion'));
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temario(false));
     vi.mocked(api.listarCursosApi).mockResolvedValue({
       elementos: [curso],
       paginacion: { pagina: 1, porPagina: 6, total: 1, totalPaginas: 1 },
@@ -63,10 +105,11 @@ describe('detalle del curso', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: curso.name })).toBeInTheDocument();
     expect(api.obtenerCursoApi).toHaveBeenCalledWith(UUID_7, expect.anything());
-    expect(screen.getByText('2 h 30 min')).toBeInTheDocument();
+    // La duracion aparece en la cabecera y en la ficha lateral
+    expect(screen.getAllByText('2 h 30 min').length).toBeGreaterThan(0);
     expect(screen.getByText('Aprende a crear aplicaciones.')).toBeInTheDocument();
     expect(screen.getByText(/120\.00/)).toBeInTheDocument();
-    const consulta = screen.getByRole('link', { name: /conversemos/i }).getAttribute('href')!;
+    const consulta = screen.getByRole('link', { name: /escríbenos/i }).getAttribute('href')!;
     expect(new URL(consulta).searchParams.get('text')).toContain(curso.name);
   });
 
@@ -146,5 +189,85 @@ describe('detalle del curso', () => {
     renderizar('/cursos/invalido');
     expect(await screen.findByRole('alert')).toHaveTextContent('Este curso no existe.');
     expect(api.obtenerCursoApi).not.toHaveBeenCalled();
+  });
+});
+
+
+describe('detalle de un curso ya comprado', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+    vi.mocked(api.obtenerCursoApi).mockResolvedValue(curso);
+    conAcceso();
+  });
+
+  it('al recargar espera la sesión antes de consultar el acceso comprado', async () => {
+    let restaurar!: (valor: Sesion) => void;
+    let cargarTemario!: (valor: ReturnType<typeof temario>) => void;
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockReturnValue(new Promise((resolve) => { restaurar = resolve; }));
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockReturnValue(new Promise((resolve) => { cargarTemario = resolve; }));
+    renderizar();
+    expect(screen.getByRole('status', { name: 'Cargando curso' })).toBeInTheDocument();
+    expect(leccionesApi.obtenerTemarioApi).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument();
+    await act(async () => { restaurar(sesion); });
+    await waitFor(() => expect(leccionesApi.obtenerTemarioApi).toHaveBeenCalledWith(UUID_7, expect.any(AbortSignal)));
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument();
+    await act(async () => { cargarTemario(temario(true)); });
+    expect(await screen.findByText('Acceso activo')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument();
+  });
+
+  it('si falla la comprobación de acceso no invita a comprar de nuevo', async () => {
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockRejectedValue(new Error('sin conexión'));
+    renderizar();
+    expect(await screen.findByRole('alert')).toHaveTextContent('No pudimos comprobar tu acceso');
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument();
+  });
+
+  it('deja de ofrecer la compra y avisa de que ya es suyo', async () => {
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    expect(await screen.findByText('Acceso activo')).toBeInTheDocument();
+    expect(screen.getByText(/ya compraste este curso/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Agregar al carrito' })).not.toBeInTheDocument();
+    // Tampoco se ve el precio
+    expect(screen.queryByText(/120\.00/)).not.toBeInTheDocument();
+  });
+
+  it('ofrece entrar a mis cursos', async () => {
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    expect(await screen.findByRole('link', { name: 'Mis cursos' })).toHaveAttribute(
+      'href',
+      '/panel-de-cursos'
+    );
+  });
+
+  it('el video se presenta como el curso, no como un avance', async () => {
+    vi.mocked(api.obtenerCursoApi).mockResolvedValue({
+      ...curso,
+      youtubeId: 'dQw4w9WgXcQ',
+      videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    });
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    expect(await screen.findByRole('button', { name: 'Ver el curso' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /reproducir el curso/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Ver avance del curso' })).not.toBeInTheDocument();
+  });
+
+  it('sin sesion la ficha sigue vendiendo', async () => {
+    window.localStorage.clear();
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockRejectedValue(new Error('sin sesion'));
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temario(false));
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    expect(await screen.findByRole('button', { name: 'Agregar al carrito' })).toBeInTheDocument();
+    expect(screen.queryByText('Acceso activo')).not.toBeInTheDocument();
   });
 });

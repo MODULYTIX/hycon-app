@@ -93,6 +93,8 @@ export default function AutenticacionProveedor({ children }: { children: ReactNo
     }
   }, [olvidarSesion]);
 
+  const actualizarUsuario = useCallback((actualizado: Usuario) => setUsuario(actualizado), []);
+
   const valor = useMemo<ValorAutenticacion>(
     () => ({
       usuario,
@@ -101,8 +103,9 @@ export default function AutenticacionProveedor({ children }: { children: ReactNo
       iniciarSesion,
       registrar,
       cerrarSesion,
+      actualizarUsuario,
     }),
-    [usuario, cargando, iniciarSesion, registrar, cerrarSesion]
+    [usuario, cargando, iniciarSesion, registrar, cerrarSesion, actualizarUsuario]
   );
 
   return (

@@ -108,11 +108,18 @@ export default function FormularioCurso({
             />
             <CampoTexto
               {...enlazar('videoUrl')}
-              etiqueta="URL del video"
+              etiqueta="URL del video de presentación"
               placeholder="https://www.youtube.com/watch?v=..."
               inputMode="url"
-              ayuda="Link de YouTube. Se ve dentro de la web, sin salir a YouTube. El video debe ser público u oculto (no privado) y tener activada la opción Permitir insertar; si no, YouTube bloquea la reproducción aquí."
+              ayuda="Link de YouTube del avance. Se ve dentro de la web, sin salir a YouTube. El video debe ser público u oculto (no privado) y tener activada la opción Permitir insertar; si no, YouTube bloquea la reproducción aquí."
               opcional
+            />
+            <CampoTexto
+              {...enlazar('previewSegundos')}
+              etiqueta="Muestra gratis (segundos)"
+              inputMode="numeric"
+              placeholder="60"
+              ayuda="Cuánto se deja ver a quien todavía no compra. Entre 5 y 600 segundos."
             />
             <div className="grid gap-4 sm:grid-cols-3">
               <CampoTexto

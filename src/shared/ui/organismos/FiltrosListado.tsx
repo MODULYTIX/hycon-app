@@ -31,11 +31,11 @@ export default function FiltrosListado({ modulo, admin = false, onAplicar }: Pro
     onAplicar(valores as Valores);
   };
   return (
-    <form key={version} onSubmit={aplicar} aria-label={`Filtros de ${modulo}`} className={admin ? "filtros-admin mb-6 rounded-xl border border-hy-20/70 bg-white p-5 shadow-sm" : "filtros-lateral rounded-xl border border-g-20 bg-white p-4"}>
+    <form key={version} onSubmit={aplicar} aria-label={`Filtros de ${modulo}`} className={admin ? "filtros-admin mb-5 rounded-xl border border-g-20 bg-white p-4 shadow-sm" : "filtros-lateral rounded-xl border border-g-20 bg-white p-4"}>
       <div className={abierto ? "mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-g-20 pb-3" : "flex flex-wrap items-center justify-between gap-2"}>
-        {admin ? <button type="button" aria-expanded={abierto} aria-controls={`${id}-contenido`} onClick={() => setAbierto((valor) => !valor)} className="flex min-h-10 flex-1 items-center justify-between gap-3 rounded-lg text-left text-[13px] font-semibold text-g-80 focus-visible:outline-2 focus-visible:outline-primary">
+        {admin ? <button type="button" aria-expanded={abierto} aria-controls={`${id}-contenido`} onClick={() => setAbierto((valor) => !valor)} className="flex min-h-10 min-w-0 flex-1 items-center justify-between gap-3 rounded-lg text-left text-[13px] font-semibold text-g-80 focus-visible:outline-2 focus-visible:outline-primary">
           <span className="inline-flex items-center gap-2"><Icon icon="solar:filter-linear" width="16" aria-hidden />Filtrar {modulo}</span>
-          <span className="inline-flex items-center gap-2 text-[12px] font-medium text-primary">{abierto ? 'Ocultar' : 'Mostrar'}<Icon icon={abierto ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'} width="16" aria-hidden /></span>
+          <span className="inline-flex shrink-0 items-center gap-2 rounded-md bg-hy-5 px-2.5 py-1.5 text-[12px] font-medium text-primary">{abierto ? 'Ocultar' : 'Mostrar'}<Icon icon={abierto ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'} width="16" aria-hidden /></span>
         </button> : <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-g-80"><Icon icon="solar:filter-linear" width="16" aria-hidden />Filtrar {modulo}</span>}
         {activos && <span className="rounded-full bg-hy-5 px-2 py-1 text-[10px] text-primary" role="status">Filtros aplicados</span>}
       </div>

@@ -30,6 +30,7 @@ const pausas: Curso = {
   youtubeId: 'dQw4w9WgXcQ',
   thumbnailUrl: null,
   durationMinutes: 90,
+  previewSegundos: 60,
   price: 120,
   discountPrice: null,
   status: 'active',

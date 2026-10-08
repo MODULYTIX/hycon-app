@@ -20,9 +20,11 @@ const PROTECCIONES = [
 interface Props {
   abierto: boolean;
   onCerrar: () => void;
+  // Se avisa cuando la sesion queda abierta, para continuar lo que se estaba haciendo
+  onAutenticado?: () => void;
 }
 
-export default function ModalAcceso({ abierto, onCerrar }: Props) {
+export default function ModalAcceso({ abierto, onCerrar, onAutenticado }: Props) {
   const [modo, setModo] = useState<ModoAcceso>('login');
 
   // Al cerrar el modal se vuelve siempre a la pestana de inicio de sesion
@@ -57,7 +59,11 @@ export default function ModalAcceso({ abierto, onCerrar }: Props) {
         </div>
 
         <div key={modo} className="mt-6 animate-fadeIn">
-          {esLogin ? <FormularioLogin onExito={() => onCerrar()} /> : <FormularioRegistro onExito={() => onCerrar()} />}
+          {esLogin ? (
+            <FormularioLogin onExito={() => (onAutenticado ?? onCerrar)()} />
+          ) : (
+            <FormularioRegistro onExito={() => (onAutenticado ?? onCerrar)()} />
+          )}
         </div>
 
         <p className="mt-6 text-center text-[13px] text-g-50">

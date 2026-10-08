@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ReproductorYoutube from './ReproductorYoutube';
 import * as youtubeApi from '@/shared/servicios/youtube-api';
@@ -207,5 +207,60 @@ describe('ReproductorYoutube', () => {
     unmount();
 
     expect(jugador.destroy).toHaveBeenCalled();
+  });
+});
+
+
+describe('ReproductorYoutube: muestra limitada', () => {
+  beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  const renderizarConLimite = async (limite: number) => {
+    const resultado = render(
+      <ReproductorYoutube
+        id={ID}
+        titulo="Pausas activas"
+        limiteSegundos={limite}
+        alTerminarMuestra={<span>Compra el curso para verlo completo</span>}
+      />
+    );
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    return { ...resultado, jugador: jugadores[0] };
+  };
+
+  it('deja ver hasta el limite y no mas', async () => {
+    const { jugador } = await renderizarConLimite(10);
+    await listoYReproduciendo(jugador);
+
+    // La barra no permite arrastrar mas alla de la muestra
+    expect(screen.getByRole('slider', { name: /progreso del video/i })).toHaveAttribute('max', '10');
+    // Y el tiempo anunciado es el del recorte, no el del video entero (5:27)
+    expect(screen.getByText('0:00 / 0:10')).toBeInTheDocument();
+    expect(screen.queryByText(/terminó la vista previa/i)).not.toBeInTheDocument();
+  });
+
+  it('al llegar al limite se detiene y ofrece comprar', async () => {
+    const { jugador } = await renderizarConLimite(10);
+    await listoYReproduciendo(jugador);
+
+    // El reproductor lee el segundo actual cada poco: al pasarse, corta solo
+    jugador.avanzarA(11);
+
+    expect(await screen.findByText(/terminó la vista previa/i)).toBeInTheDocument();
+    expect(screen.getByText('Compra el curso para verlo completo')).toBeInTheDocument();
+    await waitFor(() => expect(jugador.pauseVideo).toHaveBeenCalled());
+  });
+
+  it('sin limite el video se ve entero', async () => {
+    const { jugador } = await renderizar();
+    await listoYReproduciendo(jugador);
+
+    jugador.avanzarA(300);
+    await waitFor(() => expect(screen.getByText(/5:00/)).toBeInTheDocument());
+
+    expect(screen.queryByText(/terminó la vista previa/i)).not.toBeInTheDocument();
   });
 });

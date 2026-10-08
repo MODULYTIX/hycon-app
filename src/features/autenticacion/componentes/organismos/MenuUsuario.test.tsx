@@ -31,6 +31,7 @@ const renderizar = (rol: string) => {
         iniciarSesion: vi.fn(),
         registrar: vi.fn(),
         cerrarSesion,
+        actualizarUsuario: vi.fn(),
       }}
     >
         <MenuUsuario usuario={usuario} />

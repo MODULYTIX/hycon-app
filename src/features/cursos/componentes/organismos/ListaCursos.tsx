@@ -12,6 +12,7 @@ interface Props {
   onEditar: (curso: Curso) => void;
   onEliminar: (curso: Curso) => void;
   onVerVideo: (curso: Curso) => void;
+  onVerTemario: (curso: Curso) => void;
 }
 
 export default function ListaCursos({
@@ -23,6 +24,7 @@ export default function ListaCursos({
   onEditar,
   onEliminar,
   onVerVideo,
+  onVerTemario,
 }: Props) {
   return (
     <TablaPanel
@@ -48,6 +50,7 @@ export default function ListaCursos({
           onEditar={onEditar}
           onEliminar={onEliminar}
           onVerVideo={onVerVideo}
+          onVerTemario={onVerTemario}
         />
       ))}
     </TablaPanel>

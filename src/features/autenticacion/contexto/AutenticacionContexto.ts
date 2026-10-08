@@ -13,6 +13,8 @@ export interface ValorAutenticacion {
   iniciarSesion: (credenciales: CredencialesLogin) => Promise<Usuario>;
   registrar: (datos: DatosRegistro) => Promise<Usuario>;
   cerrarSesion: () => Promise<void>;
+  // Refresca en toda la web los datos del usuario tras editar su perfil
+  actualizarUsuario: (usuario: Usuario) => void;
 }
 
 export const AutenticacionContexto = createContext<ValorAutenticacion | null>(null);

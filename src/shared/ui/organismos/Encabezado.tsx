@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import HyconLogo from '@/assets/images/logo_hycon.webp';
+import HyconLogo from '@/assets/images/logo_ergonomia.png'
 import AccesoCuenta from '@/features/autenticacion/componentes/organismos/AccesoCuenta';
 import NavegacionPrincipal from '@/shared/ui/organismos/NavegacionPrincipal';
 import { RUTAS } from '@/app/rutas/rutas';
@@ -21,7 +21,7 @@ export default function Encabezado({
     <header className="flex w-full flex-col">
       {/* El color sale de --color-encabezado en index.css */}
       <div className="flex h-[74px] items-center justify-between bg-encabezado px-4 text-encabezado-texto sm:px-10">
-        <Link to={RUTAS.home} className="shrink-0 outline-2 outline-encabezado-texto" aria-label="Ir al inicio">
+        <Link to={RUTAS.home} className="shrink-0  outline-encabezado-texto scale-100" aria-label="Ir al inicio">
           <img src={HyconLogo} alt="Hycon" className="w-22 p-2" draggable="false" />
         </Link>
 

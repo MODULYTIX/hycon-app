@@ -10,6 +10,8 @@ export interface JugadorFalso extends JugadorYoutube {
   listo(): void;
   cambiarEstado(estado: number): void;
   fallar(codigo: number): void;
+  // Mueve el segundo actual como si el video siguiera corriendo
+  avanzarA(segundos: number): void;
 }
 
 /**
@@ -47,6 +49,9 @@ export const crearYoutubeFalso = () => {
         listo: () => opciones.events?.onReady?.({ target: jugador, data: undefined }),
         cambiarEstado: (estado) => opciones.events?.onStateChange?.({ target: jugador, data: estado }),
         fallar: (codigo) => opciones.events?.onError?.({ target: jugador, data: codigo }),
+        avanzarA: (segundos: number) => {
+          tiempo = segundos;
+        },
       };
       jugadores.push(jugador);
       return jugador;

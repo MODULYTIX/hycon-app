@@ -13,9 +13,10 @@ interface Props {
   onEditar: (curso: Curso) => void;
   onEliminar: (curso: Curso) => void;
   onVerVideo: (curso: Curso) => void;
+  onVerTemario: (curso: Curso) => void;
 }
 
-export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo }: Props) {
+export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo, onVerTemario }: Props) {
   const enOferta = curso.discountPrice !== null;
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
 
@@ -29,6 +30,15 @@ export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo }: P
           {curso.description && (
             <p className="line-clamp-1 text-[13px] text-g-50">{curso.description}</p>
           )}
+          <button
+            type="button"
+            onClick={() => onVerTemario(curso)}
+            className="mt-1 mr-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-hy-60 hover:text-hy-80 hover:underline"
+          >
+            <Icon icon="solar:playlist-2-linear" width="14" height="14" aria-hidden />
+            Contenido
+          </button>
+
           {curso.youtubeId ? (
             <button
               type="button"

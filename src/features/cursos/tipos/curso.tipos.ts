@@ -9,6 +9,8 @@ export interface Curso {
   youtubeId: string | null;
   thumbnailUrl: string | null;
   durationMinutes: number | null;
+  // Segundos de la leccion de muestra que ve quien no ha comprado
+  previewSegundos: number;
   price: number;
   discountPrice: number | null;
   status: string;
@@ -21,6 +23,7 @@ export interface FormularioCurso {
   description: string;
   videoUrl: string;
   durationMinutes: string;
+  previewSegundos: string;
   price: string;
   discountPrice: string;
   status: 'active' | 'inactive';
@@ -35,6 +38,7 @@ export const CURSO_VACIO: FormularioCurso = {
   description: '',
   videoUrl: '',
   durationMinutes: '',
+  previewSegundos: '60',
   price: '',
   discountPrice: '',
   status: 'active',
@@ -45,6 +49,7 @@ export const cursoAFormulario = (curso: Curso): FormularioCurso => ({
   description: curso.description ?? '',
   videoUrl: curso.videoUrl ?? '',
   durationMinutes: curso.durationMinutes === null ? '' : String(curso.durationMinutes),
+  previewSegundos: String(curso.previewSegundos ?? 60),
   price: String(curso.price),
   discountPrice: curso.discountPrice === null ? '' : String(curso.discountPrice),
   status: curso.status === 'inactive' ? 'inactive' : 'active',

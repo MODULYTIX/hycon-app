@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import DesplazarAlInicio from '@/app/rutas/DesplazarAlInicio';
 import RutaSoloAdmin from '@/app/rutas/RutaSoloAdmin';
-import PaginaEnConstruccion from '@/app/rutas/PaginaEnConstruccion';
 import PaginaNoEncontrada from '@/app/rutas/PaginaNoEncontrada';
 import { RUTAS } from '@/app/rutas/rutas';
 
@@ -18,6 +17,9 @@ import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicac
 import PaginaDetallePublicacion from '@/features/publicaciones/paginas/PaginaDetallePublicacion';
 import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaCarrito from '@/features/carrito/paginas/PaginaCarrito';
+import PaginaMisCompras from '@/features/pedidos/paginas/PaginaMisCompras';
+import PaginaPerfil from '@/features/perfil/paginas/PaginaPerfil';
+import PaginaMisCursos from '@/features/aprendizaje/paginas/PaginaMisCursos';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
 import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
@@ -45,9 +47,9 @@ export default function RutasApp() {
           <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
 
           {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
-          <Route path={RUTAS.perfil} element={<PaginaEnConstruccion />} />
-          <Route path={RUTAS.historial} element={<PaginaEnConstruccion />} />
-          <Route path={RUTAS.panelCursos} element={<PaginaEnConstruccion />} />
+          <Route path={RUTAS.perfil} element={<PaginaPerfil />} />
+          <Route path={RUTAS.historial} element={<PaginaMisCompras />} />
+          <Route path={RUTAS.panelCursos} element={<PaginaMisCursos />} />
 
           <Route path="*" element={<PaginaNoEncontrada />} />
         </Route>

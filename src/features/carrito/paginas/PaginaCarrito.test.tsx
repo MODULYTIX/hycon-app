@@ -4,13 +4,21 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import PaginaCarrito from './PaginaCarrito';
 import { agregarAlCarrito, leerCarrito } from '@/features/carrito/servicios/carrito.almacen';
+import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
 import * as productosApi from '@/features/productos/servicios/productos.api';
 import * as cursosApi from '@/features/cursos/servicios/cursos.api';
+import * as autenticacionApi from '@/features/autenticacion/servicios/autenticacion.api';
+import * as pedidosApi from '@/features/pedidos/servicios/pedidos.api';
+import { marcarSesionActiva } from '@/shared/utilidades/almacenamiento-sesion';
+import type { Sesion } from '@/features/autenticacion/tipos/autenticacion.tipos';
+import type { Pedido } from '@/features/pedidos/tipos/pedido.tipos';
 import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 vi.mock('@/features/productos/servicios/productos.api');
 vi.mock('@/features/cursos/servicios/cursos.api');
+vi.mock('@/features/autenticacion/servicios/autenticacion.api');
+vi.mock('@/features/pedidos/servicios/pedidos.api');
 
 const CAJA = '7b73989c-0719-4c06-bd1e-8c7ae193a432';
 const CURSO = 'b7b299d8-ee8f-4bea-a618-0a5f8261136f';
@@ -40,17 +48,53 @@ const curso: Curso = {
   youtubeId: null,
   thumbnailUrl: null,
   durationMinutes: 150,
+  previewSegundos: 60,
   price: 149,
   discountPrice: null,
   status: 'active',
   createdAt: '2026-09-10T12:00:00.000Z',
 };
 
+const sesion: Sesion = {
+  token: 'token-de-prueba',
+  expiraEn: 900,
+  usuario: {
+    userId: 7,
+    name: 'Ana',
+    lastname: 'Quispe',
+    email: 'ana@hycon.com',
+    phone: null,
+    avatarUrl: null,
+    roleId: 2,
+    rol: 'CLIENTE',
+  },
+};
+
+const pedidoGuardado: Pedido = {
+  uuid: '0192f0aa-1111-7000-8000-000000000001',
+  codigo: 'PED-0192F0',
+  estadoPago: 'pagado',
+  metodoPago: 'tarjeta',
+  subtotal: 51.8,
+  descuento: 12,
+  total: 39.8,
+  createdAt: '2026-10-07T12:00:00.000Z',
+  items: [],
+};
+
+// Con sesion abierta: el proveedor la recupera al montar si el navegador la tiene marcada
+const conSesion = () => {
+  marcarSesionActiva(true);
+  vi.mocked(autenticacionApi.restaurarSesionApi).mockResolvedValue(sesion);
+};
+
 const renderizar = () =>
   render(
-    <MemoryRouter>
-      <PaginaCarrito />
-    </MemoryRouter>
+    <AutenticacionProveedor>
+      <MemoryRouter>
+        <PaginaCarrito />
+      </MemoryRouter>
+    </AutenticacionProveedor>
   );
 
 describe('PaginaCarrito', () => {
@@ -58,6 +102,9 @@ describe('PaginaCarrito', () => {
     window.localStorage.clear();
     vi.mocked(productosApi.obtenerProductoApi).mockResolvedValue(caja);
     vi.mocked(cursosApi.obtenerCursoApi).mockResolvedValue(curso);
+    vi.mocked(pedidosApi.crearPedidoApi).mockResolvedValue(pedidoGuardado);
+    // Sin marca de sesion el proveedor ni lo intenta: el visitante entra sin cuenta
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockRejectedValue(new Error('sin sesion'));
   });
 
   it('sin nada guardado invita a ver el catalogo', async () => {
@@ -134,17 +181,92 @@ describe('PaginaCarrito', () => {
     expect(leerCarrito()).toEqual([]);
   });
 
-  it('el pedido por WhatsApp lleva el detalle y el total', async () => {
+  it('muestra el subtotal y lo que se ahorra con las ofertas', async () => {
+    agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 2 }, 3);
+    renderizar();
+    await screen.findByRole('heading', { name: caja.name });
+    const resumen = within(screen.getByRole('complementary'));
+
+    // 2 cajas: 51.80 de lista, 12.00 de descuento, 39.80 a pagar
+    expect(resumen.getByText(/51\.80/)).toBeInTheDocument();
+    expect(resumen.getByText(/-\s*S\/\s*12\.00/)).toBeInTheDocument();
+    expect(resumen.getByText(/39\.80/)).toBeInTheDocument();
+  });
+
+  it('sin ofertas no aparece la linea de descuentos', async () => {
+    agregarAlCarrito({ tipo: 'curso', uuid: CURSO });
+    renderizar();
+    await screen.findByRole('heading', { name: curso.name });
+
+    expect(within(screen.getByRole('complementary')).queryByText(/descuentos/i)).not.toBeInTheDocument();
+  });
+
+  it('sin sesion, pagar pide entrar a la cuenta antes de cobrar', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 1 }, 3);
+    renderizar();
+    await screen.findByRole('heading', { name: caja.name });
+
+    await usuario.click(screen.getByRole('button', { name: /ir a pagar/i }));
+
+    expect(await screen.findByRole('dialog', { name: /bienvenido de vuelta/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /pagar s\//i })).not.toBeInTheDocument();
+    expect(pedidosApi.crearPedidoApi).not.toHaveBeenCalled();
+  });
+
+  it('al entrar a la cuenta desde el carrito, la compra sigue donde se quedo', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    vi.mocked(autenticacionApi.iniciarSesionApi).mockResolvedValue(sesion);
+    agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 1 }, 3);
+    renderizar();
+    await screen.findByRole('heading', { name: caja.name });
+
+    await usuario.click(screen.getByRole('button', { name: /ir a pagar/i }));
+    const acceso = await screen.findByRole('dialog', { name: /bienvenido de vuelta/i });
+    await usuario.type(within(acceso).getByLabelText(/correo electr[oó]nico/i), 'ana@hycon.com');
+    await usuario.type(within(acceso).getByLabelText(/^contrase[nñ]a$/i), 'Cliente2026');
+    await usuario.click(within(acceso).getByRole('button', { name: /^iniciar sesi[oó]n$/i }));
+
+    // Sin volver a pulsar nada, se abre la pasarela
+    expect(await screen.findByRole('heading', { name: 'Pago seguro' })).toBeInTheDocument();
+  });
+
+  it('con sesion abierta pagar lleva directo a la pasarela con el total', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    conSesion();
     agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 2 }, 3);
     renderizar();
     await screen.findByRole('heading', { name: caja.name });
 
-    const enlace = screen.getByRole('link', { name: /pedir por whatsapp/i }).getAttribute('href') as string;
-    const texto = new URL(enlace).searchParams.get('text') as string;
+    await usuario.click(screen.getByRole('button', { name: /ir a pagar/i }));
 
-    expect(enlace.startsWith('https://wa.me/')).toBe(true);
-    expect(texto).toContain(`2 x ${caja.name}`);
-    expect(texto).toMatch(/Total: S\/\s*39\.80/);
+    expect(await screen.findByRole('heading', { name: 'Pago seguro' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /pagar .*39\.80/i })).toBeInTheDocument();
+  });
+
+  it('al completar el pago el carrito se vacia', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    conSesion();
+    agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 2 }, 3);
+    renderizar();
+    await screen.findByRole('heading', { name: caja.name });
+
+    await usuario.click(screen.getByRole('button', { name: /ir a pagar/i }));
+    await screen.findByRole('heading', { name: 'Pago seguro' });
+    await usuario.type(screen.getByLabelText(/número de tarjeta/i), '4111111111111111');
+    await usuario.type(screen.getByLabelText(/titular/i), 'Ana Quispe');
+    await usuario.type(screen.getByLabelText(/vencimiento/i), '1230');
+    await usuario.type(screen.getByLabelText(/cvv/i), '123');
+    await usuario.click(screen.getByRole('button', { name: /pagar s\//i }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Pago aprobado' }, { timeout: 4000 })
+    ).toBeInTheDocument();
+    expect(pedidosApi.crearPedidoApi).toHaveBeenCalledWith('tarjeta', [
+      { tipo: 'producto', uuid: CAJA, cantidad: 2 },
+    ]);
+    // La compra queda en la cuenta, no en el navegador
+    await waitFor(() => expect(leerCarrito()).toEqual([]));
   });
 
   it('lo que ya no esta en el catalogo no se muestra', async () => {

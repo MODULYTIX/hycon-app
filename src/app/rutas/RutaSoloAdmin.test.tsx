@@ -26,6 +26,7 @@ const renderizar = (usuario: Usuario | null, cargando = false) =>
         iniciarSesion: vi.fn(),
         registrar: vi.fn(),
         cerrarSesion: vi.fn(),
+        actualizarUsuario: vi.fn(),
       }}
     >
       <MemoryRouter initialEntries={['/panel-de-configuracion/productos']}>

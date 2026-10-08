@@ -42,6 +42,18 @@ export interface DatosRegistro {
   recordar?: boolean;
 }
 
+// Lo que el usuario puede cambiar de su perfil. El correo no se edita desde aqui.
+export interface DatosPerfil {
+  name: string;
+  lastname: string;
+  phone?: string;
+}
+
+export interface CambioPassword {
+  actual: string;
+  nueva: string;
+}
+
 // Cada entrada del menu que se despliega al hacer clic en el perfil
 export interface OpcionCuenta {
   id: string;

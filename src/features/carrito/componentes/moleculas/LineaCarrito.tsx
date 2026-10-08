@@ -16,9 +16,9 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
   const enElTope = linea.cantidad >= tope;
 
   return (
-    <li className="flex flex-wrap gap-4 py-6 sm:flex-nowrap">
+    <li className="grid grid-cols-[64px_minmax(0,1fr)] gap-x-3 gap-y-2 py-5 sm:grid-cols-[80px_minmax(0,1fr)_auto] sm:gap-x-4">
       <Link to={linea.ruta} tabIndex={-1} aria-hidden className="shrink-0">
-        <div className="h-24 w-24 overflow-hidden rounded-xl bg-hy-5 ring-1 ring-g-20">
+        <div className="h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-xl bg-hy-5 ring-1 ring-g-20">
           {linea.imagen ? (
             <img src={linea.imagen} alt="" loading="lazy" className="h-full w-full object-cover" />
           ) : (
@@ -33,7 +33,7 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
           {esCurso ? 'Curso' : 'Producto'}
         </p>
-        <h3 className="line-clamp-2 text-[17px] font-semibold leading-snug text-g-90">
+        <h3 className="line-clamp-2 break-words text-[15px] font-semibold leading-snug text-g-90">
           <Link to={linea.ruta} className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary">
             {linea.nombre}
           </Link>
@@ -47,7 +47,7 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
 
         <div className="mt-1 flex flex-wrap items-center gap-3">
           {esCurso ? (
-            <span className="text-[13px] text-g-50">1 inscripción</span>
+            <span className="rounded-md bg-hy-5 px-2 py-1 text-[12px] text-primary">1 inscripción</span>
           ) : (
             <div className="flex items-center rounded-lg border border-g-30">
               <button
@@ -77,7 +77,7 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
             type="button"
             onClick={onQuitar}
             aria-label={`Quitar ${linea.nombre} del carrito`}
-            className="inline-flex items-center gap-1 text-[13px] text-g-50 transition-colors hover:text-red-600"
+            className="inline-flex min-h-9 items-center gap-1 text-[12px] text-g-50 transition-colors hover:text-red-600"
           >
             <Icon icon="solar:trash-bin-minimalistic-linear" width="15" height="15" aria-hidden />
             Quitar
@@ -89,7 +89,7 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
         </div>
       </div>
 
-      <p className="shrink-0 text-[16px] font-semibold tabular-nums text-g-90">
+      <p className="col-start-2 text-[15px] font-semibold tabular-nums text-g-90 sm:col-start-3 sm:row-start-1 sm:text-right">
         {formatearPrecio(linea.precio * linea.cantidad)}
       </p>
     </li>
