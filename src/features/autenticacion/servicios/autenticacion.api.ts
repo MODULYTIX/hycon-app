@@ -1,4 +1,5 @@
 import { peticion, renovarSesion } from '@/shared/utilidades/cliente-http';
+import { sinCloudinary, subirACloudinaryApi } from '@/shared/servicios/cloudinary.api';
 import type {
   CambioPassword,
   CredencialesLogin,
@@ -33,14 +34,29 @@ export const actualizarPerfilApi = (datos: DatosPerfil) =>
 export const cambiarPasswordApi = (datos: CambioPassword) =>
   peticion<void>(`${BASE}/me/password`, { metodo: 'PUT', cuerpo: datos, autenticada: true });
 
-export const subirAvatarApi = (archivo: File) => {
-  const cuerpo = new FormData();
-  cuerpo.append('imagen', archivo);
-  return peticion<{ usuario: Usuario }>(`${BASE}/me/avatar`, {
-    metodo: 'POST',
-    cuerpo,
-    autenticada: true,
-  }).then((r) => r.usuario);
+/**
+ * Cambia la foto de perfil. La imagen va a Cloudinary y aqui solo se guarda su
+ * direccion; si el servidor no lo tiene configurado, el archivo viaja al backend.
+ */
+export const subirAvatarApi = async (archivo: File) => {
+  try {
+    const avatarUrl = await subirACloudinaryApi(archivo, 'avatar');
+    return await peticion<{ usuario: Usuario }>(`${BASE}/me/avatar`, {
+      metodo: 'PUT',
+      cuerpo: { avatarUrl },
+      autenticada: true,
+    }).then((r) => r.usuario);
+  } catch (error: unknown) {
+    if (!sinCloudinary(error)) throw error;
+
+    const cuerpo = new FormData();
+    cuerpo.append('imagen', archivo);
+    return peticion<{ usuario: Usuario }>(`${BASE}/me/avatar`, {
+      metodo: 'POST',
+      cuerpo,
+      autenticada: true,
+    }).then((r) => r.usuario);
+  }
 };
 
 export const quitarAvatarApi = () =>
