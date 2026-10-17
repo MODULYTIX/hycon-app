@@ -22,7 +22,7 @@ export default function Encabezado({
       {/* El color sale de --color-encabezado en index.css */}
       <div className="flex h-[74px] items-center justify-between bg-encabezado px-4 text-encabezado-texto sm:px-10">
         <Link to={RUTAS.home} className="shrink-0  outline-encabezado-texto scale-100" aria-label="Ir al inicio">
-          <img src={HyconLogo} alt="Hycon" className="w-22 p-2" draggable="false" />
+          <img src={HyconLogo} alt="Hycon" className="w-36 p-2" draggable="false" />
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">

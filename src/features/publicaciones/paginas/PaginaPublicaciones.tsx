@@ -25,100 +25,99 @@ export default function PaginaPublicaciones() {
     <PlantillaSeccion
       compacto
       titulo="Publicaciones"
-      descripcion="Guías de ergonomía, logística y buenas prácticas para tu operación en Arequipa."
+      descripcion="Se realizan publicaciones relevantes en ergonomía para tener actualizado a nuestro clientes y lectores."
     >
       <CatalogoConFiltros filtros={<FiltrosListado modulo="publicaciones" onAplicar={aplicar} />}>
-      {cargandoPrimera && (
-        <div aria-label="Cargando artículos" className="grid gap-4 md:grid-cols-3">
-          <div className="h-[340px] animate-pulse rounded-2xl bg-g-10" />
-          <div className="grid gap-4">
-            <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
-            <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
+        {cargandoPrimera && (
+          <div aria-label="Cargando artículos" className="grid gap-4 md:grid-cols-3">
+            <div className="h-[340px] animate-pulse rounded-2xl bg-g-10" />
+            <div className="grid gap-4">
+              <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
+              <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {!cargando && error && (
-        <p
-          role="alert"
-          className="rounded-2xl border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700"
-        >
-          {error}
-        </p>
-      )}
-
-      {!cargando && error && <button type="button" onClick={verMas} className="mb-5 mt-3 rounded-lg border border-g-20 px-4 py-2 text-[12px] text-primary">Reintentar carga</button>}
-      {!cargando && !error && publicaciones.length === 0 && (
-        <div className="rounded-2xl bg-white ring-1 ring-g-20">
-          <EstadoVacio
-            icono="solar:document-text-linear"
-            titulo={Object.keys(filtros).length ? "No encontramos publicaciones" : "Todavía no hay artículos publicados"}
-            descripcion={Object.keys(filtros).length ? "Prueba otros filtros o pulsa Limpiar para ver todas las publicaciones." : "Estamos preparando los primeros. Vuelve pronto o escríbenos por WhatsApp."}
-          />
-        </div>
-      )}
-
-      {destacado && (
-        <>
-          {/* Sin articulos de apoyo el destacado ocupa todo el ancho, para no dejar media pagina vacia */}
-          <div
-            className={`grid gap-4 ${
-              secundarios.length > 0 ? 'md:grid-cols-2 xl:grid-cols-3' : ''
-            }`}
+        {!cargando && error && (
+          <p
+            role="alert"
+            className="rounded-2xl border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700"
           >
-            <TarjetaArticuloDestacado etiqueta={filtros.orden === 'leidos' ? 'Más leído' : filtros.orden && filtros.orden !== 'recientes' ? 'Selección' : 'Lo último'} publicacion={destacado} horizontal={secundarios.length === 0} />
+            {error}
+          </p>
+        )}
 
-            {secundarios.length > 0 && (
-              <div className="contents">
-                {secundarios.map((publicacion) => (
-                  <TarjetaArticulo key={publicacion.uuid} publicacion={publicacion} />
-                ))}
-              </div>
-            )}
+        {!cargando && error && <button type="button" onClick={verMas} className="mb-5 mt-3 rounded-lg border border-g-20 px-4 py-2 text-[12px] text-primary">Reintentar carga</button>}
+        {!cargando && !error && publicaciones.length === 0 && (
+          <div className="rounded-2xl bg-white ring-1 ring-g-20">
+            <EstadoVacio
+              icono="solar:document-text-linear"
+              titulo={Object.keys(filtros).length ? "No encontramos publicaciones" : "Todavía no hay artículos publicados"}
+              descripcion={Object.keys(filtros).length ? "Prueba otros filtros o pulsa Limpiar para ver todas las publicaciones." : "Estamos preparando los primeros. Vuelve pronto o escríbenos por WhatsApp."}
+            />
           </div>
+        )}
 
-          <div className="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px] xl:gap-6">
-            <section aria-labelledby="titulo-todos">
-              <h2
-                id="titulo-todos"
-                className="mb-5 border-l-2 border-primary pl-3 text-[16px] font-semibold tracking-tight text-g-90"
-              >
-                Todos los artículos
-              </h2>
+        {destacado && (
+          <>
+            {/* Sin articulos de apoyo el destacado ocupa todo el ancho, para no dejar media pagina vacia */}
+            <div
+              className={`grid gap-4 ${secundarios.length > 0 ? 'md:grid-cols-2 xl:grid-cols-3' : ''
+                }`}
+            >
+              <TarjetaArticuloDestacado etiqueta={filtros.orden === 'leidos' ? 'Más leído' : filtros.orden && filtros.orden !== 'recientes' ? 'Selección' : 'Lo último'} publicacion={destacado} horizontal={secundarios.length === 0} />
 
-              {listado.length > 0 ? (
-                <ul aria-label="Listado de artículos" className="divide-y divide-g-20 [&>li]:py-4 [&>li:first-child]:pt-0 [&>li:last-child]:pb-0">
-                  {listado.map((publicacion) => (
-                    <FilaArticulo key={publicacion.uuid} publicacion={publicacion} />
+              {secundarios.length > 0 && (
+                <div className="contents">
+                  {secundarios.map((publicacion) => (
+                    <TarjetaArticulo key={publicacion.uuid} publicacion={publicacion} />
                   ))}
-                </ul>
-              ) : (
-                <p className="text-[13.5px] text-g-50">
-                  Por ahora solo están los artículos de arriba. Pronto habrá más.
-                </p>
-              )}
-
-              {hayMas && (
-                <div className="mt-7 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={verMas}
-                    disabled={cargando}
-                    className="inline-flex h-10 items-center gap-2 rounded-xl border border-g-30 px-5 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
-                  >
-                    {cargando ? 'Cargando...' : 'Ver más artículos'}
-                    <Icon icon="solar:alt-arrow-down-linear" width="16" height="16" aria-hidden />
-                  </button>
                 </div>
               )}
-            </section>
+            </div>
 
-            <aside className="h-fit rounded-2xl border border-g-20 bg-g-5 p-6">
-              <PanelMasLeidos publicaciones={masLeidos.publicaciones} cargando={masLeidos.cargandoPrimera} />
-            </aside>
-          </div>
-        </>
-      )}
+            <div className="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px] xl:gap-6">
+              <section aria-labelledby="titulo-todos">
+                <h2
+                  id="titulo-todos"
+                  className="mb-5 border-l-2 border-primary pl-3 text-[16px] font-semibold tracking-tight text-g-90"
+                >
+                  Todos los artículos
+                </h2>
+
+                {listado.length > 0 ? (
+                  <ul aria-label="Listado de artículos" className="divide-y divide-g-20 [&>li]:py-4 [&>li:first-child]:pt-0 [&>li:last-child]:pb-0">
+                    {listado.map((publicacion) => (
+                      <FilaArticulo key={publicacion.uuid} publicacion={publicacion} />
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[13.5px] text-g-50">
+                    Por ahora solo están los artículos de arriba. Pronto habrá más.
+                  </p>
+                )}
+
+                {hayMas && (
+                  <div className="mt-7 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={verMas}
+                      disabled={cargando}
+                      className="inline-flex h-10 items-center gap-2 rounded-xl border border-g-30 px-5 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
+                    >
+                      {cargando ? 'Cargando...' : 'Ver más artículos'}
+                      <Icon icon="solar:alt-arrow-down-linear" width="16" height="16" aria-hidden />
+                    </button>
+                  </div>
+                )}
+              </section>
+
+              <aside className="h-fit rounded-2xl border border-g-20 bg-g-5 p-6">
+                <PanelMasLeidos publicaciones={masLeidos.publicaciones} cargando={masLeidos.cargandoPrimera} />
+              </aside>
+            </div>
+          </>
+        )}
       </CatalogoConFiltros>
     </PlantillaSeccion>
   );

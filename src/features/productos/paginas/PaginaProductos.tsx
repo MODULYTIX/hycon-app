@@ -31,25 +31,25 @@ export default function PaginaProductos() {
     <PlantillaSeccion
       compacto
       titulo="Productos"
-      descripcion="Insumos y equipamiento para tu operacion logistica, listos para despacho en Arequipa."
+      descripcion="Brindamos equipamiento de uso ergonómico para tu personal administrativo y opertivo."
     >
       <CatalogoConFiltros filtros={<FiltrosListado modulo="productos" onAplicar={aplicar} />}>
-      <RejillaProductos
-        filtrado={Boolean(clave)}
-        productos={elementos}
-        // Al pasar de pagina se mantienen las tarjetas actuales en lugar del esqueleto
-        cargando={cargando && elementos.length === 0}
-        error={error}
-      />
-
-      <div className="mt-8">
-        <Paginador
-          paginacion={paginacion}
-          onCambiar={cambiarPagina}
-          entidad="productos"
-          deshabilitado={cargando}
+        <RejillaProductos
+          filtrado={Boolean(clave)}
+          productos={elementos}
+          // Al pasar de pagina se mantienen las tarjetas actuales en lugar del esqueleto
+          cargando={cargando && elementos.length === 0}
+          error={error}
         />
-      </div>
+
+        <div className="mt-8">
+          <Paginador
+            paginacion={paginacion}
+            onCambiar={cambiarPagina}
+            entidad="productos"
+            deshabilitado={cargando}
+          />
+        </div>
       </CatalogoConFiltros>
     </PlantillaSeccion>
   );

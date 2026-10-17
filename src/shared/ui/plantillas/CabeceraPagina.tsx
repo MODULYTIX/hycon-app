@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Titulo from '@/shared/ui/atomos/Titulo';
 
 // Cabecera comun de las paginas internas del sitio publico
@@ -7,7 +8,7 @@ export default function CabeceraPagina({
   compacto = false,
 }: {
   titulo: string;
-  descripcion?: string;
+  descripcion?: ReactNode;
   compacto?: boolean;
 }) {
   return (

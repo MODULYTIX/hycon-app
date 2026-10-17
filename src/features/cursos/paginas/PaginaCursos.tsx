@@ -33,27 +33,33 @@ export default function PaginaCursos() {
     <PlantillaSeccion
       compacto
       titulo="Cursos"
-      descripcion="Formacion en logistica de ultima milla, atencion al cliente y ergonomia laboral."
+      descripcion={
+        <>
+          Brindamos cursos de formación en cumplimiento ergonómico nacional para tus supervisores de seguridad y asi evitar posibles multas ante fiscalizaciones o tener hallazgos en auditorias internas o externas de seguridad.
+          <br />
+          Tambien brindamos capacitaciones orientados a personal operativo para afianzar criterios ergonómicos y su facil adopción en las areas operativas.
+        </>
+      }
     >
       <CatalogoConFiltros filtros={<FiltrosListado modulo="cursos" onAplicar={aplicar} />}>
-      <RejillaCursos
-        filtrado={Boolean(clave)}
-        cursos={elementos}
-        cargando={cargando && elementos.length === 0}
-        error={error}
-        onVerAvance={setEnReproduccion}
-      />
-
-      <div className="mt-8">
-        <Paginador
-          paginacion={paginacion}
-          onCambiar={cambiarPagina}
-          entidad="cursos"
-          deshabilitado={cargando}
+        <RejillaCursos
+          filtrado={Boolean(clave)}
+          cursos={elementos}
+          cargando={cargando && elementos.length === 0}
+          error={error}
+          onVerAvance={setEnReproduccion}
         />
-      </div>
 
-      <ModalVideoCurso curso={enReproduccion} onCerrar={() => setEnReproduccion(null)} />
+        <div className="mt-8">
+          <Paginador
+            paginacion={paginacion}
+            onCambiar={cambiarPagina}
+            entidad="cursos"
+            deshabilitado={cargando}
+          />
+        </div>
+
+        <ModalVideoCurso curso={enReproduccion} onCerrar={() => setEnReproduccion(null)} />
       </CatalogoConFiltros>
     </PlantillaSeccion>
   );

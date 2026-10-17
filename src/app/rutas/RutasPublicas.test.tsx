@@ -48,7 +48,7 @@ describe('rutas publicas', () => {
   it('la raiz muestra el home', () => {
     renderizar();
 
-    expect(screen.getByRole('heading', { name: /hycon arequipa/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /hycon el ergónomo/i })).toBeInTheDocument();
   });
 
   it('cada seccion del menu tiene su pagina', async () => {
@@ -74,11 +74,14 @@ describe('rutas publicas', () => {
     expect(screen.getByRole('heading', { name: /alcance en arequipa/i })).toBeInTheDocument();
   });
 
-  it('contactanos muestra el formulario publico', () => {
+  it('contactanos muestra la cotizacion de evaluaciones', () => {
     renderizar(RUTAS.contactanos);
 
     expect(screen.getByRole('heading', { name: /contactanos/i, level: 1 })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /enviar datos/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /cotización de evaluaciones ergonómicas/i })
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /solicitar cotización/i })).toBeInTheDocument();
   });
 
   it('una direccion inexistente muestra la pagina de no encontrada', () => {

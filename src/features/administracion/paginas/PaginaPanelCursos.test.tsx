@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import PaginaPanelCursos from './PaginaPanelCursos';
 import * as api from '@/features/cursos/servicios/cursos.api';
 import * as apiImagenes from '@/shared/servicios/imagenes.api';
+import * as apiLecciones from '@/features/cursos/servicios/lecciones.api';
 import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso, type JugadorFalso } from '@/pruebas/youtube-falso';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
@@ -19,6 +20,7 @@ vi.mock('@/shared/servicios/youtube-api');
 
 let jugadores: JugadorFalso[];
 vi.mock('@/shared/servicios/imagenes.api');
+vi.mock('@/features/cursos/servicios/lecciones.api');
 
 type Usuario = ReturnType<typeof userEvent.setup>;
 
@@ -62,6 +64,12 @@ describe('PaginaPanelCursos', () => {
     jugadores = falso.jugadores;
     vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
     vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([pausas]));
+    vi.mocked(apiLecciones.obtenerTemarioAdminApi).mockResolvedValue({
+      cursoUuid: UUID_1,
+      tieneAcceso: true,
+      previewSegundos: 60,
+      lecciones: [],
+    });
     vi.mocked(api.crearCursoApi).mockImplementation(async (datos) => ({
       ...pausas,
       uuid: UUID_2,
@@ -154,6 +162,52 @@ describe('PaginaPanelCursos', () => {
     expect(api.crearCursoApi).not.toHaveBeenCalled();
   });
 
+  it('el contenido se agrega desde el mismo modal del curso', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    renderizar();
+    await esperarListado();
+
+    const dialogo = await abrirAlta(usuario);
+    const pestanaContenido = within(dialogo).getByRole('tab', { name: /contenido/i });
+
+    // Sin curso guardado todavia no hay a que agregarle partes
+    expect(pestanaContenido).toBeDisabled();
+    expect(pestanaContenido).toHaveAttribute('title', expect.stringContaining('Guarda el curso'));
+  });
+
+  it('al editar un curso se entra directo a su contenido', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    vi.mocked(apiLecciones.obtenerTemarioAdminApi).mockResolvedValue({
+      cursoUuid: UUID_1,
+      tieneAcceso: true,
+      previewSegundos: 60,
+      lecciones: [
+        {
+          uuid: '01a0fef2-0000-70bf-a4e4-000000000001',
+          titulo: 'Parte 1',
+          descripcion: null,
+          duracionMinutos: 8,
+          posicion: 1,
+          esMuestra: true,
+          bloqueada: false,
+          videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
+          youtubeId: 'dQw4w9WgXcQ',
+          limiteSegundos: null,
+        },
+      ],
+    });
+    renderizar();
+    await esperarListado();
+
+    await usuario.click(screen.getByRole('button', { name: /editar pausas activas/i }));
+    const dialogo = await screen.findByRole('dialog', { name: /editar curso/i });
+    await usuario.click(within(dialogo).getByRole('tab', { name: /contenido/i }));
+
+    expect(await within(dialogo).findByText('Parte 1')).toBeInTheDocument();
+    expect(within(dialogo).getByLabelText('Título')).toBeInTheDocument();
+    expect(apiLecciones.obtenerTemarioAdminApi).toHaveBeenCalledWith(UUID_1);
+  });
+
   it('crea el curso con su miniatura subida y vuelve a la primera pagina', async () => {
     const usuario = userEvent.setup({ delay: null });
     renderizar();
@@ -165,6 +219,13 @@ describe('PaginaPanelCursos', () => {
     const archivo = new File([new Uint8Array(500)], 'portada.webp', { type: 'image/webp' });
     await usuario.upload(within(dialogo).getByLabelText(/elegir archivo/i), archivo);
     await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
+
+    // Al crear no se cierra: queda en Contenido para agregarle las partes
+    expect(await within(dialogo).findByRole('tab', { name: /contenido/i })).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+    await usuario.click(within(dialogo).getByRole('button', { name: 'Listo' }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(apiImagenes.subirImagenApi).toHaveBeenCalledWith(archivo);

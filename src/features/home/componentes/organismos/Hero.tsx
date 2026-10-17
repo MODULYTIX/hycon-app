@@ -30,15 +30,15 @@ export default function Hero() {
           <h1
             className="text-white font-BostNoBillsColombo
                        text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl pt-12">
-            HYCON AREQUIPA
+            HYCON EL ERGÓNOMO
           </h1>
 
           <p className="text-white/95 text-justify md:text-left">
-            Brindamos servicio Courier y contamos con una plataforma web y
-            aplicativo móvil que permitirán a nuestros repartidores actualizar
-            el estado de los pedidos y resolver inconvenientes en las entregas
-            en la ciudad de AREQUIPA, manteniendo una coordinación constante con
-            el ECOMMERCE.
+            Brindamos productos de uso ergonómico para empresas y personas naturales, tambien capacitamos
+            a tus supervisores de seguridad para el cumplimiento normativo nacional en ergonomía, tambien
+            realizamos publicaciones orientados netamente a ergonomía para mantener actualizado a nuestros
+            publico objetivo, tambien realizamos evaluaciones ergonómicas especificas basadas en estandares
+            internacionales (ISO 11228 e ISO 11226).
           </p>
 
           <div className="flex md:block">

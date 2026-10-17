@@ -9,7 +9,7 @@ export default function PlantillaSeccion({
   compacto = false,
 }: {
   titulo: string;
-  descripcion?: string;
+  descripcion?: ReactNode;
   children: ReactNode;
   compacto?: boolean;
 }) {
