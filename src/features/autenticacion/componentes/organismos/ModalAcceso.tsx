@@ -38,7 +38,7 @@ export default function ModalAcceso({ abierto, onCerrar, onAutenticado }: Props)
     // Una sola columna centrada: el formulario manda y se ve igual en movil que en escritorio
     <Modal abierto={abierto} onCerrar={onCerrar} idTitulo={ID_TITULO} ancho="max-w-[660px]">
       {/* tema-panel: dentro del modal el color principal es el del logo */}
-      <div className="tema-panel max-h-[calc(100dvh-24px)] overflow-y-auto px-6 pb-7 pt-9 sm:px-14 sm:pb-9 sm:pt-11">
+      <div className="tema-panel px-6 pb-7 pt-9 sm:px-14 sm:pb-9 sm:pt-11">
         <div className="flex flex-col items-center text-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-marca">
             <img src={LogoHycon} alt="Hycon" draggable={false} width={44} />

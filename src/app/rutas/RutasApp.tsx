@@ -25,6 +25,7 @@ import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelP
 import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
 import PaginaPanelPublicaciones from '@/features/administracion/paginas/PaginaPanelPublicaciones';
 import PaginaRegistroEmpresa from '@/features/software-ergonomico/paginas/PaginaRegistroEmpresa';
+import PaginaEmpresaErgo from '@/features/software-ergonomico/paginas/PaginaEmpresaErgo';
 
 export default function RutasApp() {
   return (
@@ -57,6 +58,7 @@ export default function RutasApp() {
         {/* Layout sin navegacion principal para flujos especificos */}
         <Route element={<PlantillaSinNavegacion />}>
           <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
+          <Route path={RUTAS.empresaErgo} element={<PaginaEmpresaErgo />} />
         </Route>
 
         {/* Panel de administracion: layout propio con barra lateral */}

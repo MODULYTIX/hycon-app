@@ -1,85 +1,26 @@
-import { useEffect } from 'react';
-import type { DatosRepresentatividad } from '@/features/software-ergonomico/tipos/ficha.tipos';
-
-interface Props {
-  datos: DatosRepresentatividad;
-  onChange: (datos: DatosRepresentatividad) => void;
-}
-
-export default function Paso2Representatividad({ datos, onChange }: Props) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    onChange({ ...datos, [name]: value });
+import EntradaBase from '@/shared/ui/atomos/EntradaBase';
+import type { DatosRepresentatividad } from '../../../tipos/ficha.tipos';
+import { SiNo } from '../../ErgoUI';
+import { numeroValido } from '../../../utilidades/ficha';
+export default function Paso2Representatividad({ datos, onChange }: { datos: DatosRepresentatividad; onChange: (d: DatosRepresentatividad) => void }) {
+  const actualizar = (c: Partial<DatosRepresentatividad>) => {
+    const nuevo = { ...datos, ...c };
+    nuevo.duracionMayor120 = numeroValido(nuevo.duracionMinutos, 1440) && Number(nuevo.duracionMinutos) >= 120;
+    nuevo.requiereIdentificacion = nuevo.duracionMayor120 && nuevo.cotidiana === true;
+    onChange(nuevo);
   };
-
-  // Calculo automatico basado en reglas de negocio
-  useEffect(() => {
-    const mayor120 = Number(datos.duracionMinutos) > 120;
-    const requiere = mayor120 && datos.cotidiana;
-    if (mayor120 !== datos.duracionMayor120 || requiere !== datos.requiereIdentificacion) {
-      onChange({ ...datos, duracionMayor120: mayor120, requiereIdentificacion: requiere });
-    }
-  }, [datos, onChange]);
-
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h3 className="text-lg font-semibold text-g-90">2. Representatividad de la evaluación</h3>
-        <p className="text-sm text-g-60">Determina si la tarea requiere una evaluación ergonómica detallada.</p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="duracionMinutos" className="text-sm font-medium text-g-80">Duración diaria (minutos)</label>
-          <input
-            id="duracionMinutos"
-            name="duracionMinutos"
-            type="number"
-            min="0"
-            value={datos.duracionMinutos}
-            onChange={handleChange}
-            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <span id="cotidiana-label" className="text-sm font-medium text-g-80">Cotidiana / diaria</span>
-          <div className="flex items-center gap-3 py-2">
-            <button
-              id="cotidiana"
-              type="button"
-              role="switch"
-              aria-checked={datos.cotidiana}
-              aria-labelledby="cotidiana-label"
-              onClick={() => onChange({ ...datos, cotidiana: !datos.cotidiana })}
-              className={`relative h-6 w-11 shrink-0 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${datos.cotidiana ? 'bg-primary' : 'bg-g-30'}`}
-            >
-              <span
-                className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${datos.cotidiana ? 'translate-x-5' : 'translate-x-0'}`}
-              />
-            </button>
-            <span className="text-sm font-medium text-g-80">{datos.cotidiana ? 'Sí' : 'No'}</span>
-          </div>
-        </div>
-      </div>
-
-      {datos.requiereIdentificacion && (
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="identificacionErgonomica" className="text-sm font-medium text-g-80">
-            Se requiere identificación ergonómica
-          </label>
-          <textarea
-            id="identificacionErgonomica"
-            name="identificacionErgonomica"
-            value={datos.identificacionErgonomica}
-            onChange={handleChange}
-            rows={3}
-            placeholder="Describe la identificación ergonómica requerida..."
-            className="rounded-lg border border-g-30 px-3 py-2 text-sm text-g-90 placeholder-g-50 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-          <p className="text-xs text-g-50">Aplica porque la duración es mayor a 120 minutos y la frecuencia es cotidiana.</p>
-        </div>
-      )}
+  const pendiente = !numeroValido(datos.duracionMinutos, 1440) || datos.cotidiana === null;
+  return <div>
+    <div className="er-grid-fields" style={{ marginBottom: 24 }}>
+      <label className="er-field">Duración diaria de la tarea (min)
+        <EntradaBase  type="number" min="0" max="1440" step="any" inputMode="decimal" placeholder="Ej. 180" value={datos.duracionMinutos} onChange={e => actualizar({ duracionMinutos: e.target.value })} />
+      </label>
+      <div className="er-field"><span>¿La actividad es cotidiana?</span><SiNo etiqueta="¿La actividad es cotidiana?" valor={datos.cotidiana} onChange={cotidiana => actualizar({ cotidiana })} /></div>
     </div>
-  );
+    <div className={`er-notice ${!pendiente && datos.requiereIdentificacion ? 'er-notice-warning' : ''}`}>
+      <strong>{pendiente ? 'Representatividad pendiente' : datos.requiereIdentificacion ? 'Corresponde identificar factores' : 'No cumple el criterio general de representatividad'}</strong>
+      <p>{pendiente ? 'Completa la duración y la frecuencia para revisar el criterio.' : datos.requiereIdentificacion ? 'La tarea es cotidiana y dura 120 minutos o más al día.' : 'El criterio general requiere una tarea cotidiana con 120 minutos o más al día.'}</p>
+    </div>
+    <p className="er-muted" style={{ marginTop: 18 }}>Puedes revisar todas las secciones. Los factores con criterios propios, como vibración de mano-brazo o cargas de 40 kg, se evalúan de forma independiente.</p>
+  </div>;
 }

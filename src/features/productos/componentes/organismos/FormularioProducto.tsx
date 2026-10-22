@@ -101,7 +101,7 @@ export default function FormularioProducto({
 
   return (
     <form className="formulario-catalogo flex min-h-0 flex-1 flex-col" onSubmit={enviar} noValidate>
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5 sm:px-7 sm:py-6">
+      <div className="modal-contenido relative min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain px-5 py-5 sm:px-7 sm:py-6">
         <AlertaFormulario mensaje={errorGeneral} />
 
         <div className="rounded-2xl border border-hy-10 bg-white p-4 sm:p-5 grid gap-6 md:grid-cols-[230px_minmax(0,1fr)]">

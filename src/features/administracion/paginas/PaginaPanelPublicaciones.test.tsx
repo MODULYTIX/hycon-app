@@ -373,7 +373,8 @@ describe('PaginaPanelPublicaciones', () => {
     renderizar();
     await usuario.click(screen.getByRole('button', { name: /Filtrar publicaciones/ }));
     await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
-    await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
+    await usuario.click(screen.getByRole('combobox', { name: 'Estado' }));
+    await usuario.click(screen.getByRole('option', { name: 'Inactivos / borradores' }));
     await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
     expect(api.listarPublicacionesApi).toHaveBeenLastCalledWith('inactive', expect.objectContaining({ pagina: 1, filtros: { buscar: 'prueba', estado: 'inactive' } }));
     await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));

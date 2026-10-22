@@ -139,7 +139,7 @@ export default function GestorTemario({ curso }: Props) {
   };
 
   return (
-    <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+    <div className="modal-contenido relative min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6">
       {error && <AlertaFormulario mensaje={error} />}
 
       {cargando ? (

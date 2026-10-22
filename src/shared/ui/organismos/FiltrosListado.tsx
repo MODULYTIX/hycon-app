@@ -1,3 +1,5 @@
+import EntradaBase from '@/shared/ui/atomos/EntradaBase';
+import Selector from '@/shared/ui/moleculas/Selector';
 import { useId, useState, type FormEvent } from 'react';
 import RangoPrecio from '@/shared/ui/moleculas/RangoPrecio';
 import { Icon } from '@iconify/react';
@@ -5,7 +7,6 @@ import type { FiltrosListado as Valores } from '@/shared/utilidades/filtros-list
 
 type Modulo = 'productos' | 'cursos' | 'publicaciones';
 interface Props { modulo: Modulo; admin?: boolean; onAplicar: (filtros: Valores) => void; }
-const CAMPO = 'h-10 w-full min-w-0 rounded-lg border border-g-20 bg-white px-3 text-[13px] text-g-70 outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
 export default function FiltrosListado({ modulo, admin = false, onAplicar }: Props) {
   const id = useId();
   const [abierto, setAbierto] = useState(!admin);
@@ -42,27 +43,24 @@ export default function FiltrosListado({ modulo, admin = false, onAplicar }: Pro
       <div id={`${id}-contenido`} hidden={!abierto}>
       <div className={admin ? "filtros-campos grid gap-4 sm:grid-cols-2 xl:grid-cols-4" : "filtros-campos flex flex-col gap-5"}>
         <label htmlFor={`${id}-buscar`} className="text-[12px] font-medium text-g-60">Buscar
-          <input id={`${id}-buscar`} name="buscar" maxLength={120} placeholder={modulo === 'publicaciones' ? 'Título o contenido' : 'Nombre o descripción'} className={`${CAMPO} mt-1`} />
+          <EntradaBase id={`${id}-buscar`} name="buscar" maxLength={120} placeholder={modulo === 'publicaciones' ? 'Título o contenido' : 'Nombre o descripción'} className="mt-1" />
         </label>
         <label htmlFor={`${id}-orden`} className="text-[12px] font-medium text-g-60">Ordenar por
-          <select id={`${id}-orden`} name="orden" className={`${CAMPO} mt-1`}>
-            <option value="recientes">Más recientes</option><option value="antiguos">Más antiguos</option>
-            {modulo === 'publicaciones' ? <><option value="leidos">Más leídos</option><option value="titulo">Título: A a Z</option></> : <><option value="nombre">Nombre: A a Z</option><option value="precio-asc">Precio de lista: menor a mayor</option><option value="precio-desc">Precio de lista: mayor a menor</option></>}
-          </select>
+          <Selector id={`${id}-orden`} name="orden" aria-label="Ordenar por" className="mt-1" opciones={[{ valor: 'recientes', etiqueta: 'Más recientes' }, { valor: 'antiguos', etiqueta: 'Más antiguos' }, ...(modulo === 'publicaciones' ? [{ valor: 'leidos', etiqueta: 'Más leídos' }, { valor: 'titulo', etiqueta: 'Título: A a Z' }] : [{ valor: 'nombre', etiqueta: 'Nombre: A a Z' }, { valor: 'precio-asc', etiqueta: 'Precio de lista: menor a mayor' }, { valor: 'precio-desc', etiqueta: 'Precio de lista: mayor a menor' }])]} />
         </label>
         {modulo !== 'publicaciones' && <div className={admin ? 'sm:col-span-2 xl:col-span-2' : ''}><RangoPrecio /></div>}
         {modulo === 'productos' && <label htmlFor={`${id}-stock`} className="text-[12px] font-medium text-g-60">Disponibilidad
-          <select id={`${id}-stock`} name="stock" className={`${CAMPO} mt-1`}><option value="">Todos</option><option value="disponible">Con stock</option><option value="agotado">Sin stock</option></select>
+          <Selector id={`${id}-stock`} name="stock" aria-label="Disponibilidad" className="mt-1" opciones={[{ valor: '', etiqueta: 'Todos' }, { valor: 'disponible', etiqueta: 'Con stock' }, { valor: 'agotado', etiqueta: 'Sin stock' }]} />
         </label>}
         {modulo === 'cursos' && <label htmlFor={`${id}-duracion`} className="text-[12px] font-medium text-g-60">Duración máxima (minutos)
-          <input id={`${id}-duracion`} name="duracionMax" type="number" min="1" max="100000" step="1" placeholder="Sin límite" className={`${CAMPO} mt-1`} />
+          <EntradaBase id={`${id}-duracion`} name="duracionMax" type="number" min="1" max="100000" step="1" placeholder="Sin límite" className="mt-1" />
         </label>}
         {modulo === 'publicaciones' && <>
-          <label htmlFor={`${id}-desde`} className="text-[12px] font-medium text-g-60">Publicado desde<input id={`${id}-desde`} name="desde" type="date" className={`${CAMPO} mt-1`} /></label>
-          <label htmlFor={`${id}-hasta`} className="text-[12px] font-medium text-g-60">Publicado hasta<input id={`${id}-hasta`} name="hasta" type="date" className={`${CAMPO} mt-1`} /></label>
+          <label htmlFor={`${id}-desde`} className="text-[12px] font-medium text-g-60">Publicado desde<EntradaBase id={`${id}-desde`} name="desde" type="date" className="mt-1" /></label>
+          <label htmlFor={`${id}-hasta`} className="text-[12px] font-medium text-g-60">Publicado hasta<EntradaBase id={`${id}-hasta`} name="hasta" type="date" className="mt-1" /></label>
         </>}
         {admin && <label htmlFor={`${id}-estado`} className="text-[12px] font-medium text-g-60">Estado
-          <select id={`${id}-estado`} name="estado" className={`${CAMPO} mt-1`}><option value="todos">Todos los estados</option><option value="active">Activos / publicados</option><option value="inactive">Inactivos / borradores</option></select>
+          <Selector id={`${id}-estado`} name="estado" aria-label="Estado" className="mt-1" opciones={[{ valor: 'todos', etiqueta: 'Todos los estados' }, { valor: 'active', etiqueta: 'Activos / publicados' }, { valor: 'inactive', etiqueta: 'Inactivos / borradores' }]} />
         </label>}
         <div className={admin ? "flex flex-col sm:flex-row items-stretch sm:items-end justify-end gap-2 sm:col-span-2 xl:col-span-4 border-t border-g-20 pt-4" : "flex flex-col gap-2 border-t border-g-20 pt-4"}>
           <button type="submit" className="h-10 rounded-lg bg-primary px-4 text-[12px] font-medium text-white hover:bg-marca-oscuro">Aplicar filtros</button>

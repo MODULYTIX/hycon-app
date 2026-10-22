@@ -85,7 +85,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-g-90/60 p-3 backdrop-blur-sm animate-fadeIn sm:p-4"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-g-90/60 p-3 backdrop-blur-sm animate-fadeIn sm:p-4"
       onMouseDown={(evento) => {
         // Solo cierra si el clic empezo en el fondo, no al arrastrar desde dentro
         if (evento.target === evento.currentTarget) solicitarCierre();
@@ -97,7 +97,7 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
-        className={`relative w-full ${ancho} overflow-hidden rounded-2xl bg-white shadow-2xl outline-none animate-modalIn`}
+        className={`relative my-auto w-full shrink-0 ${ancho} overflow-hidden rounded-2xl bg-white shadow-2xl outline-none animate-modalIn`}
       >
         <button
           type="button"

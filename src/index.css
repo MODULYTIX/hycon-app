@@ -1,5 +1,18 @@
 @import 'tailwindcss';
 
+/* Si la cabecera y las acciones dejan muy poco espacio, el formulario completo
+   se desplaza con el fondo del modal. Así no hay dos scrolls ni controles cortados. */
+@media (max-height: 400px) {
+    .modal-formulario {
+        max-height: none;
+    }
+
+    .modal-formulario .modal-contenido {
+        flex: none;
+        overflow: visible;
+    }
+}
+
 
 @theme {
     /* colores globales. El principal sale de --color-marca (el verde del logo) */

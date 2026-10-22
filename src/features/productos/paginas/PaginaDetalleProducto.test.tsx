@@ -107,13 +107,14 @@ describe('detalle de producto', () => {
     expect(screen.getByRole('link', { name: 'Ampliar imagen' })).toHaveAttribute('href', secundaria);
   });
 
-  it('evita repetir la misma foto y muestra información de entrega cuando no hay otra vista', async () => {
+  it('evita repetir la misma foto y ofrece asesoría cuando no hay otra vista', async () => {
     vi.mocked(api.obtenerProductoApi).mockResolvedValue({ ...producto, imageUrls: [producto.imageUrl!, producto.imageUrl!] });
     renderizar(`/productos/${UUID_7}`);
     await screen.findByRole('heading', { name: 'Silla ergonómica' });
 
     expect(screen.queryByRole('img', { name: 'Vista adicional de Silla ergonómica' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Ver imagen 2' })).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Entrega coordinada' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Compra con la información que necesitas' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Hablar con un asesor' })).toHaveAttribute('href', expect.stringContaining('https://wa.me/'));
   });
 });

@@ -29,8 +29,10 @@ describe('Filtros del listado', () => {
     await u.type(screen.getByLabelText('Buscar'), '  Caja  ');
     fireEvent.change(screen.getByRole('slider', { name: 'Precio mínimo' }), { target: { value: '20' } });
     fireEvent.change(screen.getByRole('slider', { name: 'Precio máximo' }), { target: { value: '100' } });
-    await u.selectOptions(screen.getByLabelText('Estado'), 'inactive');
-    await u.selectOptions(screen.getByLabelText('Disponibilidad'), 'agotado');
+    await u.click(screen.getByRole('combobox', { name: 'Estado' }));
+    await u.click(screen.getByRole('option', { name: 'Inactivos / borradores' }));
+    await u.click(screen.getByRole('combobox', { name: 'Disponibilidad' }));
+    await u.click(screen.getByRole('option', { name: 'Sin stock' }));
     await u.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
     expect(aplicar).toHaveBeenCalledWith({ buscar: 'Caja', precioMin: 20, precioMax: 100, estado: 'inactive', stock: 'agotado' });
   });
