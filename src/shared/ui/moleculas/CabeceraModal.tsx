@@ -13,7 +13,7 @@ export default function CabeceraModal({
   descripcion: string;
 }) {
   return (
-    <header className="flex items-center gap-4 border-b border-hy-10 bg-hy-5 px-5 py-4 pr-14 sm:px-7 sm:py-6">
+    <header className="flex shrink-0 items-center gap-4 border-b border-hy-10 bg-hy-5 px-5 py-4 pr-14 sm:px-7 sm:py-6">
       <span
         aria-hidden
         className="hidden h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-hy-10 text-hy-60 sm:flex"

@@ -1,3 +1,5 @@
+import EntradaBase from '@/shared/ui/atomos/EntradaBase';
+import Selector from '@/shared/ui/moleculas/Selector';
 import { useState, type FormEvent, type ChangeEvent } from 'react';
 import Titulo from '@/shared/ui/atomos/Titulo';
 import ContactanosPeople from '@/assets/images/contacanos_people.webp';
@@ -259,22 +261,14 @@ export default function FormularioContacto() {
                   <div className="flex gap-4" key={i}>
                     {field.row.map((rf) => (
                       <div key={rf.key} className="w-1/2">
-                        <label className="block mb-1 text-sm font-medium text-primary">
+                        <label htmlFor={`contacto-${activeTab}-${rf.key}`} className="block mb-1 text-sm font-medium text-primary">
                           {rf.label}
                         </label>
                         {rf.type === 'select' ? (
-                          <select
-                            name={rf.key}
-                            value={rep.unidad}
-                            onChange={handleChangeRep}
-                            className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20 text-g-40">
-                            <option value="">Seleccione unidad</option>
-                            <option value="moto">Moto</option>
-                            <option value="auto">Auto</option>
-                            <option value="camioneta">Camioneta</option>
-                          </select>
+                          <Selector id={`contacto-${activeTab}-${rf.key}`} name={rf.key} aria-label={rf.label} value={rep.unidad} onChange={unidad => setRep(prev => ({ ...prev, unidad }))} opciones={[{ valor: '', etiqueta: 'Seleccione unidad' }, { valor: 'moto', etiqueta: 'Moto' }, { valor: 'auto', etiqueta: 'Auto' }, { valor: 'camioneta', etiqueta: 'Camioneta' }]} />
                         ) : (
-                          <input
+                          <EntradaBase
+                            id={`contacto-${activeTab}-${rf.key}`} aria-label={rf.label}
                             name={rf.key}
                             type={rf.type}
                             placeholder={rf.placeholder}
@@ -292,7 +286,6 @@ export default function FormularioContacto() {
                                 ? handleChangeEcom
                                 : handleChangeRep
                             }
-                            className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20"
                           />
                         )}
                       </div>
@@ -302,10 +295,11 @@ export default function FormularioContacto() {
                   <div
                     key={field.key}
                     className={field.full ? 'w-full' : 'w-1/2'}>
-                    <label className="block mb-1 text-sm font-medium text-primary">
+                    <label htmlFor={`contacto-${activeTab}-${field.key}`} className="block mb-1 text-sm font-medium text-primary">
                       {field.label}
                     </label>
-                    <input
+                    <EntradaBase
+                      id={`contacto-${activeTab}-${field.key}`} aria-label={field.label}
                       name={field.key}
                       type={field.type}
                       placeholder={field.placeholder}
@@ -319,7 +313,6 @@ export default function FormularioContacto() {
                           ? handleChangeEcom
                           : handleChangeRep
                       }
-                      className="w-full border px-3 py-3 rounded-xl border-g-30 focus:border-primary focus:outline-2 focus:outline-primary/20"
                     />
                   </div>
                 )

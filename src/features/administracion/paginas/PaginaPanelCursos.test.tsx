@@ -296,7 +296,8 @@ describe('PaginaPanelCursos', () => {
     renderizar();
     await usuario.click(screen.getByRole('button', { name: /Filtrar cursos/ }));
     await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
-    await usuario.selectOptions(screen.getByLabelText('Estado'), 'inactive');
+    await usuario.click(screen.getByRole('combobox', { name: 'Estado' }));
+    await usuario.click(screen.getByRole('option', { name: 'Inactivos / borradores' }));
     await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
     expect(api.listarCursosApi).toHaveBeenLastCalledWith('inactive', 1, expect.anything(), undefined, { buscar: 'prueba', estado: 'inactive' });
     await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));

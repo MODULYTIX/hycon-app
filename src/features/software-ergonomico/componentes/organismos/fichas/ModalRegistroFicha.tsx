@@ -1,219 +1,97 @@
-import { useState } from 'react';
-import Modal from '@/shared/ui/organismos/Modal';
-import { type FormularioFichaErgonomica, FICHA_VACIA } from '@/features/software-ergonomico/tipos/ficha.tipos';
+import EntradaBase from '@/shared/ui/atomos/EntradaBase';
+import { useEffect, useRef, useState } from 'react';
+import type { EmpresaErgo, FichaErgo } from '../../../servicios/ergo.api';
+import { actualizarFichaErgo, crearFichaErgo } from '../../../servicios/ergo.api';
+import { normalizarFicha, validarFicha, resumenFicha, SECCIONES, type SeccionFicha } from '../../../utilidades/ficha';
+import { DialogoErgo, CabeceraSeccion } from '../../ErgoUI';
+import { mensajeError } from '../../../utilidades/presentacion';
 import Paso1Administrativo from './Paso1Administrativo';
 import Paso2Representatividad from './Paso2Representatividad';
-import Paso3PosturasForzadas from './Paso3PosturasForzadas';
-import Paso4ManipulacionCargas from './Paso4ManipulacionCargas';
-import Paso5MovimientosRepetitivos from './Paso5MovimientosRepetitivos';
-import PasoTareasEvaluar from './PasoTareasEvaluar';
-import PasoResultadoEvaluacion from './PasoResultadoEvaluacion';
-import { clasificarNiosh, clasificarOcra, clasificarPostura } from './nivelesExposicion';
+import SeccionFactores from './SeccionFactores';
 import Paso6Resumen from './Paso6Resumen';
-import { Icon } from '@iconify/react';
 
-interface Props {
-  abierto: boolean;
-  onCerrar: () => void;
-}
-
-const NOMBRES_PASOS = [
-  'Administrativa',
-  'Representatividad',
-  'Posturas Forzadas',
-  'Manipulación Cargas',
-  'Movs. Repetitivos',
-  'Tareas a Evaluar',
-  'Mov. Repetitivos DX / IX',
-  'Postura Forzada D / I',
-  'Levantamiento NIOSH',
-  'Empuje y Tracción',
-  'Resumen',
-];
-
-const ULTIMO_PASO = NOMBRES_PASOS.length - 1;
-
-export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
-  const [pasoActual, setPasoActual] = useState(0);
-  const [datosFicha, setDatosFicha] = useState<FormularioFichaErgonomica>(FICHA_VACIA);
-
-  const actualizarEvaluacion = <K extends keyof FormularioFichaErgonomica['evaluacion']>(
-    grupo: K,
-    cambios: Partial<FormularioFichaErgonomica['evaluacion'][K]>,
-  ) => {
-    setDatosFicha((previo) => ({
-      ...previo,
-      evaluacion: { ...previo.evaluacion, [grupo]: { ...previo.evaluacion[grupo], ...cambios } },
-    }));
+export default function ModalRegistroFicha({ empresa, ficha, inicial = 'datos', onCerrar, onGuardado }: {
+  empresa: EmpresaErgo; ficha?: FichaErgo; inicial?: SeccionFicha; onCerrar: () => void; onGuardado: (f: FichaErgo) => void;
+}) {
+  const [datos, setDatos] = useState(() => normalizarFicha(ficha?.payload));
+  const [nombre, setNombre] = useState(ficha?.nombre || '');
+  const [seccion, setSeccion] = useState<SeccionFicha>(inicial);
+  const [guardando, setGuardando] = useState(false);
+  const [error, setError] = useState('');
+  const base = useRef(JSON.stringify({ datos: normalizarFicha(ficha?.payload), nombre: ficha?.nombre || '' }));
+  const guardandoRef = useRef(false);
+  const contenido = useRef<HTMLDivElement>(null);
+  const navegacion = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const activa = navegacion.current?.querySelector<HTMLElement>('[aria-current="step"]');
+    activa?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+  }, [seccion]);
+  const sucio = JSON.stringify({ datos, nombre }) !== base.current;
+  const resumen = resumenFicha(datos);
+  const actual = SECCIONES.find(s => s.id === seccion)!;
+  const ir = (s: SeccionFicha) => { setSeccion(s); contenido.current?.scrollTo({ top: 0 }); };
+  const guardar = async () => {
+    if (guardandoRef.current) return;
+    const invalido = validarFicha(datos);
+    if (invalido) { setError(invalido.mensaje); ir(invalido.seccion); return; }
+    if (nombre.trim().length === 1) { setError('Usa al menos 2 caracteres para el nombre de la ficha.'); ir('datos'); return; }
+    guardandoRef.current = true; setGuardando(true); setError('');
+    try {
+      const titulo = nombre.trim() || `Ficha · ${datos.paso1.puesto.trim() || 'Puesto por definir'}`.slice(0, 200);
+      const payload = normalizarFicha(datos);
+      const guardada = ficha
+        ? await actualizarFichaErgo(empresa.id, ficha.id, titulo, payload, ficha.actualizada)
+        : await crearFichaErgo(empresa.id, titulo, payload);
+      onGuardado(guardada);
+    } catch (e) {
+      setError(mensajeError(e));
+      contenido.current?.scrollTo({ top: 0 });
+    }
+    finally { guardandoRef.current = false; setGuardando(false); }
   };
-
-  const irSiguientePaso = () => {
-    if (pasoActual < ULTIMO_PASO) setPasoActual(pasoActual + 1);
-  };
-
-  const irPasoAnterior = () => {
-    if (pasoActual > 0) setPasoActual(pasoActual - 1);
-  };
-
-  const manejarGuardado = () => {
-    // Pendiente: aquí irá el envío al endpoint. Los datos de la ficha no se
-    // escriben en la consola: en producción quedarían a la vista de cualquiera.
-    onCerrar();
-    // Reiniciar form
-    setTimeout(() => {
-      setPasoActual(0);
-      setDatosFicha(FICHA_VACIA);
-    }, 300);
-  };
-
-  const manejarCancelar = (solicitarCierre: () => void) => {
-    solicitarCierre();
-  };
-
-  return (
-    <Modal
-      abierto={abierto}
-      onCerrar={onCerrar}
-      idTitulo="modal-registro-ficha"
-      ancho="max-w-[1100px]"
-      protegido={pasoActual > 0} // protejo si ya avanzaron al menos un paso
-    >
-      {(solicitarCierre) => (
-        <div className="flex max-h-[85vh] flex-col bg-g-5">
-          {/* Header del Modal */}
-          <div className="border-b border-g-20 bg-white px-6 py-4 shadow-sm">
-            <h2 id="modal-registro-ficha" className="text-xl font-bold text-g-90">
-              Registrar Ficha Ergonómica
-            </h2>
-            <div className="mt-4 flex w-full items-center justify-between">
-              {NOMBRES_PASOS.map((nombre, i) => (
-                <div key={nombre} className="flex min-w-0 flex-1 flex-col items-center gap-2">
-                  <div className="flex w-full items-center justify-center">
-                    <div
-                      className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors
-                        ${i < pasoActual ? 'bg-primary text-white' : i === pasoActual ? 'border-2 border-primary text-primary' : 'bg-g-20 text-g-50'}
-                      `}
-                    >
-                      {i < pasoActual ? <Icon icon="solar:check-read-bold" width="20" height="20" /> : i + 1}
-                    </div>
-                    {i < NOMBRES_PASOS.length - 1 && (
-                      <div className={`h-[2px] flex-1 ${i < pasoActual ? 'bg-primary' : 'bg-g-20'}`} />
-                    )}
-                  </div>
-                  <span className={`text-[10px] font-medium sm:text-xs text-center leading-tight ${i <= pasoActual ? 'text-g-90' : 'text-g-50'}`}>
-                    {nombre}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Cuerpo - Scrollable */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {pasoActual === 0 && (
-              <Paso1Administrativo 
-                datos={datosFicha.paso1} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso1: nuevosDatos })} 
-              />
-            )}
-            {pasoActual === 1 && (
-              <Paso2Representatividad 
-                datos={datosFicha.paso2} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso2: nuevosDatos })}              />
-            )}
-            {pasoActual === 2 && (
-              <Paso3PosturasForzadas 
-                datos={datosFicha.paso3} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso3: nuevosDatos })} 
-              />
-            )}
-            {pasoActual === 3 && (
-              <Paso4ManipulacionCargas 
-                datos={datosFicha.paso4} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso4: nuevosDatos })} 
-              />
-            )}
-            {pasoActual === 4 && (
-              <Paso5MovimientosRepetitivos 
-                datos={datosFicha.paso5} 
-                onChange={(nuevosDatos) => setDatosFicha({ ...datosFicha, paso5: nuevosDatos })} 
-              />
-            )}
-            {pasoActual === 5 && <PasoTareasEvaluar datos={datosFicha} />}
-            {pasoActual === 6 && (
-              <PasoResultadoEvaluacion
-                titulo="7. Movimientos repetitivos"
-                clasificar={clasificarOcra}
-                campos={[
-                  { id: 'dx', etiqueta: 'DX', valor: datosFicha.evaluacion.movimientosRepetitivos.dx, onChange: (v) => actualizarEvaluacion('movimientosRepetitivos', { dx: v }) },
-                  { id: 'ix', etiqueta: 'IX', valor: datosFicha.evaluacion.movimientosRepetitivos.ix, onChange: (v) => actualizarEvaluacion('movimientosRepetitivos', { ix: v }) },
-                ]}
-              />
-            )}
-            {pasoActual === 7 && (
-              <PasoResultadoEvaluacion
-                titulo="8. Postura forzada"
-                clasificar={clasificarPostura}
-                campos={[
-                  { id: 'd', etiqueta: 'D', valor: datosFicha.evaluacion.posturaForzada.d, onChange: (v) => actualizarEvaluacion('posturaForzada', { d: v }) },
-                  { id: 'i', etiqueta: 'I', valor: datosFicha.evaluacion.posturaForzada.i, onChange: (v) => actualizarEvaluacion('posturaForzada', { i: v }) },
-                ]}
-              />
-            )}
-            {pasoActual === 8 && (
-              <PasoResultadoEvaluacion
-                titulo="9. Levantamiento de cargas"
-                clasificar={clasificarNiosh}
-                campos={[
-                  { id: 'niosh', etiqueta: 'NIOSH', valor: datosFicha.evaluacion.levantamientoCargas.niosh, onChange: (v) => actualizarEvaluacion('levantamientoCargas', { niosh: v }) },
-                ]}
-              />
-            )}
-            {pasoActual === 9 && (
-              <PasoResultadoEvaluacion
-                titulo="10. Empuje y tracción"
-                campos={[
-                  { id: 'iso11228', etiqueta: '11228-2', valor: datosFicha.evaluacion.empujeTraccion.iso11228, onChange: (v) => actualizarEvaluacion('empujeTraccion', { iso11228: v }) },
-                ]}
-              />
-            )}
-            {pasoActual === ULTIMO_PASO && (
-              <Paso6Resumen
-                datos={datosFicha} 
-              />
-            )}
-          </div>
-
-          {/* Footer - Fijo */}
-          <div className="flex items-center justify-between border-t border-g-20 bg-white px-6 py-4">
-            <button
-              type="button"
-              onClick={pasoActual === 0 ? () => manejarCancelar(solicitarCierre) : irPasoAnterior}
-              className="rounded-lg px-4 py-2.5 text-sm font-medium text-g-70 transition-colors hover:bg-g-10"
-            >
-              {pasoActual === 0 ? 'Cancelar' : 'Anterior'}
-            </button>
-            <div className="flex gap-3">
-              {pasoActual === ULTIMO_PASO && (
-                <button
-                  type="button"
-                  className="rounded-lg border border-g-30 bg-white px-4 py-2.5 text-sm font-medium text-g-70 transition-colors hover:bg-g-10"
-                  onClick={manejarGuardado}
-                >
-                  Guardar y continuar
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={pasoActual === ULTIMO_PASO ? manejarGuardado : irSiguientePaso}
-                className="rounded-lg bg-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
-              >
-                {pasoActual === ULTIMO_PASO ? 'Guardar ficha' : 'Siguiente'}
-              </button>
-            </div>
-          </div>
+  return <DialogoErgo titulo={ficha ? 'Editar ficha ergonómica' : 'Nueva ficha ergonómica'} amplio sucio={sucio} bloqueado={guardando} onCerrar={onCerrar}>
+    {cerrar => <div className="er-editor">
+      <header className="er-editor-header">
+        <div><p className="er-eyebrow">{empresa.nombre} / Ficha ergonómica</p><h2>{ficha ? 'Editar ficha' : 'Nueva ficha'}</h2></div>
+        <div className="er-actions"><span className="er-tag">{resumen.estado}</span><button type="button" className="er-close" aria-label="Cerrar ficha" disabled={guardando} onClick={cerrar}>×</button></div>
+      </header>
+      <div className="er-editor-middle">
+        <nav ref={navegacion} className="er-sidebar" aria-label="Secciones de la ficha">
+          <p>Accede a cualquier sección</p>
+          {SECCIONES.map((s, i) => {
+            const f = resumen.factores.filter(f => f.grupo === s.id);
+            const pendientes = resumen.pendientes.filter(f => f.grupo === s.id).length;
+            return <button type="button" className="er-section-button" aria-label={s.titulo} aria-current={s.id === seccion ? 'step' : undefined} key={s.id} onClick={() => ir(s.id)}>
+              <span className="er-section-number">{String(i + 1).padStart(2, '0')}</span>
+              <span>{s.titulo}<small>{f.length ? `${f.length - pendientes} de ${f.length} registrados` : s.id === 'resumen' ? 'Revisión de la ficha' : 'Información de contexto'}</small></span>
+            </button>;
+          })}
+        </nav>
+        <div className="er-editor-content" ref={contenido}>
+          {error && <p role="alert" className="er-notice er-notice-error er-editor-error">{error}</p>}
+          <CabeceraSeccion titulo={actual.titulo} descripcion={actual.descripcion} />
+          <fieldset disabled={guardando}>
+            <legend className="sr-only">{actual.titulo}</legend>
+            {seccion === 'datos' && <>
+              <label className="er-field" style={{ marginBottom: 20 }}>Nombre de la ficha <span className="er-muted" style={{ fontSize: 11 }}>Opcional. Si lo dejas vacío, usaremos el nombre del puesto.</span>
+                <EntradaBase  placeholder="Ej. Evaluación del puesto de almacén" maxLength={200} value={nombre} onChange={e => setNombre(e.target.value)} />
+              </label>
+              <Paso1Administrativo datos={datos.paso1} onChange={paso1 => setDatos({ ...datos, paso1 })} />
+            </>}
+            {seccion === 'tarea' && <Paso2Representatividad datos={datos.paso2} onChange={paso2 => setDatos({ ...datos, paso2 })} />}
+            {(seccion === 'posturas' || seccion === 'cargas' || seccion === 'repetitivos') && <SeccionFactores grupo={seccion} datos={datos} onChange={setDatos} />}
+            {seccion === 'resumen' && <Paso6Resumen datos={datos} onEditar={ir} />}
+          </fieldset>
         </div>
-      )}
-    </Modal>
-  );
+      </div>
+      <footer className="er-editor-footer">
+        <p>{sucio ? 'Cambios sin guardar' : ficha ? 'Ficha guardada' : 'Puedes guardar y completar después'}</p>
+        <div className="er-actions">
+          <button className="er-button" onClick={cerrar} disabled={guardando}>Cerrar</button>
+          {seccion !== 'resumen' && <button className="er-button" onClick={() => ir('resumen')}>Ver resumen</button>}
+          <button className="er-button er-button-primary" onClick={guardar} disabled={guardando}>{guardando ? 'Guardando…' : ficha ? 'Guardar cambios' : 'Guardar ficha'}</button>
+        </div>
+      </footer>
+    </div>}
+  </DialogoErgo>;
 }

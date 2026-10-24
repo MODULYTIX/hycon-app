@@ -11,14 +11,13 @@ export interface DatosAdministrativos {
 
 export interface DatosRepresentatividad {
   duracionMinutos: string; // lo guardamos como string para el input y lo parseamos luego
-  cotidiana: boolean; // Frecuencia cotidiana / diaria (Sí / No)
-  duracionMayor120: boolean; // Automático: duracionMinutos > 120
-  requiereIdentificacion: boolean; // Automático: duracion > 120 && cotidiana
-  identificacionErgonomica: string; // Texto libre, solo se muestra si requiereIdentificacion
+  cotidiana: boolean | null; // null indica que aún no se ha respondido.
+  duracionMayor120: boolean; // Automático: duracionMinutos >= 120 (nombre conservado por compatibilidad)
+  requiereIdentificacion: boolean; // Automático: duracion >= 120 && cotidiana
 }
 
 export interface FactorPostura {
-  aplica: boolean;
+  aplica: boolean | null;
   duracionDiaria: string;
 }
 
@@ -46,6 +45,8 @@ export interface MovimientosRepetitivos {
     manipulacionPinzaMayor1kg: FactorPostura;
     munecasFlexionadasAgarre: FactorPostura;
     accionAtornillar: FactorPostura;
+    impactoRepetido: FactorPostura;
+    vibracionBrazoMano: FactorPostura;
   };
   movimientosAltaFrecuencia: {
     repiteMovimiento4vecesMinuto2horas: FactorPostura;
@@ -57,7 +58,6 @@ export interface EvaluacionResultados {
   movimientosRepetitivos: { dx: string; ix: string };
   posturaForzada: { d: string; i: string };
   levantamientoCargas: { niosh: string };
-  empujeTraccion: { iso11228: string };
 }
 
 export interface InformacionAdicional {
@@ -87,43 +87,43 @@ export const FICHA_VACIA: FormularioFichaErgonomica = {
   },
   paso2: {
     duracionMinutos: '',
-    cotidiana: false,
+    cotidiana: null,
     duracionMayor120: false,
     requiereIdentificacion: false,
-    identificacionErgonomica: '',
   },
   paso3: {
-    manosSobreCabeza: { aplica: false, duracionDiaria: '' },
-    codosSobreHombro: { aplica: false, duracionDiaria: '' },
-    espaldaInclinadaAdelante: { aplica: false, duracionDiaria: '' },
-    espaldaExtension: { aplica: false, duracionDiaria: '' },
-    cuelloDobladoGirado: { aplica: false, duracionDiaria: '' },
-    sentadoEspaldaInclinada: { aplica: false, duracionDiaria: '' },
-    sentadoEspaldaGirada: { aplica: false, duracionDiaria: '' },
-    trabajoCuclillas: { aplica: false, duracionDiaria: '' },
-    trabajoRodillas: { aplica: false, duracionDiaria: '' },
+    manosSobreCabeza: { aplica: null, duracionDiaria: '' },
+    codosSobreHombro: { aplica: null, duracionDiaria: '' },
+    espaldaInclinadaAdelante: { aplica: null, duracionDiaria: '' },
+    espaldaExtension: { aplica: null, duracionDiaria: '' },
+    cuelloDobladoGirado: { aplica: null, duracionDiaria: '' },
+    sentadoEspaldaInclinada: { aplica: null, duracionDiaria: '' },
+    sentadoEspaldaGirada: { aplica: null, duracionDiaria: '' },
+    trabajoCuclillas: { aplica: null, duracionDiaria: '' },
+    trabajoRodillas: { aplica: null, duracionDiaria: '' },
   },
   paso4: {
-    levantamiento40kg: { aplica: false, duracionDiaria: '' },
-    levantamiento25kg: { aplica: false, duracionDiaria: '' },
-    levantamiento5kg: { aplica: false, duracionDiaria: '' },
-    levantamientoMenor3kg: { aplica: false, duracionDiaria: '' },
+    levantamiento40kg: { aplica: null, duracionDiaria: '' },
+    levantamiento25kg: { aplica: null, duracionDiaria: '' },
+    levantamiento5kg: { aplica: null, duracionDiaria: '' },
+    levantamientoMenor3kg: { aplica: null, duracionDiaria: '' },
   },
   paso5: {
     esfuerzoManos: {
-      manipulacionPinzaMayor1kg: { aplica: false, duracionDiaria: '' },
-      munecasFlexionadasAgarre: { aplica: false, duracionDiaria: '' },
-      accionAtornillar: { aplica: false, duracionDiaria: '' },
+      manipulacionPinzaMayor1kg: { aplica: null, duracionDiaria: '' },
+      munecasFlexionadasAgarre: { aplica: null, duracionDiaria: '' },
+      accionAtornillar: { aplica: null, duracionDiaria: '' },
+      impactoRepetido: { aplica: null, duracionDiaria: '' },
+      vibracionBrazoMano: { aplica: null, duracionDiaria: '' },
     },
     movimientosAltaFrecuencia: {
-      repiteMovimiento4vecesMinuto2horas: { aplica: false, duracionDiaria: '' },
+      repiteMovimiento4vecesMinuto2horas: { aplica: null, duracionDiaria: '' },
     },
   },
   evaluacion: {
     movimientosRepetitivos: { dx: '', ix: '' },
     posturaForzada: { d: '', i: '' },
     levantamientoCargas: { niosh: '' },
-    empujeTraccion: { iso11228: '' },
   },
   paso7Adicional: {
     sector: '',

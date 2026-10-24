@@ -31,6 +31,7 @@ const PaginaPanelProductos = lazy(() => import('@/features/administracion/pagina
 const PaginaPanelCursos = lazy(() => import('@/features/administracion/paginas/PaginaPanelCursos'));
 const PaginaPanelPublicaciones = lazy(() => import('@/features/administracion/paginas/PaginaPanelPublicaciones'));
 import PaginaRegistroEmpresa from '@/features/software-ergonomico/paginas/PaginaRegistroEmpresa';
+import PaginaEmpresaErgo from '@/features/software-ergonomico/paginas/PaginaEmpresaErgo';
 
 // Mientras llega una pantalla que se carga aparte
 const CargandoPantalla = () => (
@@ -73,6 +74,7 @@ export default function RutasApp() {
           <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
           {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
           <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
+          <Route path={RUTAS.empresaErgo} element={<PaginaEmpresaErgo />} />
         </Route>
 
         {/* Panel de administracion: layout propio con barra lateral */}

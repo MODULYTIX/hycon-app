@@ -1,3 +1,4 @@
+import EntradaBase from './EntradaBase';
 import { Icon } from '@iconify/react';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
@@ -8,9 +9,8 @@ interface Props extends InputHTMLAttributes<HTMLInputElement> {
   accesorio?: ReactNode;
 }
 
-// Campo relleno: descansa sobre un gris muy suave y se vuelve blanco al escribir,
-// asi el formulario se lee como un bloque tranquilo y el foco queda evidente.
-export default function EntradaTexto({ icono, invalido, accesorio, ...props }: Props) {
+// Variante del campo compartido para iconos y acciones de autenticación.
+export default function EntradaTexto({ icono, invalido, accesorio, style, ...props }: Props) {
   return (
     <div className="relative">
       {icono && (
@@ -25,16 +25,10 @@ export default function EntradaTexto({ icono, invalido, accesorio, ...props }: P
         />
       )}
 
-      <input
+      <EntradaBase
         {...props}
         aria-invalid={invalido || undefined}
-        className={`h-12 w-full rounded-xl border bg-g-5 px-4 text-[15px] text-g-90 outline-none transition-colors placeholder:text-g-40 focus:bg-white focus:ring-3 ${
-          icono ? 'pl-11' : ''
-        } ${accesorio ? 'pr-12' : ''} ${
-          invalido
-            ? 'border-red-300 bg-red-50/40 focus:border-red-500 focus:ring-red-500/15'
-            : 'border-transparent hover:border-g-30 focus:border-primary focus:ring-primary/15'
-        }`}
+        style={{ height: 46, ...(icono ? { paddingLeft: 44 } : {}), ...(accesorio ? { paddingRight: 48 } : {}), ...style }}
       />
 
       {accesorio && <div className="absolute right-2 top-1/2 -translate-y-1/2">{accesorio}</div>}

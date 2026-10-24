@@ -17,7 +17,7 @@ export default function ModalTemario({ abierto, curso, onCerrar }: Props) {
 
   return (
     <Modal abierto={abierto} onCerrar={onCerrar} idTitulo={ID_TITULO} ancho="max-w-[820px]">
-      <div className="flex max-h-[calc(100dvh-24px)] flex-col sm:max-h-[90vh]">
+      <div className="modal-formulario flex min-h-0 max-h-[calc(100dvh-24px)] flex-col sm:max-h-[min(90dvh,calc(100dvh-32px))]">
         <CabeceraModal
           id={ID_TITULO}
           icono="solar:playlist-2-bold"

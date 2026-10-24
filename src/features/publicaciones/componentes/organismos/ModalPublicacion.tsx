@@ -30,7 +30,7 @@ export default function ModalPublicacion({ abierto, publicacion, onCerrar, onGua
       ancho="max-w-[1100px]"
     >
       {(solicitarCierre) => (
-        <div className="flex max-h-[calc(100dvh-24px)] flex-col sm:max-h-[92vh]">
+        <div className="modal-formulario flex min-h-0 max-h-[calc(100dvh-24px)] flex-col sm:max-h-[min(92dvh,calc(100dvh-32px))]">
           <CabeceraModal
             id={ID_TITULO}
             icono={publicacion ? 'solar:pen-new-square-bold' : 'solar:document-add-bold'}

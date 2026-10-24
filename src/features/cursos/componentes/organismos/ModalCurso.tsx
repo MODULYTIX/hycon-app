@@ -58,7 +58,7 @@ export default function ModalCurso({
       ancho="max-w-[920px]"
     >
       {(solicitarCierre) => (
-        <div className="flex max-h-[calc(100dvh-24px)] flex-col sm:max-h-[90vh]">
+        <div className="modal-formulario flex min-h-0 max-h-[calc(100dvh-24px)] flex-col sm:max-h-[min(90dvh,calc(100dvh-32px))]">
           <CabeceraModal
             id={ID_TITULO}
             icono={enEdicion ? 'solar:pen-new-square-bold' : 'solar:diploma-bold'}
