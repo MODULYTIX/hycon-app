@@ -59,13 +59,15 @@ export const extraerInicioYoutube = (enlace: string | null | undefined): number 
 export const HOST_YOUTUBE_SIN_COOKIES = 'https://www.youtube-nocookie.com';
 
 // Configuracion del reproductor: sin la barra de YouTube (la web pinta la suya),
-// sin anotaciones, sin atajos propios y sin su boton de pantalla completa
+// sin anotaciones, sin atajos propios, sin su boton de pantalla completa y sin
+// subtitulos encendidos de entrada
 export const parametrosReproductor = (inicio = 0, origen?: string) => ({
   autoplay: 1,
   controls: 0,
   rel: 0,
   playsinline: 1,
   iv_load_policy: 3,
+  cc_load_policy: 0,
   disablekb: 1,
   fs: 0,
   enablejsapi: 1,
@@ -89,7 +91,7 @@ export const formatearTiempo = (total: number): string => {
 export const mensajeErrorYoutube = (codigo: number): string => {
   // 101 y 150: el video tiene desactivado "Permitir insertar" o es privado
   if (codigo === 101 || codigo === 150) {
-    return 'Este video no se puede reproducir fuera de YouTube. Escríbenos y lo resolvemos.';
+    return 'Este video no se puede reproducir aquí. Escríbenos y lo resolvemos.';
   }
   if (codigo === 100) return 'El video ya no está disponible.';
   return 'No se pudo reproducir el video.';

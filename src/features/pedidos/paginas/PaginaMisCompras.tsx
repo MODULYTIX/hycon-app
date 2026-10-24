@@ -1,31 +1,39 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
 import Paginador from '@/shared/ui/moleculas/Paginador';
+import FiltrosCuenta from '@/shared/ui/organismos/FiltrosCuenta';
 import TarjetaPedido from '@/features/pedidos/componentes/moleculas/TarjetaPedido';
 import { listarMisPedidosApi } from '@/features/pedidos/servicios/pedidos.api';
 import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
 import { PAGINACION_INICIAL } from '@/shared/utilidades/paginacion';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import { RUTAS } from '@/app/rutas/rutas';
+import type { FiltrosCuenta as Filtros } from '@/shared/utilidades/filtros-listado';
 
 export default function PaginaMisCompras() {
   const { usuario, cargando: cargandoSesion } = useAutenticacion();
+  const [filtros, setFiltros] = useState<Filtros>({});
+
   // Sin sesion no se consulta nada; al entrar, la clave cambia y se pide el listado
   const cargar = useCallback(
     (pagina: number, senal: AbortSignal) =>
       usuario
-        ? listarMisPedidosApi(pagina, senal)
+        ? listarMisPedidosApi(pagina, senal, filtros)
         : Promise.resolve({ elementos: [], paginacion: PAGINACION_INICIAL }),
-    [usuario]
+    [usuario, filtros]
   );
+
+  // Al cambiar de usuario o de filtros se vuelve a la primera pagina
   const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
     cargar,
     'No se pudieron cargar tus compras',
-    String(usuario?.userId ?? 'sin-sesion')
+    `${usuario?.userId ?? 'sin-sesion'}|${JSON.stringify(filtros)}`
   );
+
+  const hayFiltros = Object.keys(filtros).length > 0;
 
   if (!cargandoSesion && !usuario) {
     return (
@@ -43,6 +51,8 @@ export default function PaginaMisCompras() {
 
   return (
     <PlantillaSeccion titulo="Mis compras" descripcion="Aquí queda el detalle de cada pedido.">
+      <FiltrosCuenta modulo="mis-compras" onAplicar={setFiltros} />
+
       {cargando && (
         <div aria-label="Cargando compras" className="space-y-4">
           {[0, 1].map((posicion) => (
@@ -62,20 +72,30 @@ export default function PaginaMisCompras() {
 
       {!cargando && !error && elementos.length === 0 && (
         <div className="rounded-2xl bg-white ring-1 ring-g-20">
-          <EstadoVacio
-            icono="solar:bag-check-linear"
-            titulo="Todavía no tienes compras"
-            descripcion="Cuando completes un pedido lo verás aquí con su detalle."
-          />
-          <div className="flex justify-center pb-8">
-            <Link
-              to={RUTAS.productos}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
-            >
-              Ver el catálogo
-              <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />
-            </Link>
-          </div>
+          {hayFiltros ? (
+            <EstadoVacio
+              icono="solar:magnifer-linear"
+              titulo="Ninguna compra coincide con el filtro"
+              descripcion="Prueba con otras fechas o limpia los filtros para verlas todas."
+            />
+          ) : (
+            <>
+              <EstadoVacio
+                icono="solar:bag-check-linear"
+                titulo="Todavía no tienes compras"
+                descripcion="Cuando completes un pedido lo verás aquí con su detalle."
+              />
+              <div className="flex justify-center pb-8">
+                <Link
+                  to={RUTAS.productos}
+                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
+                >
+                  Ver el catálogo
+                  <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
 

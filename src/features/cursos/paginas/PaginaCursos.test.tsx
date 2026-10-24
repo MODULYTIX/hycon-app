@@ -25,6 +25,7 @@ const curso: Curso = {
   youtubeId: 'dQw4w9WgXcQ',
   thumbnailUrl: null,
   durationMinutes: 150,
+  partes: 0,
   previewSegundos: 60,
   price: 199,
   discountPrice: 149,

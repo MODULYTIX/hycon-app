@@ -1,5 +1,6 @@
 import { Icon } from '@iconify/react';
 import { formatearDuracion } from '@/shared/utilidades/formato';
+import { fuenteDeLeccion } from '@/features/cursos/utilidades/video-leccion';
 import type { Leccion } from '@/features/cursos/tipos/leccion.tipos';
 
 interface Props {
@@ -15,13 +16,15 @@ export default function TemarioCurso({ lecciones, activa, onElegir }: Props) {
     <ol className="divide-y divide-g-20 overflow-hidden rounded-xl border border-g-20 bg-white">
       {lecciones.map((leccion, indice) => {
         const esActiva = leccion.uuid === activa;
+        // Una parte desbloqueada pero sin video tampoco se puede abrir
+        const sinVideo = !leccion.bloqueada && fuenteDeLeccion(leccion) === null;
 
         return (
           <li key={leccion.uuid}>
             <button
               type="button"
               onClick={() => onElegir(leccion)}
-              disabled={leccion.bloqueada}
+              disabled={leccion.bloqueada || sinVideo}
               aria-current={esActiva ? 'true' : undefined}
               className={`flex w-full items-center gap-2 px-3 py-3 sm:gap-3 sm:px-4 text-left transition-colors ${
                 esActiva ? 'bg-hy-5' : 'hover:bg-g-5'
@@ -30,7 +33,7 @@ export default function TemarioCurso({ lecciones, activa, onElegir }: Props) {
               <span
                 aria-hidden
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[12px] font-semibold tabular-nums ${
-                  leccion.bloqueada ? 'bg-g-10 text-g-40' : 'bg-hy-10 text-primary'
+                  leccion.bloqueada || sinVideo ? 'bg-g-10 text-g-40' : 'bg-hy-10 text-primary'
                 }`}
               >
                 {indice + 1}
@@ -40,7 +43,7 @@ export default function TemarioCurso({ lecciones, activa, onElegir }: Props) {
                 <span className="flex flex-wrap items-center gap-2">
                   <span
                     className={`break-words text-[13px] font-medium leading-snug sm:text-[14px] ${
-                      leccion.bloqueada ? 'text-g-50' : 'text-g-90'
+                      leccion.bloqueada || sinVideo ? 'text-g-50' : 'text-g-90'
                     }`}
                   >
                     {leccion.titulo}
@@ -59,13 +62,27 @@ export default function TemarioCurso({ lecciones, activa, onElegir }: Props) {
               </span>
 
               <span className="flex shrink-0 flex-col items-end gap-1 text-[11px] sm:flex-row sm:items-center sm:gap-2 sm:text-[12px] text-g-50">
-                {leccion.duracionMinutos !== null && formatearDuracion(leccion.duracionMinutos)}
+                {sinVideo
+                  ? 'Sin video'
+                  : leccion.duracionMinutos !== null && formatearDuracion(leccion.duracionMinutos)}
                 <Icon
-                  icon={leccion.bloqueada ? 'solar:lock-keyhole-minimalistic-bold' : 'solar:play-circle-bold'}
+                  icon={
+                    leccion.bloqueada
+                      ? 'solar:lock-keyhole-minimalistic-bold'
+                      : sinVideo
+                        ? 'solar:videocamera-record-broken'
+                        : 'solar:play-circle-bold'
+                  }
                   width="18"
                   height="18"
-                  aria-label={leccion.bloqueada ? 'Se desbloquea al comprar' : 'Reproducir'}
-                  className={leccion.bloqueada ? 'text-g-40' : 'text-primary'}
+                  aria-label={
+                    leccion.bloqueada
+                      ? 'Se desbloquea al comprar'
+                      : sinVideo
+                        ? 'Todavía sin video'
+                        : 'Reproducir'
+                  }
+                  className={leccion.bloqueada || sinVideo ? 'text-g-40' : 'text-primary'}
                 />
               </span>
             </button>

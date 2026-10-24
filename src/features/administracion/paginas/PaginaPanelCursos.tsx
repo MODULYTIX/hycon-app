@@ -32,6 +32,19 @@ export default function PaginaPanelCursos() {
   const [enReproduccion, setEnReproduccion] = useState<Curso | null>(null);
   // Curso cuyo temario se esta administrando
   const [conTemario, setConTemario] = useState<Curso | null>(null);
+  // Curso del que se parte al duplicar; se guarda como uno nuevo
+  const [copiaDe, setCopiaDe] = useState<Curso | null>(null);
+
+  const duplicar = (curso: Curso) => {
+    // La copia nace inactiva para poder revisarla antes de publicarla
+    setCopiaDe({ ...curso, name: `${curso.name} (copia)`, status: 'inactive' });
+    modal.abrirAlta();
+  };
+
+  const cerrarModal = () => {
+    setCopiaDe(null);
+    modal.cerrar();
+  };
 
   return (
     <>
@@ -39,7 +52,10 @@ export default function PaginaPanelCursos() {
         titulo="Cursos"
         descripcion="Agrega, edita o retira los cursos del catálogo de formación."
         textoBoton="Agregar curso"
-        onAgregar={modal.abrirAlta}
+        onAgregar={() => {
+          setCopiaDe(null);
+          modal.abrirAlta();
+        }}
       />
 
       <FiltrosListado modulo="cursos" admin onAplicar={aplicar} />
@@ -51,8 +67,12 @@ export default function PaginaPanelCursos() {
           cargando={listado.cargando}
           error={listado.error}
           onCambiarPagina={listado.irAPagina}
-          onEditar={modal.abrirEdicion}
+          onEditar={(curso) => {
+            setCopiaDe(null);
+            modal.abrirEdicion(curso);
+          }}
           onEliminar={borrado.pedir}
+          onDuplicar={duplicar}
           onVerVideo={setEnReproduccion}
           onVerTemario={setConTemario}
         />
@@ -61,7 +81,8 @@ export default function PaginaPanelCursos() {
       <ModalCurso
         abierto={modal.abierto}
         curso={modal.elemento}
-        onCerrar={modal.cerrar}
+        plantilla={copiaDe}
+        onCerrar={cerrarModal}
         onGuardado={modal.alGuardar}
       />
 

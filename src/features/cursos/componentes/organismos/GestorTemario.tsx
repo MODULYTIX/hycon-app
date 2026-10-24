@@ -3,6 +3,8 @@ import { Icon } from '@iconify/react';
 import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
 import CampoTextoLargo from '@/shared/ui/moleculas/CampoTextoLargo';
 import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
+import ZonaVideo from '@/shared/ui/organismos/ZonaVideo';
+import { obtenerAlmacenVideosApi, type AlmacenVideos } from '@/shared/servicios/videos.api';
 import {
   actualizarLeccionApi,
   crearLeccionApi,
@@ -10,7 +12,7 @@ import {
   obtenerTemarioAdminApi,
   reordenarLeccionesApi,
 } from '@/features/cursos/servicios/lecciones.api';
-import { validarYoutubeOpcional } from '@/features/cursos/utilidades/validaciones-curso';
+import { validarVideoLeccion } from '@/features/cursos/utilidades/validaciones-curso';
 import { validarEnteroOpcional, validarNombre } from '@/shared/utilidades/validaciones-comunes';
 import { formatearDuracion } from '@/shared/utilidades/formato';
 import {
@@ -26,7 +28,7 @@ type Errores = Partial<Record<keyof FormularioLeccion, string>>;
 const revisar = (datos: FormularioLeccion): Errores => {
   const errores: Errores = {
     title: validarNombre(datos.title),
-    videoUrl: validarYoutubeOpcional(datos.videoUrl),
+    videoUrl: validarVideoLeccion(datos.videoUrl),
     durationMinutes: validarEnteroOpcional(datos.durationMinutes, 1, 'La duracion'),
   };
   return Object.fromEntries(Object.entries(errores).filter(([, mensaje]) => mensaje)) as Errores;
@@ -45,6 +47,25 @@ export default function GestorTemario({ curso }: Props) {
   const [valores, setValores] = useState<FormularioLeccion>(LECCION_VACIA);
   const [errores, setErrores] = useState<Errores>({});
   const [guardando, setGuardando] = useState(false);
+  // Donde guarda videos el servidor: decide si se ofrece subir un archivo
+  const [almacen, setAlmacen] = useState<AlmacenVideos | null>(null);
+
+  useEffect(() => {
+    const controlador = new AbortController();
+    let vigente = true;
+
+    obtenerAlmacenVideosApi(controlador.signal)
+      .then((datos) => {
+        if (vigente) setAlmacen(datos);
+      })
+      // Sin esta respuesta solo se puede pegar un enlace, que es lo de siempre
+      .catch(() => undefined);
+
+    return () => {
+      vigente = false;
+      controlador.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (!curso) return;
@@ -171,7 +192,7 @@ export default function GestorTemario({ curso }: Props) {
                       Muestra gratis
                     </span>
                   )}
-                  {!leccion.videoUrl && (
+                  {!leccion.videoUrl && !leccion.referencia && (
                     <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-y-70">
                       <Icon icon="solar:danger-triangle-linear" width="13" height="13" aria-hidden />
                       Sin video
@@ -242,15 +263,12 @@ export default function GestorTemario({ curso }: Props) {
         />
 
         <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_150px]">
-          <CampoTexto
-            id="leccion-videoUrl"
-            etiqueta="URL del video"
-            placeholder="https://www.youtube.com/watch?v=..."
-            inputMode="url"
-            opcional
-            value={valores.videoUrl}
+          <ZonaVideo
+            cursoUuid={curso.uuid}
+            valor={valores.videoUrl}
             error={errores.videoUrl}
-            onChange={(evento) => cambiar('videoUrl', evento.target.value)}
+            almacen={almacen}
+            onCambiar={(valor) => cambiar('videoUrl', valor)}
           />
           <CampoTexto
             id="leccion-durationMinutes"

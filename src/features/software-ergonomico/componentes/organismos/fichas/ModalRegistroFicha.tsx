@@ -56,8 +56,8 @@ export default function ModalRegistroFicha({ abierto, onCerrar }: Props) {
   };
 
   const manejarGuardado = () => {
-    // Aquí iría el envío al endpoint
-    console.log('Ficha guardada:', datosFicha);
+    // Pendiente: aquí irá el envío al endpoint. Los datos de la ficha no se
+    // escriben en la consola: en producción quedarían a la vista de cualquiera.
     onCerrar();
     // Reiniciar form
     setTimeout(() => {

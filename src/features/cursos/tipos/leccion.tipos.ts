@@ -1,3 +1,6 @@
+// Con que reproductor se ve: YouTube, un archivo nuestro o un reproductor ajeno
+export type TipoVideo = 'youtube' | 'archivo' | 'incrustado';
+
 // Espejo de lo que devuelve el backend en /catalog/courses/{uuid}/lecciones
 export interface Leccion {
   uuid: string;
@@ -8,9 +11,13 @@ export interface Leccion {
   esMuestra: boolean;
   // true cuando hay que comprar el curso para verla
   bloqueada: boolean;
-  // El backend solo manda el video de lo que este usuario puede ver
+  tipoVideo: TipoVideo | null;
+  // El backend solo manda el video de lo que este usuario puede ver. Si es
+  // nuestro, llega un enlace firmado que caduca.
   videoUrl: string | null;
   youtubeId: string | null;
+  // Lo guardado en la base; solo llega en el temario del panel
+  referencia?: string | null;
   // Segundos que se dejan ver de la muestra; null cuando se puede ver entera
   limiteSegundos: number | null;
 }
@@ -42,7 +49,8 @@ export const LECCION_VACIA: FormularioLeccion = {
 export const leccionAFormulario = (leccion: Leccion): FormularioLeccion => ({
   title: leccion.titulo,
   description: leccion.descripcion ?? '',
-  videoUrl: leccion.videoUrl ?? '',
+  // Se edita lo guardado, no el enlace firmado con el que se reproduce
+  videoUrl: leccion.referencia ?? leccion.videoUrl ?? '',
   durationMinutes: leccion.duracionMinutos === null ? '' : String(leccion.duracionMinutos),
   esMuestra: leccion.esMuestra,
 });

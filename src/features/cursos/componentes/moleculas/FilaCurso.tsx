@@ -12,11 +12,19 @@ interface Props {
   curso: Curso;
   onEditar: (curso: Curso) => void;
   onEliminar: (curso: Curso) => void;
+  onDuplicar: (curso: Curso) => void;
   onVerVideo: (curso: Curso) => void;
   onVerTemario: (curso: Curso) => void;
 }
 
-export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo, onVerTemario }: Props) {
+export default function FilaCurso({
+  curso,
+  onEditar,
+  onEliminar,
+  onDuplicar,
+  onVerVideo,
+  onVerTemario,
+}: Props) {
   const enOferta = curso.discountPrice !== null;
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
 
@@ -36,7 +44,9 @@ export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo, onV
             className="mt-1 mr-3 inline-flex items-center gap-1 text-[12.5px] font-semibold text-hy-60 hover:text-hy-80 hover:underline"
           >
             <Icon icon="solar:playlist-2-linear" width="14" height="14" aria-hidden />
-            Contenido
+            {curso.partes > 0
+              ? `Contenido (${curso.partes} ${curso.partes === 1 ? 'parte' : 'partes'})`
+              : 'Agregar contenido'}
           </button>
 
           {curso.youtubeId ? (
@@ -83,6 +93,7 @@ export default function FilaCurso({ curso, onEditar, onEliminar, onVerVideo, onV
           nombre={curso.name}
           onEditar={() => onEditar(curso)}
           onEliminar={() => onEliminar(curso)}
+          onDuplicar={() => onDuplicar(curso)}
         />
       </div>
     </li>

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PaginaCursos from './PaginaCursos';
@@ -34,6 +34,7 @@ const curso: Curso = {
   youtubeId: null,
   videoUrl: 'https://example.com/avance.mp4',
   durationMinutes: 150,
+  partes: 0,
   previewSegundos: 60,
   price: 150,
   discountPrice: 120,
@@ -246,7 +247,8 @@ describe('detalle de un curso ya comprado', () => {
     );
   });
 
-  it('el video se presenta como el curso, no como un avance', async () => {
+  // Quien ya compro no ve el avance: entra al aula, que es donde esta el curso
+  it('lleva al aula en lugar de ofrecer el avance', async () => {
     vi.mocked(api.obtenerCursoApi).mockResolvedValue({
       ...curso,
       youtubeId: 'dQw4w9WgXcQ',
@@ -255,8 +257,14 @@ describe('detalle de un curso ya comprado', () => {
     renderizar();
     await screen.findByRole('heading', { level: 1, name: curso.name });
 
-    expect(await screen.findByRole('button', { name: 'Ver el curso' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /reproducir el curso/i })).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: 'Ver el curso' })).toHaveAttribute(
+      'href',
+      `/cursos/${UUID_7}/aula`
+    );
+    expect(screen.getByRole('link', { name: /entrar al curso/i })).toHaveAttribute(
+      'href',
+      `/cursos/${UUID_7}/aula`
+    );
     expect(screen.queryByRole('button', { name: 'Ver avance del curso' })).not.toBeInTheDocument();
   });
 
@@ -269,5 +277,175 @@ describe('detalle de un curso ya comprado', () => {
 
     expect(await screen.findByRole('button', { name: 'Agregar al carrito' })).toBeInTheDocument();
     expect(screen.queryByText('Acceso activo')).not.toBeInTheDocument();
+  });
+});
+
+// Lecciones alojadas por nosotros: el backend manda un enlace firmado y el tipo
+const URL_FIRMADA = 'https://bucket.r2.cloudflarestorage.com/hycon/cursos/parte-1.mp4?X-Amz-Signature=abc';
+
+const temarioPropio = (tieneAcceso: boolean) => ({
+  cursoUuid: UUID_7,
+  tieneAcceso,
+  previewSegundos: 60,
+  lecciones: [
+    {
+      uuid: '01a0fef2-0000-70bf-a4e4-000000000001',
+      titulo: 'Qué es la ergonomía',
+      descripcion: null,
+      duracionMinutos: 8,
+      posicion: 1,
+      esMuestra: true,
+      bloqueada: false,
+      tipoVideo: 'archivo' as const,
+      videoUrl: URL_FIRMADA,
+      youtubeId: null,
+      limiteSegundos: tieneAcceso ? null : 60,
+    },
+    {
+      uuid: '01a0fef2-0000-70bf-a4e4-000000000002',
+      titulo: 'Evaluación de puestos',
+      descripcion: null,
+      duracionMinutos: 12,
+      posicion: 2,
+      esMuestra: false,
+      bloqueada: !tieneAcceso,
+      tipoVideo: tieneAcceso ? ('archivo' as const) : null,
+      videoUrl: tieneAcceso ? URL_FIRMADA : null,
+      youtubeId: null,
+      limiteSegundos: null,
+    },
+  ],
+});
+
+const reproductorPropio = (titulo: string) =>
+  screen.getByLabelText(`Reproductor: ${titulo}`) as HTMLVideoElement;
+
+// La muestra se ofrece en dos sitios: sobre la portada y en la ficha lateral
+const verLaMuestra = async () =>
+  (await screen.findAllByRole('button', { name: /ver la muestra gratis/i }))[0];
+
+describe('curso con el video alojado por nosotros', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockRejectedValue(new Error('sin sesion'));
+    vi.mocked(api.obtenerCursoApi).mockResolvedValue(curso);
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temarioPropio(false));
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  it('la muestra se ve con nuestro reproductor y sin pasar por YouTube', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+
+    await usuario.click(await verLaMuestra());
+
+    expect(reproductorPropio('Qué es la ergonomía')).toHaveAttribute('src', URL_FIRMADA);
+    expect(jugadores).toHaveLength(0);
+  });
+
+  it('la parte elegida queda marcada en el temario', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await verLaMuestra();
+
+    await usuario.click(screen.getByRole('button', { name: /qué es la ergonomía/i }));
+
+    expect(screen.getByRole('button', { name: /qué es la ergonomía/i })).toHaveAttribute(
+      'aria-current',
+      'true'
+    );
+  });
+
+  it('lo que no se ha comprado no se puede abrir', async () => {
+    renderizar();
+    await verLaMuestra();
+
+    expect(screen.getByRole('button', { name: /evaluación de puestos/i })).toBeDisabled();
+  });
+
+  it('al acabarse la muestra invita a comprar', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await usuario.click(await verLaMuestra());
+
+    const video = reproductorPropio('Qué es la ergonomía');
+    video.pause = vi.fn();
+    Object.defineProperty(video, 'currentTime', { value: 61, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+
+    expect(await screen.findByText(/terminó la vista previa/i)).toBeInTheDocument();
+    const aviso = screen.getByText(/terminó la vista previa/i).parentElement as HTMLElement;
+    expect(within(aviso).getByRole('button', { name: /agregar al carrito/i })).toBeInTheDocument();
+  });
+
+  it('quien compro el curso ve las partes completas y sin corte', async () => {
+    const usuario = userEvent.setup();
+    conAcceso();
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temarioPropio(true));
+    renderizar();
+
+    await usuario.click(await screen.findByRole('button', { name: /evaluación de puestos/i }));
+
+    const video = reproductorPropio('Evaluación de puestos');
+    video.pause = vi.fn();
+    Object.defineProperty(video, 'currentTime', { value: 600, writable: true, configurable: true });
+    fireEvent.timeUpdate(video);
+
+    expect(screen.queryByText(/terminó la vista previa/i)).not.toBeInTheDocument();
+    expect(video.pause).not.toHaveBeenCalled();
+  });
+});
+
+describe('partes sin video que reproducir', () => {
+  // Pasa cuando el almacen de videos no responde: el backend manda la parte sin enlace
+  const temarioSinVideo = () => ({
+    cursoUuid: UUID_7,
+    tieneAcceso: false,
+    previewSegundos: 5,
+    lecciones: [
+      {
+        uuid: '01a0fef2-0000-70bf-a4e4-000000000001',
+        titulo: 'Qué es la ergonomía',
+        descripcion: null,
+        duracionMinutos: 1,
+        posicion: 1,
+        esMuestra: true,
+        bloqueada: false,
+        tipoVideo: null,
+        videoUrl: null,
+        youtubeId: null,
+        limiteSegundos: 5,
+      },
+    ],
+  });
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    window.localStorage.clear();
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockRejectedValue(new Error('sin sesion'));
+    vi.mocked(api.obtenerCursoApi).mockResolvedValue({ ...curso, youtubeId: null, videoUrl: null });
+    vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temarioSinVideo());
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  it('no ofrece una muestra que no se puede reproducir', async () => {
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    expect(screen.queryByRole('button', { name: /ver la muestra gratis/i })).not.toBeInTheDocument();
+  });
+
+  it('la parte aparece marcada como sin video y no se puede abrir', async () => {
+    renderizar();
+    await screen.findByRole('heading', { level: 1, name: curso.name });
+
+    const parte = screen.getByRole('button', { name: /qué es la ergonomía/i });
+    expect(parte).toBeDisabled();
+    expect(within(parte).getByText('Sin video')).toBeInTheDocument();
   });
 });

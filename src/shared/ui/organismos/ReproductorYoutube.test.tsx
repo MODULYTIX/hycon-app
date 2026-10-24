@@ -188,7 +188,7 @@ describe('ReproductorYoutube', () => {
 
     await act(async () => jugador.fallar(150));
 
-    expect(screen.getByRole('alert')).toHaveTextContent(/no se puede reproducir fuera de YouTube/i);
+    expect(screen.getByRole('alert')).toHaveTextContent(/no se puede reproducir aquí/i);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
@@ -262,5 +262,145 @@ describe('ReproductorYoutube: muestra limitada', () => {
     await waitFor(() => expect(screen.getByText(/5:00/)).toBeInTheDocument());
 
     expect(screen.queryByText(/terminó la vista previa/i)).not.toBeInTheDocument();
+  });
+});
+
+describe('ReproductorYoutube: sin rastro de YouTube', () => {
+  beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  /**
+   * El iframe se monta mas alto que la caja: el video queda centrado y del mismo
+   * tamaño, y la franja donde YouTube pinta su titulo y su canal cae fuera.
+   */
+  it('deja fuera de la vista la franja donde YouTube pone su titulo', async () => {
+    await renderizar();
+
+    const lienzo = screen.getByTestId('lienzo-video');
+    expect(lienzo).toHaveClass('-top-[72px]');
+    expect(lienzo).toHaveClass('h-[calc(100%+144px)]');
+    // Sin raton encima, YouTube tampoco saca su barra
+    expect(lienzo).toHaveClass('pointer-events-none');
+  });
+
+  it('en pantalla completa la caja se queda en 16:9 para no recortar el video', async () => {
+    await renderizar();
+    const marco = screen.getByRole('region');
+
+    Object.defineProperty(document, 'fullscreenElement', { value: marco, configurable: true });
+    await act(async () => {
+      document.dispatchEvent(new Event('fullscreenchange'));
+    });
+
+    expect(screen.getByTestId('caja-video')).toHaveClass('h-[min(100%,56.25vw)]');
+    Object.defineProperty(document, 'fullscreenElement', { value: null, configurable: true });
+  });
+
+  it('los controles tardan en esconderse mientras se reproduce', async () => {
+    const { jugador } = await renderizar();
+    await listoYReproduciendo(jugador);
+
+    vi.useFakeTimers();
+    fireEvent.mouseMove(screen.getByRole('region'));
+
+    act(() => {
+      vi.advanceTimersByTime(4500);
+    });
+    expect(screen.getByTestId('controles')).toHaveClass('opacity-100');
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(screen.getByTestId('controles')).toHaveClass('opacity-0');
+    vi.useRealTimers();
+  });
+});
+
+describe('ReproductorYoutube: subtitulos', () => {
+  const conPistas = () => {
+    const falso = crearYoutubeFalso({ pistas: [{ languageCode: 'es' }] });
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  };
+
+  beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  it('pide el video con los subtitulos apagados', async () => {
+    const { jugador } = await renderizar();
+
+    expect(jugador.opciones.playerVars).toMatchObject({ cc_load_policy: 0 });
+  });
+
+  /**
+   * YouTube enciende los subtitulos solo si el usuario los tiene activados en su
+   * cuenta, y avisa con onApiChange. Ahi se quita la pista: el modulo se queda
+   * cargado, no se ve ningun subtitulo y se sabe que el video los tiene.
+   */
+  it('los apaga en cuanto YouTube anuncia el modulo', async () => {
+    conPistas();
+    const resultado = render(<ReproductorYoutube id={ID} titulo="Pausas activas" />);
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    const jugador = jugadores[0];
+
+    await act(async () => {
+      jugador.listo();
+      jugador.apiLista();
+    });
+
+    expect(jugador.setOption).toHaveBeenCalledWith('captions', 'track', {});
+    expect(jugador.pistaPuesta()).toEqual({});
+    expect(jugador.modulos.has('captions')).toBe(true);
+    resultado.unmount();
+  });
+
+  it('sin pistas no ofrece el boton', async () => {
+    const { jugador } = await renderizar();
+    await listoYReproduciendo(jugador);
+    await act(async () => jugador.apiLista());
+
+    expect(screen.queryByRole('button', { name: 'Subtítulos' })).not.toBeInTheDocument();
+  });
+
+  // Mientras YouTube no anuncia el modulo no hay nada que ofrecer
+  it('el boton aparece cuando el modulo responde, no antes', async () => {
+    conPistas();
+    render(<ReproductorYoutube id={ID} titulo="Pausas activas" />);
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    const jugador = jugadores[0];
+    await listoYReproduciendo(jugador);
+
+    expect(screen.queryByRole('button', { name: 'Subtítulos' })).not.toBeInTheDocument();
+
+    await act(async () => jugador.apiLista());
+
+    expect(screen.getByRole('button', { name: 'Subtítulos' })).toBeInTheDocument();
+  });
+
+  it('con pistas ofrece ponerlos y quitarlos', async () => {
+    conPistas();
+    const usuario = userEvent.setup();
+    render(<ReproductorYoutube id={ID} titulo="Pausas activas" />);
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    const jugador = jugadores[0];
+    await listoYReproduciendo(jugador);
+    await act(async () => jugador.apiLista());
+
+    const boton = screen.getByRole('button', { name: 'Subtítulos' });
+    expect(boton).toHaveAttribute('aria-pressed', 'false');
+
+    await usuario.click(boton);
+    expect(jugador.pistaPuesta()).toEqual({ languageCode: 'es' });
+    expect(boton).toHaveAttribute('aria-pressed', 'true');
+
+    await usuario.click(boton);
+    expect(jugador.pistaPuesta()).toEqual({});
+    expect(boton).toHaveAttribute('aria-pressed', 'false');
   });
 });

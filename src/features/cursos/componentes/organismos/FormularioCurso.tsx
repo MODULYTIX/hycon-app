@@ -19,6 +19,8 @@ type CampoTextual = Exclude<keyof ValoresCurso, 'status'>;
 
 interface Props {
   curso: Curso | null;
+  // Curso del que se copian los datos al crear uno nuevo
+  plantilla?: Curso | null;
   onGuardado: (curso: Curso) => void;
   onCancelar: () => void;
   onCambiosPendientes: (hayCambios: boolean) => void;
@@ -26,18 +28,23 @@ interface Props {
 
 export default function FormularioCurso({
   curso,
+  plantilla = null,
   onGuardado,
   onCancelar,
   onCambiosPendientes,
 }: Props) {
-  const [inicial] = useState<ValoresCurso>(() => (curso ? cursoAFormulario(curso) : CURSO_VACIO));
+  // Al duplicar se arranca con los datos del original, pero se guarda como nuevo
+  const [inicial] = useState<ValoresCurso>(() => {
+    const origen = curso ?? plantilla;
+    return origen ? cursoAFormulario(origen) : CURSO_VACIO;
+  });
   const [valores, setValores] = useState<ValoresCurso>(inicial);
   const [errores, setErrores] = useState<ErroresCurso>({});
   const [errorGeneral, setErrorGeneral] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
   const { imagen, setImagen, cambio: cambioImagen, resolverUrl } = useImagenFormulario(
-    curso?.thumbnailUrl ?? ''
+    (curso ?? plantilla)?.thumbnailUrl ?? ''
   );
 
   const hayCambios = cambioImagen || JSON.stringify(valores) !== JSON.stringify(inicial);

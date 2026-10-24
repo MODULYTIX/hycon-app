@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import PaginaMisCompras from './PaginaMisCompras';
@@ -57,6 +57,10 @@ const pagina = (elementos: Pedido[], extra = {}) => ({
   paginacion: { pagina: 1, porPagina: 6, total: elementos.length, totalPaginas: 1, ...extra },
 });
 
+// Los filtros vienen plegados: primero hay que abrirlos
+const abrirFiltros = async (usuario: ReturnType<typeof userEvent.setup>) =>
+  usuario.click(await screen.findByRole('button', { name: /filtrar mis compras/i }));
+
 const renderizar = () =>
   render(
     <AutenticacionProveedor>
@@ -78,7 +82,7 @@ describe('PaginaMisCompras', () => {
     renderizar();
     await screen.findByText('PED-0192F0');
 
-    expect(api.listarMisPedidosApi).toHaveBeenCalledWith(1, expect.anything());
+    expect(api.listarMisPedidosApi).toHaveBeenCalledWith(1, expect.anything(), {});
   });
 
   it('muestra cada compra con su detalle, su metodo y su total', async () => {
@@ -91,7 +95,8 @@ describe('PaginaMisCompras', () => {
     expect(compra.getByText('Pagado')).toBeInTheDocument();
     expect(compra.getByText(/caja de carton 40x40/i)).toBeInTheDocument();
     expect(compra.getByText(/2 x/)).toBeInTheDocument();
-    expect(compra.getByText(/ahorraste .*12\.00/i)).toBeInTheDocument();
+    expect(compra.getByText(/ahorraste/i)).toBeInTheDocument();
+    expect(compra.getByText(/-S\/ 12\.00/)).toBeInTheDocument();
     // El total aparece dos veces: en la linea del producto y en el total del pedido
     expect(compra.getAllByText(/39\.80/)).toHaveLength(2);
   });
@@ -142,6 +147,67 @@ describe('PaginaMisCompras', () => {
     await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
 
     expect(await screen.findByText('PED-0192F1')).toBeInTheDocument();
-    expect(api.listarMisPedidosApi).toHaveBeenLastCalledWith(2, expect.anything());
+    expect(api.listarMisPedidosApi).toHaveBeenLastCalledWith(2, expect.anything(), {});
+  });
+});
+
+describe('filtros de mis compras', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    marcarSesionActiva(true);
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockResolvedValue(sesion);
+    vi.mocked(api.listarMisPedidosApi).mockResolvedValue(pagina([pagado, pendiente]));
+  });
+
+  // Lo que se filtra lo decide el backend: aqui solo viaja la consulta
+  it('manda al backend el estado, el texto y el rango de fechas', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByText('PED-0192F0');
+
+    await abrirFiltros(usuario);
+    await usuario.type(screen.getByLabelText(/buscar/i), 'caja');
+    await usuario.selectOptions(screen.getByLabelText(/estado del pago/i), 'pendiente');
+    await usuario.type(screen.getByLabelText(/^desde$/i), '2026-01-01');
+    await usuario.type(screen.getByLabelText(/^hasta$/i), '2026-06-30');
+    await usuario.click(screen.getByRole('button', { name: /aplicar filtros/i }));
+
+    await waitFor(() =>
+      expect(api.listarMisPedidosApi).toHaveBeenLastCalledWith(1, expect.anything(), {
+        buscar: 'caja',
+        estado: 'pendiente',
+        desde: '2026-01-01',
+        hasta: '2026-06-30',
+      })
+    );
+  });
+
+  it('avisa antes de consultar si el rango de fechas esta al reves', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByText('PED-0192F0');
+    const llamadas = vi.mocked(api.listarMisPedidosApi).mock.calls.length;
+
+    await abrirFiltros(usuario);
+    await usuario.type(screen.getByLabelText(/^desde$/i), '2026-06-30');
+    await usuario.type(screen.getByLabelText(/^hasta$/i), '2026-01-01');
+    await usuario.click(screen.getByRole('button', { name: /aplicar filtros/i }));
+
+    expect(await screen.findByText(/la fecha inicial no puede superar la final/i)).toBeInTheDocument();
+    expect(api.listarMisPedidosApi).toHaveBeenCalledTimes(llamadas);
+  });
+
+  it('con un filtro sin resultados no invita al catalogo', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByText('PED-0192F0');
+    vi.mocked(api.listarMisPedidosApi).mockResolvedValue(pagina([]));
+
+    await abrirFiltros(usuario);
+    await usuario.type(screen.getByLabelText(/buscar/i), 'soldadura');
+    await usuario.click(screen.getByRole('button', { name: /aplicar filtros/i }));
+
+    expect(await screen.findByText(/ninguna compra coincide/i)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /ver el catálogo/i })).not.toBeInTheDocument();
   });
 });

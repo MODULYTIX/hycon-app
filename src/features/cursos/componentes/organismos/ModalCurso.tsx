@@ -13,11 +13,19 @@ type Pestana = 'datos' | 'contenido';
 interface Props {
   abierto: boolean;
   curso: Curso | null;
+  // Curso del que se copian los datos para crear uno nuevo
+  plantilla?: Curso | null;
   onCerrar: () => void;
   onGuardado: (curso: Curso) => void;
 }
 
-export default function ModalCurso({ abierto, curso, onCerrar, onGuardado }: Props) {
+export default function ModalCurso({
+  abierto,
+  curso,
+  plantilla = null,
+  onCerrar,
+  onGuardado,
+}: Props) {
   const [hayCambios, setHayCambios] = useState(false);
   const [pestana, setPestana] = useState<Pestana>('datos');
   // Tras guardar uno nuevo se sigue trabajando sobre el curso ya creado
@@ -54,11 +62,13 @@ export default function ModalCurso({ abierto, curso, onCerrar, onGuardado }: Pro
           <CabeceraModal
             id={ID_TITULO}
             icono={enEdicion ? 'solar:pen-new-square-bold' : 'solar:diploma-bold'}
-            titulo={curso ? 'Editar curso' : 'Agregar curso'}
+            titulo={curso ? 'Editar curso' : plantilla ? 'Duplicar curso' : 'Agregar curso'}
             descripcion={
               enEdicion
                 ? `Estás editando "${enEdicion.name}".`
-                : 'Completa los datos y publícalo en el catálogo.'
+                : plantilla
+                  ? `Copia de "${plantilla.name}". Revisa los datos y guárdalo como un curso nuevo.`
+                  : 'Completa los datos y publícalo en el catálogo.'
             }
           />
 
@@ -92,8 +102,9 @@ export default function ModalCurso({ abierto, curso, onCerrar, onGuardado }: Pro
 
           {pestana === 'datos' ? (
             <FormularioCurso
-              key={enEdicion?.uuid ?? 'nuevo'}
+              key={enEdicion?.uuid ?? plantilla?.uuid ?? 'nuevo'}
               curso={enEdicion}
+              plantilla={plantilla}
               onCambiosPendientes={setHayCambios}
               onCancelar={solicitarCierre}
               onGuardado={(recienGuardado) => {

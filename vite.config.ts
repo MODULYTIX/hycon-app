@@ -2,17 +2,22 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath, URL } from 'node:url';
+import {
+  CONSTRUCCION,
+  limpiezaDeCodigo,
+  PREFIJOS_ENTORNO,
+} from './src/shared/configuracion/construccion';
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
-  // Variables del .env que se exponen al navegador. Cualquier variable que
-  // empiece por HYCON_ acaba en el bundle publico: no poner secretos con ese prefijo.
-  envPrefix: ['VITE_', 'HYCON_'],
+  envPrefix: [...PREFIJOS_ENTORNO],
   resolve: {
     alias: {
       // Alias absoluto para que mover carpetas no rompa los imports
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-});
+  build: { ...CONSTRUCCION },
+  esbuild: limpiezaDeCodigo(mode === 'production'),
+}));

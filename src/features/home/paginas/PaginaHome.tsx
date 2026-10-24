@@ -1,7 +1,7 @@
 import Hero from '@/features/home/componentes/organismos/Hero';
-import Servicios from '@/features/home/componentes/organismos/Servicios';
-import PlataformaAsociada from '@/features/home/componentes/organismos/PlataformaAsociada';
-import NuestrosClientes from '@/features/home/componentes/organismos/NuestrosClientes';
+// import Servicios from '@/features/home/componentes/organismos/Servicios';
+// import PlataformaAsociada from '@/features/home/componentes/organismos/PlataformaAsociada';
+// import NuestrosClientes from '@/features/home/componentes/organismos/NuestrosClientes';
 
 export default function PaginaHome() {
   return (
@@ -10,7 +10,7 @@ export default function PaginaHome() {
         <Hero />
       </section>
 
-      <section id="servicios" className="flex min-h-screen items-center justify-center">
+      {/* <section id="servicios" className="flex min-h-screen items-center justify-center">
         <Servicios />
       </section>
 
@@ -23,7 +23,7 @@ export default function PaginaHome() {
 
       <section id="nuestros_clientes" className="flex items-center justify-center bg-g-10">
         <NuestrosClientes />
-      </section>
+      </section> */}
     </>
   );
 }

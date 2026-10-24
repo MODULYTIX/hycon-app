@@ -32,6 +32,7 @@ const pausas: Curso = {
   youtubeId: 'dQw4w9WgXcQ',
   thumbnailUrl: null,
   durationMinutes: 90,
+  partes: 0,
   previewSegundos: 60,
   price: 120,
   discountPrice: null,
@@ -190,6 +191,7 @@ describe('PaginaPanelCursos', () => {
           posicion: 1,
           esMuestra: true,
           bloqueada: false,
+          tipoVideo: 'youtube',
           videoUrl: 'https://youtu.be/dQw4w9WgXcQ',
           youtubeId: 'dQw4w9WgXcQ',
           limiteSegundos: null,
@@ -299,5 +301,85 @@ describe('PaginaPanelCursos', () => {
     expect(api.listarCursosApi).toHaveBeenLastCalledWith('inactive', 1, expect.anything(), undefined, { buscar: 'prueba', estado: 'inactive' });
     await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
     expect(api.listarCursosApi).toHaveBeenLastCalledWith("todos", 1, expect.anything(), undefined, {});
+  });
+});
+
+describe('crear un curso partiendo de otro', () => {
+  beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([{ ...pausas, partes: 3 }]));
+    vi.mocked(apiLecciones.obtenerTemarioAdminApi).mockResolvedValue({
+      cursoUuid: UUID_1,
+      tieneAcceso: true,
+      previewSegundos: 60,
+      lecciones: [],
+    });
+    vi.mocked(api.crearCursoApi).mockImplementation(async (datos) => ({
+      ...pausas,
+      uuid: UUID_2,
+      name: datos.name,
+    }));
+  });
+
+  // De un vistazo se ve si un curso ya tiene temario o esta vacio
+  it('la fila dice cuantas partes tiene el curso', async () => {
+    renderizar();
+    await esperarListado();
+
+    expect(screen.getByRole('button', { name: /contenido \(3 partes\)/i })).toBeInTheDocument();
+  });
+
+  it('un curso sin partes invita a agregarlas', async () => {
+    vi.mocked(api.listarCursosApi).mockResolvedValue(pagina([{ ...pausas, partes: 0 }]));
+    renderizar();
+    await esperarListado();
+
+    expect(screen.getByRole('button', { name: /agregar contenido/i })).toBeInTheDocument();
+  });
+
+  it('duplicar abre el formulario con los datos del original y como curso nuevo', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    renderizar();
+    await esperarListado();
+
+    await usuario.click(screen.getByRole('button', { name: /duplicar pausas activas/i }));
+
+    const dialogo = await screen.findByRole('dialog', { name: /duplicar curso/i });
+    expect(within(dialogo).getByLabelText(/nombre/i)).toHaveValue('Pausas activas en oficina (copia)');
+    // La copia nace inactiva para revisarla antes de publicarla
+    expect(within(dialogo).getByRole('radio', { name: /inactivo/i })).toBeChecked();
+  });
+
+  it('al guardar la copia se crea un curso nuevo, no se edita el original', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    renderizar();
+    await esperarListado();
+    await usuario.click(screen.getByRole('button', { name: /duplicar pausas activas/i }));
+    const dialogo = await screen.findByRole('dialog', { name: /duplicar curso/i });
+
+    await usuario.click(within(dialogo).getByRole('button', { name: /agregar curso/i }));
+
+    await waitFor(() =>
+      expect(api.crearCursoApi).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'Pausas activas en oficina (copia)', status: 'inactive' })
+      )
+    );
+    expect(api.actualizarCursoApi).not.toHaveBeenCalled();
+  });
+
+  it('despues de duplicar, agregar un curso vuelve a empezar en blanco', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    renderizar();
+    await esperarListado();
+    await usuario.click(screen.getByRole('button', { name: /duplicar pausas activas/i }));
+    await screen.findByRole('dialog', { name: /duplicar curso/i });
+    await usuario.keyboard('{Escape}');
+
+    await usuario.click(screen.getByRole('button', { name: /agregar curso/i }));
+
+    const dialogo = await screen.findByRole('dialog', { name: /agregar curso/i });
+    expect(within(dialogo).getByLabelText(/nombre/i)).toHaveValue('');
   });
 });

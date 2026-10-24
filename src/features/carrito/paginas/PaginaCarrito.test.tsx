@@ -48,6 +48,7 @@ const curso: Curso = {
   youtubeId: null,
   thumbnailUrl: null,
   durationMinutes: 150,
+  partes: 0,
   previewSegundos: 60,
   price: 149,
   discountPrice: null,

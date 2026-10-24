@@ -51,11 +51,12 @@ describe('extraerInicioYoutube', () => {
 });
 
 describe('parametrosReproductor', () => {
-  it('oculta la barra, las anotaciones y los atajos de YouTube', () => {
+  it('oculta la barra, las anotaciones, los atajos y los subtitulos de entrada', () => {
     expect(parametrosReproductor()).toMatchObject({
       controls: 0,
       rel: 0,
       iv_load_policy: 3,
+      cc_load_policy: 0,
       disablekb: 1,
       fs: 0,
       autoplay: 1,
@@ -89,8 +90,8 @@ describe('formatearTiempo', () => {
 describe('mensajeErrorYoutube', () => {
   it('explica los errores habituales', () => {
     // 101 y 150: el video no permite insertarse o es privado
-    expect(mensajeErrorYoutube(150)).toMatch(/no se puede reproducir fuera de YouTube/);
-    expect(mensajeErrorYoutube(101)).toMatch(/no se puede reproducir fuera de YouTube/);
+    expect(mensajeErrorYoutube(150)).toMatch(/no se puede reproducir aquí/);
+    expect(mensajeErrorYoutube(101)).toMatch(/no se puede reproducir aquí/);
     expect(mensajeErrorYoutube(100)).toMatch(/ya no está disponible/);
     expect(mensajeErrorYoutube(5)).toBe('No se pudo reproducir el video.');
   });

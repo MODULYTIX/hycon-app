@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { validarCurso } from './validaciones-curso';
+import { validarCurso, validarVideoLeccion } from './validaciones-curso';
 import { sinErroresCatalogo } from '@/shared/utilidades/validaciones-comunes';
 import { CURSO_VACIO, cursoAFormulario } from '@/features/cursos/tipos/curso.tipos';
 
@@ -67,6 +67,7 @@ describe('cursoAFormulario', () => {
         youtubeId: null,
         thumbnailUrl: null,
         durationMinutes: null,
+        partes: 0,
         previewSegundos: 60,
         price: 120,
         discountPrice: 99,
@@ -83,5 +84,23 @@ describe('cursoAFormulario', () => {
       discountPrice: '99',
       status: 'active',
     });
+  });
+});
+
+describe('validarVideoLeccion', () => {
+  it('acepta un enlace de YouTube o ninguno', () => {
+    expect(validarVideoLeccion('https://youtu.be/dQw4w9WgXcQ')).toBeUndefined();
+    expect(validarVideoLeccion('')).toBeUndefined();
+  });
+
+  // Lo que sube el administrador se guarda como referencia, no como URL
+  it('acepta un video ya subido a nuestro almacen', () => {
+    expect(validarVideoLeccion('r2:cursos/01a0/parte-1.mp4')).toBeUndefined();
+    expect(validarVideoLeccion('stream:ea95132c15732412d22c1476fa83f27a')).toBeUndefined();
+  });
+
+  it('rechaza cualquier otro enlace', () => {
+    expect(validarVideoLeccion('https://vimeo.com/12345')).toMatch(/link de youtube/i);
+    expect(validarVideoLeccion('javascript:alert(1)')).toMatch(/link de youtube/i);
   });
 });

@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import DesplazarAlInicio from '@/app/rutas/DesplazarAlInicio';
 import RutaSoloAdmin from '@/app/rutas/RutaSoloAdmin';
@@ -6,7 +7,11 @@ import { RUTAS } from '@/app/rutas/rutas';
 
 import PlantillaPublica from '@/shared/ui/plantillas/PlantillaPublica';
 import PlantillaSinNavegacion from '@/shared/ui/plantillas/PlantillaSinNavegacion';
-import PlantillaPanel from '@/features/administracion/componentes/plantillas/PlantillaPanel';
+// El panel y su editor de texto solo los usa un ADMIN: se cargan aparte para
+// no meter ese peso en el paquete que descarga cualquier visitante
+const PlantillaPanel = lazy(
+  () => import('@/features/administracion/componentes/plantillas/PlantillaPanel')
+);
 
 import PaginaHome from '@/features/home/paginas/PaginaHome';
 import PaginaProductos from '@/features/productos/paginas/PaginaProductos';
@@ -20,18 +25,27 @@ import PaginaCarrito from '@/features/carrito/paginas/PaginaCarrito';
 import PaginaMisCompras from '@/features/pedidos/paginas/PaginaMisCompras';
 import PaginaPerfil from '@/features/perfil/paginas/PaginaPerfil';
 import PaginaMisCursos from '@/features/aprendizaje/paginas/PaginaMisCursos';
+import PaginaAulaCurso from '@/features/aprendizaje/paginas/PaginaAulaCurso';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
-import PaginaPanelProductos from '@/features/administracion/paginas/PaginaPanelProductos';
-import PaginaPanelCursos from '@/features/administracion/paginas/PaginaPanelCursos';
-import PaginaPanelPublicaciones from '@/features/administracion/paginas/PaginaPanelPublicaciones';
+const PaginaPanelProductos = lazy(() => import('@/features/administracion/paginas/PaginaPanelProductos'));
+const PaginaPanelCursos = lazy(() => import('@/features/administracion/paginas/PaginaPanelCursos'));
+const PaginaPanelPublicaciones = lazy(() => import('@/features/administracion/paginas/PaginaPanelPublicaciones'));
 import PaginaRegistroEmpresa from '@/features/software-ergonomico/paginas/PaginaRegistroEmpresa';
+
+// Mientras llega una pantalla que se carga aparte
+const CargandoPantalla = () => (
+  <div role="status" aria-label="Cargando" className="flex min-h-[60vh] items-center justify-center">
+    <span className="h-10 w-10 animate-spin rounded-full border-4 border-g-20 border-t-primary" />
+  </div>
+);
 
 export default function RutasApp() {
   return (
     <BrowserRouter>
       <DesplazarAlInicio />
 
-      <Routes>
+      <Suspense fallback={<CargandoPantalla />}>
+        <Routes>
         {/* Sitio publico: encabezado, navegacion y pie compartidos por todas las paginas */}
         <Route element={<PlantillaPublica />}>
           <Route path={RUTAS.home} element={<PaginaHome />} />
@@ -57,6 +71,8 @@ export default function RutasApp() {
         {/* Layout sin navegacion principal para flujos especificos */}
         <Route element={<PlantillaSinNavegacion />}>
           <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
+          {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
+          <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
         </Route>
 
         {/* Panel de administracion: layout propio con barra lateral */}
@@ -73,7 +89,8 @@ export default function RutasApp() {
           <Route path="cursos" element={<PaginaPanelCursos />} />
           <Route path="publicaciones" element={<PaginaPanelPublicaciones />} />
         </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

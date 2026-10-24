@@ -11,6 +11,12 @@ export interface JugadorYoutube {
   getCurrentTime(): number;
   getDuration(): number;
   destroy(): void;
+  // Modulos del reproductor: con ellos se quitan y se ponen los subtitulos.
+  // Son opcionales porque YouTube los expone solo cuando el video los tiene.
+  loadModule?(modulo: string): void;
+  unloadModule?(modulo: string): void;
+  getOption?(modulo: string, opcion: string): unknown;
+  setOption?(modulo: string, opcion: string, valor: unknown): void;
 }
 
 export interface EventoJugador<T = unknown> {
@@ -27,6 +33,8 @@ export interface OpcionesJugador {
   events?: {
     onReady?: (evento: EventoJugador) => void;
     onStateChange?: (evento: EventoJugador<number>) => void;
+    // YouTube avisa aqui cuando un modulo (los subtitulos) ya responde
+    onApiChange?: (evento: EventoJugador) => void;
     onError?: (evento: EventoJugador<number>) => void;
   };
 }

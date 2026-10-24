@@ -33,6 +33,12 @@ const cotizacion: Cotizacion = {
   createdAt: '2026-10-16T12:00:00.000Z',
 };
 
+// Las evaluaciones viven en un desplegable: primero hay que abrirlo
+const abrirEvaluaciones = async (usuario: ReturnType<typeof userEvent.setup>) => {
+  await screen.findByText(/cada una con su norma iso/i);
+  await usuario.click(screen.getByRole('button', { name: /cada una con su norma iso/i }));
+};
+
 const rellenar = async (usuario: ReturnType<typeof userEvent.setup>) => {
   await usuario.type(screen.getByLabelText(/nombre y apellido/i), 'Ana Quispe');
   await usuario.type(screen.getByLabelText(/celular/i), '902665565');
@@ -45,19 +51,32 @@ describe('FormularioCotizacion', () => {
     vi.mocked(api.solicitarCotizacionApi).mockResolvedValue(cotizacion);
   });
 
-  it('muestra las evaluaciones con su norma y su precio', async () => {
+  it('muestra las evaluaciones con su norma y su precio al desplegarlas', async () => {
+    const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
 
-    expect(await screen.findByText('Levantamiento de cargas')).toBeInTheDocument();
+    await abrirEvaluaciones(usuario);
+
+    expect(screen.getByText('Levantamiento de cargas')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-1:2021')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-3:2026')).toBeInTheDocument();
     expect(screen.getAllByRole('checkbox')).toHaveLength(4);
   });
 
+  // Cerrado, el formulario cabe de un vistazo
+  it('empieza cerrado y sin la lista a la vista', async () => {
+    render(<FormularioCotizacion />);
+
+    expect(
+      await screen.findByRole('button', { name: /elige las evaluaciones/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('checkbox')).toBeNull();
+  });
+
   it('suma el total conforme se eligen y se quitan evaluaciones', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     // El precio tambien aparece en cada evaluacion: se mira solo el total
     const total = () => screen.getByText(/total estimado/i).closest('p') as HTMLElement;
@@ -75,7 +94,7 @@ describe('FormularioCotizacion', () => {
   it('no envia sin elegir evaluaciones', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await rellenar(usuario);
     await usuario.click(screen.getByRole('button', { name: /solicitar cotización/i }));
@@ -87,7 +106,7 @@ describe('FormularioCotizacion', () => {
   it('avisa de los datos de contacto que faltan o estan mal', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await usuario.click(screen.getByRole('checkbox', { name: /empuje y tracción/i }));
     await usuario.type(screen.getByLabelText(/celular/i), 'llamame');
@@ -103,7 +122,7 @@ describe('FormularioCotizacion', () => {
   it('envia solo los codigos elegidos y los datos de contacto', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
     await rellenar(usuario);
@@ -125,7 +144,7 @@ describe('FormularioCotizacion', () => {
   it('al enviarse muestra el codigo, el detalle y el enlace de WhatsApp', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
     await rellenar(usuario);
@@ -147,7 +166,7 @@ describe('FormularioCotizacion', () => {
       new Error('Ya enviaste varias solicitudes')
     );
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await usuario.click(screen.getByRole('checkbox', { name: /posturas forzadas/i }));
     await rellenar(usuario);
@@ -166,7 +185,7 @@ describe('FormularioCotizacion', () => {
   it('desde el acuse se puede pedir otra cotizacion', async () => {
     const usuario = userEvent.setup({ delay: null });
     render(<FormularioCotizacion />);
-    await screen.findByText('Levantamiento de cargas');
+    await abrirEvaluaciones(usuario);
 
     await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
     await rellenar(usuario);
@@ -178,5 +197,55 @@ describe('FormularioCotizacion', () => {
     // El formulario vuelve limpio
     expect(await screen.findByLabelText(/nombre y apellido/i)).toHaveValue('');
     expect(within(screen.getByRole('button', { name: /solicitar cotización/i })).queryByText(/enviando/i)).toBeNull();
+  });
+});
+
+describe('desplegable de evaluaciones', () => {
+  it('el boton resume cuantas se han elegido', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    render(<FormularioCotizacion />);
+    await abrirEvaluaciones(usuario);
+
+    await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
+    expect(screen.getByText('1 evaluación elegida')).toBeInTheDocument();
+
+    await usuario.click(screen.getByRole('checkbox', { name: /empuje y tracción/i }));
+    expect(screen.getByText('2 evaluaciones elegidas')).toBeInTheDocument();
+  });
+
+  // Cerrado el desplegable, hay que seguir viendo lo elegido
+  it('lo elegido queda a la vista aunque se cierre', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    render(<FormularioCotizacion />);
+    await abrirEvaluaciones(usuario);
+    await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
+
+    await usuario.keyboard('{Escape}');
+
+    expect(screen.queryByRole('checkbox')).toBeNull();
+    expect(screen.getByRole('button', { name: /quitar levantamiento de cargas/i })).toBeInTheDocument();
+  });
+
+  it('se puede quitar una evaluacion desde su etiqueta', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    render(<FormularioCotizacion />);
+    await abrirEvaluaciones(usuario);
+    await usuario.click(screen.getByRole('checkbox', { name: /levantamiento de cargas/i }));
+    await usuario.keyboard('{Escape}');
+
+    await usuario.click(screen.getByRole('button', { name: /quitar levantamiento de cargas/i }));
+
+    expect(screen.getByRole('button', { name: /elige las evaluaciones/i })).toBeInTheDocument();
+    expect(screen.queryByText(/total estimado/i)).not.toBeInTheDocument();
+  });
+
+  it('se cierra al pulsar fuera', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    render(<FormularioCotizacion />);
+    await abrirEvaluaciones(usuario);
+
+    await usuario.click(screen.getByLabelText(/nombre y apellido/i));
+
+    expect(screen.queryByRole('checkbox')).toBeNull();
   });
 });

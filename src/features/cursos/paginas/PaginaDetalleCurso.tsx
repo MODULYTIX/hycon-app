@@ -2,25 +2,45 @@ import { useEffect, useState } from 'react';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import { Icon } from '@iconify/react';
 import { Link, useParams } from 'react-router-dom';
-import { RUTAS } from '@/app/rutas/rutas';
+import { RUTAS, rutaAulaCurso } from '@/app/rutas/rutas';
 import { obtenerCursoApi } from '@/features/cursos/servicios/cursos.api';
 import { obtenerTemarioApi } from '@/features/cursos/servicios/lecciones.api';
 import TemarioCurso from '@/features/cursos/componentes/organismos/TemarioCurso';
-import ReproductorYoutube from '@/shared/ui/organismos/ReproductorYoutube';
+import ReproductorLeccion from '@/features/cursos/componentes/organismos/ReproductorLeccion';
 import { extraerInicioYoutube, miniaturaYoutube } from '@/shared/utilidades/youtube';
 import { agregarAlCarrito } from '@/features/carrito/servicios/carrito.almacen';
 import { formatearDuracion, formatearPrecio } from '@/shared/utilidades/formato';
 import { esUuid } from '@/shared/utilidades/identificador';
+import { fuenteDeLeccion, inicioDeLeccion } from '@/features/cursos/utilidades/video-leccion';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
-import type { Leccion, Temario } from '@/features/cursos/tipos/leccion.tipos';
+import type { Leccion, Temario, TipoVideo } from '@/features/cursos/tipos/leccion.tipos';
 
 // Lo que se esta reproduciendo: una leccion del temario o el avance del curso
 interface EnPantalla {
-  youtubeId: string;
+  // null cuando es el avance del curso y no una parte del temario
+  leccionUuid: string | null;
+  tipo: TipoVideo;
+  // El id de YouTube o el enlace que mando el backend
+  fuente: string;
   titulo: string;
   inicio: number;
   limiteSegundos: number | null;
 }
+
+
+const CAPA_PORTADA =
+  'group absolute inset-0 flex flex-col items-center justify-center gap-3 bg-g-90/25 transition-colors hover:bg-g-90/35 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white';
+
+const portadaInterior = (etiqueta: string) => (
+  <>
+    <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform group-hover:scale-105">
+      <Icon icon="solar:play-bold" width="26" height="26" aria-hidden className="ml-1" />
+    </span>
+    <span className="rounded-xl bg-white/95 px-3 py-1.5 text-xs font-medium text-primary">
+      {etiqueta}
+    </span>
+  </>
+);
 
 export default function PaginaDetalleCurso() {
   const { uuid = '' } = useParams();
@@ -121,6 +141,8 @@ export default function PaginaDetalleCurso() {
   // Sin miniatura propia se usa la del video
   const portada = curso.thumbnailUrl ?? (curso.youtubeId ? miniaturaYoutube(curso.youtubeId) : null);
   const muestra = lecciones.find((leccion) => leccion.esMuestra && !leccion.bloqueada);
+  // Una muestra sin video no se puede ofrecer: el boton no haria nada
+  const fuenteMuestra = fuenteDeLeccion(muestra);
 
   const agregar = () => {
     if (tieneAcceso || (usuarioId !== undefined && errorAcceso)) return;
@@ -131,11 +153,14 @@ export default function PaginaDetalleCurso() {
   };
 
   const reproducirLeccion = (leccion: Leccion) => {
-    if (!leccion.youtubeId) return;
+    const fuente = fuenteDeLeccion(leccion);
+    if (!fuente || !leccion.tipoVideo) return;
     setEnPantalla({
-      youtubeId: leccion.youtubeId,
+      leccionUuid: leccion.uuid,
+      tipo: leccion.tipoVideo,
+      fuente,
       titulo: leccion.titulo,
-      inicio: extraerInicioYoutube(leccion.videoUrl),
+      inicio: inicioDeLeccion(leccion),
       limiteSegundos: leccion.limiteSegundos,
     });
   };
@@ -144,7 +169,9 @@ export default function PaginaDetalleCurso() {
   const reproducirAvance = () => {
     if (!curso.youtubeId) return;
     setEnPantalla({
-      youtubeId: curso.youtubeId,
+      leccionUuid: null,
+      tipo: 'youtube',
+      fuente: curso.youtubeId,
       titulo: curso.name,
       inicio: extraerInicioYoutube(curso.videoUrl),
       limiteSegundos: tieneAcceso ? null : curso.previewSegundos,
@@ -152,7 +179,7 @@ export default function PaginaDetalleCurso() {
   };
 
   const empezar = () => (muestra ? reproducirLeccion(muestra) : reproducirAvance());
-  const hayAlgoQueVer = Boolean(muestra?.youtubeId || curso.youtubeId);
+  const hayAlgoQueVer = Boolean(fuenteMuestra || curso.youtubeId);
 
   return (
     <article className="detalle-interior mx-auto w-full max-w-[1120px] px-5 pb-16 pt-6 sm:px-7">
@@ -213,9 +240,10 @@ export default function PaginaDetalleCurso() {
         <section aria-label="Contenido del curso" className="min-w-0">
           {enPantalla ? (
             <div className="overflow-hidden rounded-xl">
-              <ReproductorYoutube
-                key={enPantalla.youtubeId + String(enPantalla.limiteSegundos)}
-                id={enPantalla.youtubeId}
+              <ReproductorLeccion
+                key={enPantalla.fuente + String(enPantalla.limiteSegundos)}
+                tipo={enPantalla.tipo}
+                fuente={enPantalla.fuente}
                 titulo={enPantalla.titulo}
                 inicio={enPantalla.inicio}
                 limiteSegundos={enPantalla.limiteSegundos}
@@ -246,20 +274,16 @@ export default function PaginaDetalleCurso() {
                   <span className="text-xs uppercase tracking-[0.2em]">Formación Hycon</span>
                 </div>
               )}
-              {hayAlgoQueVer && (
-                <button
-                  type="button"
-                  onClick={empezar}
-                  className="group absolute inset-0 flex flex-col items-center justify-center gap-3 bg-g-90/25 transition-colors hover:bg-g-90/35 focus-visible:outline-2 focus-visible:outline-offset-[-4px] focus-visible:outline-white"
-                >
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform group-hover:scale-105">
-                    <Icon icon="solar:play-bold" width="26" height="26" aria-hidden className="ml-1" />
-                  </span>
-                  <span className="rounded-xl bg-white/95 px-3 py-1.5 text-xs font-medium text-primary">
-                    {tieneAcceso ? 'Ver el curso' : muestra ? 'Ver la muestra gratis' : 'Ver avance del curso'}
-                  </span>
-                </button>
-              )}
+              {(hayAlgoQueVer || tieneAcceso) &&
+                (tieneAcceso ? (
+                  <Link to={rutaAulaCurso(curso.uuid)} className={CAPA_PORTADA}>
+                    {portadaInterior('Ver el curso')}
+                  </Link>
+                ) : (
+                  <button type="button" onClick={empezar} className={CAPA_PORTADA}>
+                    {portadaInterior(muestra ? 'Ver la muestra gratis' : 'Ver avance del curso')}
+                  </button>
+                ))}
             </div>
           )}
 
@@ -278,9 +302,7 @@ export default function PaginaDetalleCurso() {
             {lecciones.length > 0 ? (
               <TemarioCurso
                 lecciones={lecciones}
-                activa={
-                  lecciones.find((leccion) => leccion.youtubeId === enPantalla?.youtubeId)?.uuid ?? null
-                }
+                activa={enPantalla?.leccionUuid ?? null}
                 onElegir={reproducirLeccion}
               />
             ) : (
@@ -313,16 +335,13 @@ export default function PaginaDetalleCurso() {
               <p className="mt-2 text-xs leading-relaxed text-g-50">
                 Ya compraste este curso: puedes verlo cuando quieras.
               </p>
-              {hayAlgoQueVer && !enPantalla && (
-                <button
-                  type="button"
-                  onClick={empezar}
-                  className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-white transition-colors hover:bg-marca-oscuro"
-                >
-                  <Icon icon="solar:play-circle-linear" width="18" height="18" aria-hidden />
-                  Reproducir el curso
-                </button>
-              )}
+              <Link
+                to={rutaAulaCurso(curso.uuid)}
+                className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-white transition-colors hover:bg-marca-oscuro"
+              >
+                <Icon icon="solar:play-circle-linear" width="18" height="18" aria-hidden />
+                Entrar al curso
+              </Link>
             </>
           ) : usuarioId !== undefined && errorAcceso ? (
             <p role="alert" className="rounded-lg bg-g-5 p-4 text-sm leading-relaxed text-g-60">No pudimos comprobar tu acceso. Recarga la página para intentarlo de nuevo.</p>
@@ -354,7 +373,7 @@ export default function PaginaDetalleCurso() {
                 Agregar al carrito
               </button>
 
-              {muestra && (
+              {muestra && fuenteMuestra && (
                 <button
                   type="button"
                   onClick={() => reproducirLeccion(muestra)}

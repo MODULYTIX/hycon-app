@@ -14,6 +14,9 @@ export interface EstadoReproductor {
   duracion: number;
   silenciado: boolean;
   volumen: number;
+  // true solo si el video trae subtitulos y se pueden ofrecer
+  haySubtitulos: boolean;
+  subtitulos: boolean;
   error: string | null;
 }
 
@@ -25,11 +28,50 @@ const ESTADO_INICIAL: EstadoReproductor = {
   duracion: 0,
   silenciado: false,
   volumen: 100,
+  haySubtitulos: false,
+  subtitulos: false,
   error: null,
 };
 
 // Cada cuanto se lee el segundo actual para mover la barra de progreso
 const INTERVALO_PROGRESO_MS = 250;
+
+// Nombre del modulo de subtitulos dentro del reproductor
+const MODULO_SUBTITULOS = 'captions';
+
+type Pista = Record<string, unknown>;
+
+const pistasDe = (jugador: JugadorYoutube): Pista[] => {
+  try {
+    const pistas = jugador.getOption?.(MODULO_SUBTITULOS, 'tracklist');
+    return Array.isArray(pistas) ? (pistas as Pista[]) : [];
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * Carga el modulo pero sin ninguna pista puesta. Asi no se ve ningun subtitulo
+ * (YouTube los enciende solo si el usuario los tiene activados en su cuenta) y
+ * a la vez podemos saber si el video trae alguno para ofrecerlo.
+ */
+const prepararSubtitulos = (jugador: JugadorYoutube) => {
+  try {
+    jugador.loadModule?.(MODULO_SUBTITULOS);
+    jugador.setOption?.(MODULO_SUBTITULOS, 'track', {});
+  } catch {
+    // Un video sin subtitulos no tiene el modulo: no hay nada que preparar
+  }
+};
+
+const ponerSubtitulos = (jugador: JugadorYoutube, encender: boolean) => {
+  try {
+    const [primera] = pistasDe(jugador);
+    jugador.setOption?.(MODULO_SUBTITULOS, 'track', encender && primera ? primera : {});
+  } catch {
+    // Si el modulo desaparece, el video se sigue viendo igual
+  }
+};
 
 /**
  * Monta el reproductor oficial de YouTube dentro de `contenedor` y expone su estado
@@ -41,11 +83,14 @@ export function useReproductorYoutube(
   contenedor: RefObject<HTMLDivElement | null>
 ) {
   const jugadorRef = useRef<JugadorYoutube | null>(null);
+  // Lo que el usuario eligio: YouTube puede recargar el modulo y hay que respetarlo
+  const subtitulosRef = useRef(false);
   const [estado, setEstado] = useState<EstadoReproductor>(ESTADO_INICIAL);
 
   useEffect(() => {
     let cancelado = false;
     let intervalo: ReturnType<typeof setInterval> | undefined;
+    subtitulosRef.current = false;
     setEstado(ESTADO_INICIAL);
 
     cargarApiYoutube()
@@ -65,12 +110,14 @@ export function useReproductorYoutube(
           events: {
             onReady: ({ target }) => {
               if (cancelado) return;
+              prepararSubtitulos(target);
               setEstado((previo) => ({
                 ...previo,
                 listo: true,
                 duracion: target.getDuration(),
                 silenciado: target.isMuted(),
                 volumen: target.getVolume(),
+                haySubtitulos: pistasDe(target).length > 0,
               }));
               target.playVideo();
             },
@@ -82,11 +129,23 @@ export function useReproductorYoutube(
                 target.seekTo(0, true);
                 target.pauseVideo();
               }
+              // La lista de pistas puede llegar despues de empezar el video
+              const hay = pistasDe(target).length > 0;
               setEstado((previo) => ({
                 ...previo,
                 reproduciendo: data === YT.PlayerState.PLAYING,
                 terminado: data === YT.PlayerState.ENDED,
+                haySubtitulos: previo.haySubtitulos || hay,
               }));
+            },
+            // El modulo de subtitulos no existe hasta que YouTube lo anuncia aqui
+            onApiChange: ({ target }) => {
+              if (cancelado) return;
+              ponerSubtitulos(target, subtitulosRef.current);
+              const hay = pistasDe(target).length > 0;
+              setEstado((previo) =>
+                previo.haySubtitulos === hay ? previo : { ...previo, haySubtitulos: hay }
+              );
             },
             onError: ({ data }) => {
               if (!cancelado) setEstado((previo) => ({ ...previo, error: mensajeErrorYoutube(data) }));
@@ -148,6 +207,16 @@ export function useReproductorYoutube(
     setEstado((previo) => ({ ...previo, silenciado: !previo.silenciado }));
   }, [estado.listo, estado.silenciado]);
 
+  /** Los subtitulos se ponen y se quitan a mano, nunca solos. */
+  const alternarSubtitulos = useCallback(() => {
+    const jugador = jugadorRef.current;
+    if (!jugador || !estado.listo) return;
+
+    subtitulosRef.current = !estado.subtitulos;
+    ponerSubtitulos(jugador, subtitulosRef.current);
+    setEstado((previo) => ({ ...previo, subtitulos: !previo.subtitulos }));
+  }, [estado.listo, estado.subtitulos]);
+
   const cambiarVolumen = useCallback(
     (volumen: number) => {
       const jugador = jugadorRef.current;
@@ -161,5 +230,12 @@ export function useReproductorYoutube(
     [estado.listo, estado.silenciado]
   );
 
-  return { estado, alternarReproduccion, buscar, alternarSonido, cambiarVolumen };
+  return {
+    estado,
+    alternarReproduccion,
+    buscar,
+    alternarSonido,
+    cambiarVolumen,
+    alternarSubtitulos,
+  };
 }

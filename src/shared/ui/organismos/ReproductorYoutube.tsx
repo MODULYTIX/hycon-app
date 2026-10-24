@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Icon } from '@iconify/react';
+import AvisoMuestraAgotada from '@/shared/ui/moleculas/AvisoMuestraAgotada';
 import { useReproductorYoutube } from '@/shared/hooks/useReproductorYoutube';
 import { formatearTiempo } from '@/shared/utilidades/youtube';
 
@@ -14,7 +15,7 @@ interface Props {
 }
 
 // Tras este tiempo sin mover el raton, los controles se esconden mientras se reproduce
-const OCULTAR_CONTROLES_MS = 2500;
+const OCULTAR_CONTROLES_MS = 5000;
 
 // Cuanto adelanta o retrocede cada boton y cada tecla
 const SALTO_CORTO = 10;
@@ -40,9 +41,16 @@ export default function ReproductorYoutube({
   const [controlesVisibles, setControlesVisibles] = useState(true);
   const [pantallaCompleta, setPantallaCompleta] = useState(false);
 
-  const { estado, alternarReproduccion, buscar, alternarSonido, cambiarVolumen } =
-    useReproductorYoutube(id, inicio, contenedorRef);
+  const {
+    estado,
+    alternarReproduccion,
+    buscar,
+    alternarSonido,
+    cambiarVolumen,
+    alternarSubtitulos,
+  } = useReproductorYoutube(id, inicio, contenedorRef);
   const { listo, reproduciendo, actual, duracion, silenciado, volumen, error } = estado;
+  const { haySubtitulos, subtitulos } = estado;
 
   const mostrarControles = useCallback(() => {
     setControlesVisibles(true);
@@ -111,181 +119,218 @@ export default function ReproductorYoutube({
       onKeyDown={alPulsarTecla}
       onMouseMove={mostrarControles}
       onMouseLeave={() => reproduciendo && setControlesVisibles(false)}
-      className={`relative w-full overflow-hidden bg-black outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-        pantallaCompleta ? 'h-full' : 'aspect-video'
+      className={`relative w-full bg-black outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+        pantallaCompleta ? 'flex h-full items-center justify-center' : ''
       } ${visibles ? '' : 'cursor-none'}`}
     >
-      {/* YouTube inserta aqui su iframe */}
+      {/* En pantalla completa la caja se mantiene en 16:9 dentro de la pantalla: asi el
+          recorte de abajo nunca se come un trozo del video */}
       <div
-        ref={contenedorRef}
-        data-testid="lienzo-video"
-        className="absolute inset-0 [&>iframe]:h-full [&>iframe]:w-full"
-      />
-
-      {/* Capa encima del video: recibe los clics para pausar y reanudar. Mientras no
-          se reproduce se vuelve opaca, porque ahi es cuando YouTube saca su titulo,
-          su logo y sus videos sugeridos */}
-      <div
-        aria-hidden
-        data-testid="capa-video"
-        data-tapado={!reproduciendo}
-        onClick={() => {
-          mostrarControles();
-          alternarReproduccion();
-        }}
-        onDoubleClick={alternarPantallaCompleta}
-        className={`absolute inset-0 z-10 flex items-center justify-center transition-colors duration-200 ${
-          reproduciendo ? 'bg-transparent' : 'bg-g-90'
+        data-testid="caja-video"
+        className={`relative overflow-hidden bg-black ${
+          pantallaCompleta ? 'h-[min(100%,56.25vw)] w-[min(100%,177.78vh)]' : 'aspect-video w-full'
         }`}
       >
-        {!listo && !error && (
-          <span className="h-12 w-12 animate-spin rounded-full border-4 border-white/25 border-t-white" />
-        )}
-        {listo && !reproduciendo && !error && (
-          <span className="flex flex-col items-center gap-4 px-6 text-center">
-            <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 sm:h-20 sm:w-20">
-              <Icon icon="solar:play-bold" width="34" height="34" className="ml-1" />
-            </span>
-            <span className="line-clamp-2 text-[13px] font-medium text-white/80 sm:text-[15px]">{titulo}</span>
-          </span>
-        )}
-      </div>
-
-      {muestraAgotada && !error && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-g-90/95 px-6 text-center text-white">
-          <Icon icon="solar:lock-keyhole-minimalistic-bold" width="34" height="34" aria-hidden className="text-white/70" />
-          <p className="text-[15px] font-medium">Terminó la vista previa</p>
-          {alTerminarMuestra}
-        </div>
-      )}
-
-      {error && (
+        {/* El iframe se monta mas alto que la caja. El video queda centrado y del mismo
+            tamaño, pero las franjas donde YouTube pinta su titulo y su canal se quedan
+            fuera de lo que se ve. Tampoco recibe el raton, asi no saca su barra */}
         <div
-          role="alert"
-          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-g-90 px-6 text-center text-white"
+          ref={contenedorRef}
+          data-testid="lienzo-video"
+          className="pointer-events-none absolute inset-x-0 -top-[72px] h-[calc(100%+144px)] [&>iframe]:h-full [&>iframe]:w-full"
+        />
+
+        {/* Capa encima del video: recibe los clics para pausar y reanudar. Mientras no
+            se reproduce se vuelve opaca, porque ahi es cuando YouTube saca su titulo,
+            su logo y sus videos sugeridos */}
+        <div
+          aria-hidden
+          data-testid="capa-video"
+          data-tapado={!reproduciendo}
+          onClick={() => {
+            mostrarControles();
+            alternarReproduccion();
+          }}
+          onDoubleClick={alternarPantallaCompleta}
+          className={`absolute inset-0 z-10 flex items-center justify-center transition-colors duration-200 ${
+            reproduciendo ? 'bg-transparent' : 'bg-g-90'
+          }`}
         >
-          <Icon icon="solar:videocamera-record-broken" width="40" height="40" aria-hidden className="text-white/60" />
-          <p className="max-w-[420px] text-[15px]">{error}</p>
+          {!listo && !error && (
+            <span className="h-12 w-12 animate-spin rounded-full border-4 border-white/25 border-t-white" />
+          )}
+          {listo && !reproduciendo && !error && (
+            <span className="flex flex-col items-center gap-4 px-6 text-center">
+              <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-white shadow-lg transition-transform hover:scale-105 sm:h-20 sm:w-20">
+                <Icon icon="solar:play-bold" width="34" height="34" className="ml-1" />
+              </span>
+              <span className="line-clamp-2 text-[13px] font-medium text-white/80 sm:text-[15px]">
+                {titulo}
+              </span>
+            </span>
+          )}
         </div>
-      )}
 
-      <div
-        className={`absolute inset-x-0 bottom-0 z-20 bg-g-90/85 px-3 pb-2 pt-1.5 transition-opacity duration-200 sm:px-4 ${
-          visibles && !error ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      >
-        {/* Barra solida con el color de la web; el input invisible encima da el arrastre y el teclado */}
-        <div className="group/progreso relative flex h-4 items-center">
-          <div aria-hidden className="h-1.5 w-full overflow-hidden rounded-full bg-white/25">
-            <div className="h-full bg-primary" style={{ width: `${progreso}%` }} />
+        {muestraAgotada && !error && <AvisoMuestraAgotada>{alTerminarMuestra}</AvisoMuestraAgotada>}
+
+        {error && (
+          <div
+            role="alert"
+            className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-g-90 px-6 text-center text-white"
+          >
+            <Icon
+              icon="solar:videocamera-record-broken"
+              width="40"
+              height="40"
+              aria-hidden
+              className="text-white/60"
+            />
+            <p className="max-w-[420px] text-[15px]">{error}</p>
           </div>
-          <span
-            aria-hidden
-            className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white shadow transition-transform group-hover/progreso:scale-110"
-            style={{ left: `${progreso}%` }}
-          />
-          <input
-            type="range"
-            aria-label="Progreso del video"
-            aria-valuetext={`${formatearTiempo(actual)} de ${formatearTiempo(duracion)}`}
-            min={0}
-            max={limiteSegundos ?? duracion ?? 0}
-            step={0.1}
-            value={Math.min(actual, duracion || 0)}
-            disabled={!listo}
-            onChange={(evento) => buscar(Number(evento.target.value))}
-            className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-default"
-          />
-        </div>
+        )}
 
-        <div className="mt-1.5 flex items-center gap-1">
-          <button
-            type="button"
-            onClick={() => buscar(actual - SALTO_CORTO)}
-            disabled={!listo}
-            aria-label={`Retroceder ${SALTO_CORTO} segundos`}
-            title={`Retroceder ${SALTO_CORTO} s`}
-            className={BOTON_CONTROL}
-          >
-            <Icon icon="solar:rewind-10-seconds-back-bold" width="20" height="20" aria-hidden />
-          </button>
-
-          <button
-            type="button"
-            onClick={alternarReproduccion}
-            disabled={!listo}
-            aria-label={reproduciendo ? 'Pausar' : 'Reproducir'}
-            className={BOTON_CONTROL}
-          >
-            <Icon icon={reproduciendo ? 'solar:pause-bold' : 'solar:play-bold'} width="20" height="20" aria-hidden />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => buscar(actual + SALTO_CORTO)}
-            disabled={!listo}
-            aria-label={`Adelantar ${SALTO_CORTO} segundos`}
-            title={`Adelantar ${SALTO_CORTO} s`}
-            className={BOTON_CONTROL}
-          >
-            <Icon icon="solar:rewind-10-seconds-forward-bold" width="20" height="20" aria-hidden />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => buscar(actual + SALTO_LARGO)}
-            disabled={!listo}
-            aria-label="Adelantar un minuto"
-            title="Adelantar 1 min"
-            className={`${BOTON_CONTROL} w-auto px-2 text-[12px] font-semibold tabular-nums`}
-          >
-            +1 min
-          </button>
-
-          <button
-            type="button"
-            onClick={alternarSonido}
-            disabled={!listo}
-            aria-label={silenciado ? 'Activar sonido' : 'Silenciar'}
-            className={BOTON_CONTROL}
-          >
-            <Icon
-              icon={silenciado || volumen === 0 ? 'solar:muted-bold' : 'solar:volume-loud-bold'}
-              width="20"
-              height="20"
+        <div
+          data-testid="controles"
+          className={`absolute inset-x-0 bottom-0 z-20 bg-g-90/85 px-3 pb-2 pt-1.5 transition-opacity duration-200 sm:px-4 ${
+            visibles && !error ? 'opacity-100' : 'pointer-events-none opacity-0'
+          }`}
+        >
+          {/* Barra solida con el color de la web; el input invisible encima da el arrastre y el teclado */}
+          <div className="group/progreso relative flex h-4 items-center">
+            <div aria-hidden className="h-1.5 w-full overflow-hidden rounded-full bg-white/25">
+              <div className="h-full bg-primary" style={{ width: `${progreso}%` }} />
+            </div>
+            <span
               aria-hidden
+              className="pointer-events-none absolute h-3.5 w-3.5 -translate-x-1/2 rounded-full bg-white shadow transition-transform group-hover/progreso:scale-110"
+              style={{ left: `${progreso}%` }}
             />
-          </button>
-
-          <input
-            type="range"
-            aria-label="Volumen"
-            min={0}
-            max={100}
-            value={silenciado ? 0 : volumen}
-            disabled={!listo}
-            onChange={(evento) => cambiarVolumen(Number(evento.target.value))}
-            className="hidden h-1 w-20 cursor-pointer accent-white sm:block"
-          />
-
-          {/* En una muestra el total que se anuncia es el del recorte, no el del video entero */}
-          <span className="ml-2 text-[12.5px] font-medium tabular-nums text-white/90">
-            {formatearTiempo(actual)} / {formatearTiempo(limiteSegundos ?? duracion)}
-          </span>
-
-          <button
-            type="button"
-            onClick={alternarPantallaCompleta}
-            aria-label={pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'}
-            className={`${BOTON_CONTROL} ml-auto`}
-          >
-            <Icon
-              icon={pantallaCompleta ? 'solar:minimize-square-linear' : 'solar:maximize-square-linear'}
-              width="20"
-              height="20"
-              aria-hidden
+            <input
+              type="range"
+              aria-label="Progreso del video"
+              aria-valuetext={`${formatearTiempo(actual)} de ${formatearTiempo(duracion)}`}
+              min={0}
+              max={limiteSegundos ?? duracion ?? 0}
+              step={0.1}
+              value={Math.min(actual, duracion || 0)}
+              disabled={!listo}
+              onChange={(evento) => buscar(Number(evento.target.value))}
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-default"
             />
-          </button>
+          </div>
+
+          <div className="mt-1.5 flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => buscar(actual - SALTO_CORTO)}
+              disabled={!listo}
+              aria-label={`Retroceder ${SALTO_CORTO} segundos`}
+              title={`Retroceder ${SALTO_CORTO} s`}
+              className={BOTON_CONTROL}
+            >
+              <Icon icon="solar:rewind-10-seconds-back-bold" width="20" height="20" aria-hidden />
+            </button>
+
+            <button
+              type="button"
+              onClick={alternarReproduccion}
+              disabled={!listo}
+              aria-label={reproduciendo ? 'Pausar' : 'Reproducir'}
+              className={BOTON_CONTROL}
+            >
+              <Icon
+                icon={reproduciendo ? 'solar:pause-bold' : 'solar:play-bold'}
+                width="20"
+                height="20"
+                aria-hidden
+              />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => buscar(actual + SALTO_CORTO)}
+              disabled={!listo}
+              aria-label={`Adelantar ${SALTO_CORTO} segundos`}
+              title={`Adelantar ${SALTO_CORTO} s`}
+              className={BOTON_CONTROL}
+            >
+              <Icon icon="solar:rewind-10-seconds-forward-bold" width="20" height="20" aria-hidden />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => buscar(actual + SALTO_LARGO)}
+              disabled={!listo}
+              aria-label="Adelantar un minuto"
+              title="Adelantar 1 min"
+              className={`${BOTON_CONTROL} w-auto px-2 text-[12px] font-semibold tabular-nums`}
+            >
+              +1 min
+            </button>
+
+            <button
+              type="button"
+              onClick={alternarSonido}
+              disabled={!listo}
+              aria-label={silenciado ? 'Activar sonido' : 'Silenciar'}
+              className={BOTON_CONTROL}
+            >
+              <Icon
+                icon={silenciado || volumen === 0 ? 'solar:muted-bold' : 'solar:volume-loud-bold'}
+                width="20"
+                height="20"
+                aria-hidden
+              />
+            </button>
+
+            <input
+              type="range"
+              aria-label="Volumen"
+              min={0}
+              max={100}
+              value={silenciado ? 0 : volumen}
+              disabled={!listo}
+              onChange={(evento) => cambiarVolumen(Number(evento.target.value))}
+              className="hidden h-1 w-20 cursor-pointer accent-white sm:block"
+            />
+
+            {/* En una muestra el total que se anuncia es el del recorte, no el del video entero */}
+            <span className="ml-2 text-[12.5px] font-medium tabular-nums text-white/90">
+              {formatearTiempo(actual)} / {formatearTiempo(limiteSegundos ?? duracion)}
+            </span>
+
+            {/* El boton solo sale si el video trae subtitulos; de entrada van apagados */}
+            {haySubtitulos && (
+              <button
+                type="button"
+                onClick={alternarSubtitulos}
+                aria-pressed={subtitulos}
+                aria-label="Subtítulos"
+                title="Subtítulos"
+                className={`${BOTON_CONTROL} ml-auto ${subtitulos ? 'bg-white/20' : ''}`}
+              >
+                <Icon icon="solar:subtitles-linear" width="20" height="20" aria-hidden />
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={alternarPantallaCompleta}
+              aria-label={pantallaCompleta ? 'Salir de pantalla completa' : 'Pantalla completa'}
+              className={`${BOTON_CONTROL} ${haySubtitulos ? '' : 'ml-auto'}`}
+            >
+              <Icon
+                icon={
+                  pantallaCompleta
+                    ? 'solar:minimize-square-linear'
+                    : 'solar:maximize-square-linear'
+                }
+                width="20"
+                height="20"
+                aria-hidden
+              />
+            </button>
+          </div>
         </div>
       </div>
     </div>

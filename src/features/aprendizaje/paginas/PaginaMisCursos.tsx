@@ -1,50 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
+import Paginador from '@/shared/ui/moleculas/Paginador';
+import FiltrosCuenta from '@/shared/ui/organismos/FiltrosCuenta';
 import TarjetaCursoComprado from '@/features/aprendizaje/componentes/moleculas/TarjetaCursoComprado';
 import { listarMisCursosApi } from '@/features/aprendizaje/servicios/aprendizaje.api';
+import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
+import { PAGINACION_INICIAL } from '@/shared/utilidades/paginacion';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import { RUTAS } from '@/app/rutas/rutas';
-import type { CursoComprado } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
+import type { FiltrosCuenta as Filtros } from '@/shared/utilidades/filtros-listado';
 
 export default function PaginaMisCursos() {
   const { usuario, cargando: cargandoSesion } = useAutenticacion();
-  const [cursos, setCursos] = useState<CursoComprado[]>([]);
-  const [cargando, setCargando] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [filtros, setFiltros] = useState<Filtros>({});
 
-  useEffect(() => {
-    // Sin sesion no hay nada que pedir
-    if (cargandoSesion) return;
-    if (!usuario) {
-      setCargando(false);
-      return;
-    }
+  // Sin sesion no se consulta nada; al entrar, la clave cambia y se pide el listado
+  const cargar = useCallback(
+    (pagina: number, senal: AbortSignal) =>
+      usuario
+        ? listarMisCursosApi(pagina, senal, filtros)
+        : Promise.resolve({ elementos: [], paginacion: PAGINACION_INICIAL }),
+    [usuario, filtros]
+  );
 
-    const controlador = new AbortController();
-    let vigente = true;
-    setCargando(true);
-    setError(null);
+  // Al cambiar de usuario o de filtros se vuelve a la primera pagina
+  const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
+    cargar,
+    'No se pudieron cargar tus cursos',
+    `${usuario?.userId ?? 'sin-sesion'}|${JSON.stringify(filtros)}`
+  );
 
-    listarMisCursosApi(controlador.signal)
-      .then((lista) => {
-        if (vigente) setCursos(lista);
-      })
-      .catch((fallo: unknown) => {
-        if (!vigente || controlador.signal.aborted) return;
-        setError(fallo instanceof Error ? fallo.message : 'No se pudieron cargar tus cursos');
-      })
-      .finally(() => {
-        if (vigente) setCargando(false);
-      });
-
-    return () => {
-      vigente = false;
-      controlador.abort();
-    };
-  }, [usuario, cargandoSesion]);
+  const hayFiltros = Object.keys(filtros).length > 0;
 
   if (!cargandoSesion && !usuario) {
     return (
@@ -62,8 +51,13 @@ export default function PaginaMisCursos() {
 
   return (
     <PlantillaSeccion titulo="Mis cursos" descripcion="Los cursos a los que tienes acceso.">
+      <FiltrosCuenta modulo="mis-cursos" onAplicar={setFiltros} />
+
       {(cargando || cargandoSesion) && (
-        <ul aria-label="Cargando cursos" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <ul
+          aria-label="Cargando cursos"
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        >
           {[0, 1, 2].map((posicion) => (
             <li key={posicion} className="overflow-hidden rounded-2xl bg-white ring-1 ring-g-20">
               <div className="aspect-[16/9] animate-pulse bg-g-10" />
@@ -85,31 +79,50 @@ export default function PaginaMisCursos() {
         </p>
       )}
 
-      {!cargando && !error && cursos.length === 0 && (
+      {!cargando && !error && elementos.length === 0 && (
         <div className="rounded-2xl bg-white ring-1 ring-g-20">
-          <EstadoVacio
-            icono="solar:diploma-linear"
-            titulo="Todavía no tienes cursos"
-            descripcion="Cuando compres uno aparecerá aquí para que lo veas cuando quieras."
-          />
-          <div className="flex justify-center pb-8">
-            <Link
-              to={RUTAS.cursos}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
-            >
-              Ver los cursos
-              <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />
-            </Link>
-          </div>
+          {hayFiltros ? (
+            <EstadoVacio
+              icono="solar:magnifer-linear"
+              titulo="Ningún curso coincide con el filtro"
+              descripcion="Prueba con otro texto o limpia los filtros para verlos todos."
+            />
+          ) : (
+            <>
+              <EstadoVacio
+                icono="solar:diploma-linear"
+                titulo="Todavía no tienes cursos"
+                descripcion="Cuando compres uno aparecerá aquí para que lo veas cuando quieras."
+              />
+              <div className="flex justify-center pb-8">
+                <Link
+                  to={RUTAS.cursos}
+                  className="inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
+                >
+                  Ver los cursos
+                  <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       )}
 
-      {!cargando && !error && cursos.length > 0 && (
-        <ul aria-label="Mis cursos" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {cursos.map((curso) => (
-            <TarjetaCursoComprado key={curso.uuid} curso={curso} />
-          ))}
-        </ul>
+      {!cargando && !error && elementos.length > 0 && (
+        <>
+          <ul
+            aria-label="Mis cursos"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {elementos.map((curso) => (
+              <TarjetaCursoComprado key={curso.uuid} curso={curso} />
+            ))}
+          </ul>
+
+          <div className="mt-8">
+            <Paginador paginacion={paginacion} onCambiar={irAPagina} entidad="cursos" />
+          </div>
+        </>
       )}
     </PlantillaSeccion>
   );

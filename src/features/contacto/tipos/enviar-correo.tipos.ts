@@ -23,7 +23,7 @@ export interface RepartidorPayload {
 
 export type HyconPayload = EcommercePayload | RepartidorPayload;
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   ok?: boolean;
   mensaje?: string;
   error?: string;

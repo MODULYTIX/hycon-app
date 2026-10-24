@@ -8,12 +8,22 @@ import {
   validarUrlOpcional,
 } from '@/shared/utilidades/validaciones-comunes';
 import { extraerIdYoutube } from '@/shared/utilidades/youtube';
+import { esVideoSubido } from '@/shared/utilidades/video';
 
 // El video se reproduce dentro de la web, por eso solo vale un link de YouTube
 export const validarYoutubeOpcional = (valor: string): string | undefined => {
   if (!valor.trim()) return undefined;
   if (valor.trim().length > 500) return 'La URL es demasiado larga';
   return extraerIdYoutube(valor) ? undefined : 'Debe ser un link de YouTube valido';
+};
+
+/**
+ * En una parte del curso el video puede ser un enlace de YouTube o un archivo
+ * ya subido a nuestro almacen, que llega como referencia y no como URL.
+ */
+export const validarVideoLeccion = (valor: string): string | undefined => {
+  if (esVideoSubido(valor)) return undefined;
+  return validarYoutubeOpcional(valor);
 };
 
 // La muestra gratis: entre 5 segundos y 10 minutos, igual que el backend

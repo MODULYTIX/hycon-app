@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ModalTemario from './ModalTemario';
 import * as api from '@/features/cursos/servicios/lecciones.api';
+import * as videosApi from '@/shared/servicios/videos.api';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 import type { Leccion, Temario } from '@/features/cursos/tipos/leccion.tipos';
 
 vi.mock('@/features/cursos/servicios/lecciones.api');
+vi.mock('@/shared/servicios/videos.api', async (original) => {
+  const real = await original<typeof import('@/shared/servicios/videos.api')>();
+  return { ...real, obtenerAlmacenVideosApi: vi.fn(), subirVideoApi: vi.fn() };
+});
 
 const CURSO_UUID = 'b7b299d8-ee8f-4bea-a618-0a5f8261136f';
 
@@ -18,6 +23,7 @@ const curso: Curso = {
   youtubeId: null,
   thumbnailUrl: null,
   durationMinutes: 150,
+  partes: 0,
   previewSegundos: 60,
   price: 149,
   discountPrice: null,
@@ -33,8 +39,10 @@ const leccion = (cambios: Partial<Leccion> = {}): Leccion => ({
   posicion: 1,
   esMuestra: true,
   bloqueada: false,
+  tipoVideo: 'youtube',
   videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   youtubeId: 'dQw4w9WgXcQ',
+  referencia: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
   limiteSegundos: null,
   ...cambios,
 });
@@ -54,6 +62,16 @@ const temario = (lecciones: Leccion[]): Temario => ({
 });
 
 const renderizar = () => render(<ModalTemario abierto curso={curso} onCerrar={vi.fn()} />);
+
+beforeEach(() => {
+  // Por defecto el servidor no guarda videos: solo se pegan enlaces de YouTube
+  vi.mocked(videosApi.obtenerAlmacenVideosApi).mockResolvedValue({
+    proveedor: 'youtube',
+    aceptaSubidas: false,
+    maximoMb: 1024,
+    extensiones: ['mp4'],
+  });
+});
 
 describe('ModalTemario', () => {
   beforeEach(() => {
@@ -78,7 +96,7 @@ describe('ModalTemario', () => {
 
   it('avisa de las partes que no tienen video', async () => {
     vi.mocked(api.obtenerTemarioAdminApi).mockResolvedValue(
-      temario([leccion({ videoUrl: null, youtubeId: null })])
+      temario([leccion({ tipoVideo: null, videoUrl: null, youtubeId: null, referencia: null })])
     );
     renderizar();
 
@@ -204,5 +222,83 @@ describe('ModalTemario', () => {
     await usuario.click(screen.getByRole('button', { name: /agregar parte/i }));
 
     expect(await screen.findByText(/el titulo ya existe/i)).toBeInTheDocument();
+  });
+});
+
+// El servidor dice si guarda videos y de que tipo; sin eso solo se pegan enlaces
+const almacenR2 = {
+  proveedor: 'r2' as const,
+  aceptaSubidas: true,
+  maximoMb: 1024,
+  extensiones: ['mp4', 'webm'],
+};
+
+const subida = leccion({
+  titulo: 'Parte subida',
+  tipoVideo: 'archivo',
+  videoUrl: 'https://bucket.r2.cloudflarestorage.com/hycon/cursos/clase.mp4?X-Amz-Signature=abc',
+  youtubeId: null,
+  referencia: 'r2:cursos/01a0/clase.mp4',
+});
+
+describe('video de las partes segun el almacen del servidor', () => {
+  beforeEach(() => {
+    vi.mocked(api.obtenerTemarioAdminApi).mockResolvedValue(temario([leccion(), segunda]));
+  });
+
+  it('sin almacen configurado solo se puede pegar un enlace', async () => {
+    vi.mocked(videosApi.obtenerAlmacenVideosApi).mockRejectedValue(new Error('sin almacen'));
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    expect(screen.getByLabelText(/url del video/i)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /subir un archivo/i })).not.toBeInTheDocument();
+  });
+
+  it('con almacen configurado ofrece subir el archivo', async () => {
+    vi.mocked(videosApi.obtenerAlmacenVideosApi).mockResolvedValue(almacenR2);
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    expect(await screen.findByRole('button', { name: /subir un archivo/i })).toBeInTheDocument();
+  });
+
+  // Al editar se trabaja con lo guardado, no con el enlace firmado que caduca
+  it('una parte con video propio se edita mostrando el archivo', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    vi.mocked(videosApi.obtenerAlmacenVideosApi).mockResolvedValue(almacenR2);
+    vi.mocked(api.obtenerTemarioAdminApi).mockResolvedValue(temario([subida]));
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    await usuario.click(screen.getByRole('button', { name: /editar parte subida/i }));
+
+    expect(screen.getByText(/clase\.mp4/)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/url del video/i)).not.toBeInTheDocument();
+  });
+
+  it('al subir un video se guarda su referencia en la parte', async () => {
+    const usuario = userEvent.setup({ delay: null });
+    vi.mocked(videosApi.obtenerAlmacenVideosApi).mockResolvedValue(almacenR2);
+    vi.mocked(videosApi.subirVideoApi).mockResolvedValue('r2:cursos/01a0/nueva.mp4');
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+    await screen.findByRole('button', { name: /subir un archivo/i });
+
+    const video = new File([new Uint8Array(10)], 'nueva.mp4', { type: 'video/mp4' });
+    fireEvent.change(screen.getByLabelText(/elegir el archivo del video/i), {
+      target: { files: [video] },
+    });
+    await screen.findByText(/nueva\.mp4/);
+
+    await usuario.type(screen.getByLabelText('Título'), 'Parte 3');
+    await usuario.click(screen.getByRole('button', { name: /agregar parte/i }));
+
+    await waitFor(() =>
+      expect(api.crearLeccionApi).toHaveBeenCalledWith(
+        CURSO_UUID,
+        expect.objectContaining({ videoUrl: 'r2:cursos/01a0/nueva.mp4' })
+      )
+    );
   });
 });

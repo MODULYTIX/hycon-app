@@ -195,9 +195,9 @@ export default function FormularioContacto() {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      alert(err.message || 'Error inesperado');
+      alert(err instanceof Error ? err.message : 'Error inesperado');
     } finally {
       setSending(false);
     }
@@ -281,11 +281,11 @@ export default function FormularioContacto() {
                             value={
                               activeTab === 'ECOMMERCE'
                                 ? rf.key in ecom
-                                  ? (ecom as any)[rf.key] ?? ''
-                                  : (rep as any)[rf.key] ?? ''
+                                  ? (ecom as Record<string, string>)[rf.key] ?? ''
+                                  : (rep as Record<string, string>)[rf.key] ?? ''
                                 : rf.key in rep
-                                ? (rep as any)[rf.key] ?? ''
-                                : (ecom as any)[rf.key] ?? ''
+                                ? (rep as Record<string, string>)[rf.key] ?? ''
+                                : (ecom as Record<string, string>)[rf.key] ?? ''
                             }
                             onChange={
                               activeTab === 'ECOMMERCE'
@@ -311,8 +311,8 @@ export default function FormularioContacto() {
                       placeholder={field.placeholder}
                       value={
                         activeTab === 'ECOMMERCE'
-                          ? (ecom as any)[field.key] ?? ''
-                          : (rep as any)[field.key] ?? ''
+                          ? (ecom as Record<string, string>)[field.key] ?? ''
+                          : (rep as Record<string, string>)[field.key] ?? ''
                       }
                       onChange={
                         activeTab === 'ECOMMERCE'

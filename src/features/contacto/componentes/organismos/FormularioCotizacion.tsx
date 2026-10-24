@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Icon } from '@iconify/react';
 import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
 import CampoTextoLargo from '@/shared/ui/moleculas/CampoTextoLargo';
@@ -50,6 +50,9 @@ export default function FormularioCotizacion() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enviada, setEnviada] = useState<Cotizacion | null>(null);
+  // El desplegable de evaluaciones: cerrado deja el formulario corto
+  const [abierto, setAbierto] = useState(false);
+  const selectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controlador = new AbortController();
@@ -68,6 +71,25 @@ export default function FormularioCotizacion() {
       controlador.abort();
     };
   }, []);
+
+  // Se cierra al pulsar fuera o con Escape, como cualquier desplegable
+  useEffect(() => {
+    if (!abierto) return;
+
+    const alPulsarFuera = (evento: PointerEvent) => {
+      if (!selectorRef.current?.contains(evento.target as Node)) setAbierto(false);
+    };
+    const alTeclear = (evento: KeyboardEvent) => {
+      if (evento.key === 'Escape') setAbierto(false);
+    };
+
+    document.addEventListener('pointerdown', alPulsarFuera);
+    document.addEventListener('keydown', alTeclear);
+    return () => {
+      document.removeEventListener('pointerdown', alPulsarFuera);
+      document.removeEventListener('keydown', alTeclear);
+    };
+  }, [abierto]);
 
   // El total se muestra con los precios que manda el servidor
   const total = evaluaciones
@@ -189,35 +211,100 @@ export default function FormularioCotizacion() {
         <fieldset disabled={enviando}>
           <legend className="text-[14px] font-semibold text-g-90">¿Qué necesitas evaluar?</legend>
 
-          <ul className="mt-3 space-y-2">
-            {evaluaciones.map((evaluacion) => {
-              const marcada = elegidas.includes(evaluacion.codigo);
+          <div ref={selectorRef} className="relative mt-3">
+            <button
+              type="button"
+              aria-expanded={abierto}
+              aria-controls="lista-evaluaciones"
+              onClick={() => setAbierto((valor) => !valor)}
+              className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
+                errores.evaluaciones
+                  ? 'border-red-300'
+                  : abierto
+                    ? 'border-primary ring-2 ring-primary/15'
+                    : 'border-g-20 hover:border-g-30'
+              }`}
+            >
+              <span className="min-w-0">
+                <span className="block text-[14px] font-medium text-g-90">
+                  {elegidas.length === 0
+                    ? 'Elige las evaluaciones'
+                    : `${elegidas.length} ${elegidas.length === 1 ? 'evaluación elegida' : 'evaluaciones elegidas'}`}
+                </span>
+                <span className="block text-[12.5px] text-g-50">
+                  {evaluaciones.length > 0
+                    ? `${evaluaciones.length} disponibles, cada una con su norma ISO`
+                    : 'Cargando las evaluaciones...'}
+                </span>
+              </span>
 
-              return (
-                <li key={evaluacion.codigo}>
-                  <label
-                    className={`flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
-                      marcada ? 'border-primary bg-hy-5' : 'border-g-20 hover:border-g-30'
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={marcada}
-                      onChange={() => alternar(evaluacion.codigo)}
-                      className="mt-0.5 h-4 w-4 shrink-0 accent-hy-60"
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-[14px] font-medium text-g-90">{evaluacion.nombre}</span>
-                      <span className="block text-[12.5px] text-g-50">{evaluacion.norma}</span>
-                    </span>
-                    <span className="shrink-0 text-[14px] font-semibold tabular-nums text-primary">
-                      {formatearPrecio(evaluacion.precio)}
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+              <Icon
+                icon={abierto ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
+                width="18"
+                height="18"
+                aria-hidden
+                className="shrink-0 text-g-50"
+              />
+            </button>
+
+            {abierto && (
+              <ul
+                id="lista-evaluaciones"
+                className="absolute left-0 right-0 z-20 mt-1.5 max-h-[320px] overflow-y-auto rounded-xl border border-g-20 bg-white p-1.5 shadow-[0_18px_40px_rgba(28,58,57,0.14)]"
+              >
+                {evaluaciones.map((evaluacion) => {
+                  const marcada = elegidas.includes(evaluacion.codigo);
+
+                  return (
+                    <li key={evaluacion.codigo}>
+                      <label
+                        className={`flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
+                          marcada ? 'bg-hy-5' : 'hover:bg-g-5'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={marcada}
+                          onChange={() => alternar(evaluacion.codigo)}
+                          className="mt-0.5 h-4 w-4 shrink-0 accent-hy-60"
+                        />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-[13.5px] font-medium text-g-90">
+                            {evaluacion.nombre}
+                          </span>
+                          <span className="block text-[12px] text-g-50">{evaluacion.norma}</span>
+                        </span>
+                        <span className="shrink-0 text-[13.5px] font-semibold tabular-nums text-primary">
+                          {formatearPrecio(evaluacion.precio)}
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* Lo elegido se ve aunque el desplegable este cerrado */}
+          {elegidas.length > 0 && (
+            <ul className="mt-2.5 flex flex-wrap gap-2">
+              {evaluaciones
+                .filter((evaluacion) => elegidas.includes(evaluacion.codigo))
+                .map((evaluacion) => (
+                  <li key={evaluacion.codigo}>
+                    <button
+                      type="button"
+                      onClick={() => alternar(evaluacion.codigo)}
+                      aria-label={`Quitar ${evaluacion.nombre}`}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-hy-5 py-1 pl-3 pr-2 text-[12.5px] font-medium text-primary transition-colors hover:bg-hy-10"
+                    >
+                      {evaluacion.nombre}
+                      <Icon icon="solar:close-circle-bold" width="15" height="15" aria-hidden />
+                    </button>
+                  </li>
+                ))}
+            </ul>
+          )}
 
           {errores.evaluaciones && (
             <p className="mt-2 text-[12.5px] text-red-600">{errores.evaluaciones}</p>

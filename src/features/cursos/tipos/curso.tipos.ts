@@ -9,6 +9,8 @@ export interface Curso {
   youtubeId: string | null;
   thumbnailUrl: string | null;
   durationMinutes: number | null;
+  // Partes del temario que tiene el curso
+  partes: number;
   // Segundos de la leccion de muestra que ve quien no ha comprado
   previewSegundos: number;
   price: number;

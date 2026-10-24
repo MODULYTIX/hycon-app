@@ -11,6 +11,7 @@ interface Props {
   onCambiarPagina: (pagina: number) => void;
   onEditar: (curso: Curso) => void;
   onEliminar: (curso: Curso) => void;
+  onDuplicar: (curso: Curso) => void;
   onVerVideo: (curso: Curso) => void;
   onVerTemario: (curso: Curso) => void;
 }
@@ -23,6 +24,7 @@ export default function ListaCursos({
   onCambiarPagina,
   onEditar,
   onEliminar,
+  onDuplicar,
   onVerVideo,
   onVerTemario,
 }: Props) {
@@ -49,6 +51,7 @@ export default function ListaCursos({
           curso={curso}
           onEditar={onEditar}
           onEliminar={onEliminar}
+          onDuplicar={onDuplicar}
           onVerVideo={onVerVideo}
           onVerTemario={onVerTemario}
         />

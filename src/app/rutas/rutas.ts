@@ -6,6 +6,8 @@ export const RUTAS = {
   productoDetalle: '/productos/:uuid',
   cursos: '/cursos',
   cursoDetalle: '/cursos/:uuid',
+  // Donde se ve un curso ya comprado, con su temario al lado
+  aulaCurso: '/cursos/:uuid/aula',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
   acercaDe: '/acerca-de',
@@ -23,6 +25,7 @@ export const RUTAS = {
 
 export const rutaProductoDetalle = (uuid: string) => `/productos/${uuid}`;
 export const rutaCursoDetalle = (uuid: string) => `/cursos/${uuid}`;
+export const rutaAulaCurso = (uuid: string) => `/cursos/${uuid}/aula`;
 export const rutaPublicacionDetalle = (slug: string) => `/publicaciones/${slug}`;
 
 export interface EnlaceNavegacion {
