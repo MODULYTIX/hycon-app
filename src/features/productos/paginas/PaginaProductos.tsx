@@ -15,7 +15,7 @@ export default function PaginaProductos() {
     (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal, 12, filtros),
     [filtros]
   );
-  const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
+  const { elementos, paginacion, cargando, error, irAPagina, recargar } = useListadoPaginado(
     cargar,
     'No se pudieron cargar los productos',
     clave
@@ -40,6 +40,7 @@ export default function PaginaProductos() {
           // Al pasar de pagina se mantienen las tarjetas actuales en lugar del esqueleto
           cargando={cargando && elementos.length === 0}
           error={error}
+          onReintentar={recargar}
         />
 
         <div className="mt-8">

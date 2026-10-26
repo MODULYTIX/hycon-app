@@ -10,6 +10,9 @@ import FilaArticulo from '@/features/publicaciones/componentes/moleculas/FilaArt
 import PanelMasLeidos from '@/features/publicaciones/componentes/organismos/PanelMasLeidos';
 import { usePublicacionesPublicas } from '@/features/publicaciones/hooks/usePublicacionesPublicas';
 
+import EsqueletoPublicaciones from '@/features/publicaciones/componentes/organismos/EsqueletoPublicaciones';
+import AvisoErrorCatalogo from '@/shared/ui/moleculas/AvisoErrorCatalogo';
+
 export default function PaginaPublicaciones() {
   const { filtros, aplicar } = useFiltrosListado();
   const { publicaciones, cargando, cargandoPrimera, error, hayMas, verMas } =
@@ -28,26 +31,18 @@ export default function PaginaPublicaciones() {
       descripcion="Se realizan publicaciones relevantes en ergonomía para tener actualizado a nuestro clientes y lectores."
     >
       <CatalogoConFiltros filtros={<FiltrosListado modulo="publicaciones" onAplicar={aplicar} />}>
-        {cargandoPrimera && (
-          <div aria-label="Cargando artículos" className="grid gap-4 md:grid-cols-3">
-            <div className="h-[340px] animate-pulse rounded-2xl bg-g-10" />
-            <div className="grid gap-4">
-              <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
-              <div className="h-[160px] animate-pulse rounded-2xl bg-g-10" />
-            </div>
-          </div>
-        )}
+        {cargandoPrimera && <EsqueletoPublicaciones />}
 
         {!cargando && error && (
-          <p
-            role="alert"
-            className="rounded-2xl border border-red-200 bg-red-50 px-5 py-8 text-center text-[15px] text-red-700"
-          >
-            {error}
-          </p>
+          <div className="space-y-6">
+            <AvisoErrorCatalogo
+              error={error}
+              onReintentar={verMas}
+              reintentando={cargando}
+            />
+            <EsqueletoPublicaciones />
+          </div>
         )}
-
-        {!cargando && error && <button type="button" onClick={verMas} className="mb-5 mt-3 rounded-lg border border-g-20 px-4 py-2 text-[12px] text-primary">Reintentar carga</button>}
         {!cargando && !error && publicaciones.length === 0 && (
           <div className="rounded-2xl bg-white ring-1 ring-g-20">
             <EstadoVacio

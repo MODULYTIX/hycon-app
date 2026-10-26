@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { RUTAS } from '@/app/rutas/rutas';
 import HeroBackground from '@/assets/images/hero-background.webp';
-import HeroPersona from '@/assets/images/hero-persona.webp';
+// import HeroPersona from '@/assets/images/hero-persona.webp';
 
 export default function Hero() {
   return (
@@ -57,12 +57,12 @@ export default function Hero() {
             w-full max-w-[400px] mx-auto md:mx-0
             md:self-end         
           ">
-          <img
+          {/* <img
             src={HeroPersona}
             alt="Persona"
             draggable={false}
             className="w-full h-auto object-contain"
-          />
+          /> */}
         </div>
       </div>
     </div>

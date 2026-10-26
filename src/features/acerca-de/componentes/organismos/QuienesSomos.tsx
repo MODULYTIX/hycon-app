@@ -1,5 +1,5 @@
 import Titulo from '@/shared/ui/atomos/Titulo';
-import QS from '@/assets/images/QS.png';
+import QS from '@/assets/images/QS.webp';
 
 export default function QuienesSomos() {
   return (

@@ -1,6 +1,6 @@
 import QuienesSomos from '@/features/acerca-de/componentes/organismos/QuienesSomos';
-import PorqueElegirnos from '@/features/acerca-de/componentes/organismos/PorqueElegirnos';
-import Alcance from '@/features/acerca-de/componentes/organismos/Alcance';
+// import PorqueElegirnos from '@/features/acerca-de/componentes/organismos/PorqueElegirnos';
+// import Alcance from '@/features/acerca-de/componentes/organismos/Alcance';
 
 export default function PaginaAcercaDe() {
   return (
@@ -11,13 +11,13 @@ export default function PaginaAcercaDe() {
         <QuienesSomos />
       </section>
 
-      <section id="porque_elegirnos" className="flex items-center justify-center">
+      {/* <section id="porque_elegirnos" className="flex items-center justify-center">
         <PorqueElegirnos />
       </section>
 
       <section id="alcance" className="flex items-center justify-center py-16 sm:py-24">
         <Alcance />
-      </section>
+      </section> */}
     </>
   );
 }

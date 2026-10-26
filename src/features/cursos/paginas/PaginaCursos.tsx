@@ -16,7 +16,7 @@ export default function PaginaCursos() {
     (pagina: number, senal: AbortSignal) => listarCursosApi('active', pagina, senal, 12, filtros),
     [filtros]
   );
-  const { elementos, paginacion, cargando, error, irAPagina } = useListadoPaginado(
+  const { elementos, paginacion, cargando, error, irAPagina, recargar } = useListadoPaginado(
     cargar,
     'No se pudieron cargar los cursos',
     clave
@@ -48,6 +48,7 @@ export default function PaginaCursos() {
           cargando={cargando && elementos.length === 0}
           error={error}
           onVerAvance={setEnReproduccion}
+          onReintentar={recargar}
         />
 
         <div className="mt-8">

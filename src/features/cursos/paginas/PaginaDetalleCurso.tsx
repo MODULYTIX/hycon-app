@@ -110,11 +110,14 @@ export default function PaginaDetalleCurso() {
 
   if (cargando || restaurandoSesion || consultandoAcceso) {
     return (
-      <div role="status" aria-label="Cargando curso" className="mx-auto w-full max-w-[1120px] animate-pulse px-5 py-10 sm:px-7">
-        <div className="mb-8 h-10 w-3/4 bg-g-10" />
+      <div role="status" aria-label="Cargando curso" className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-7">
+        <div className="esqueleto-onda mb-8 h-10 w-3/4 rounded-lg bg-g-10" />
         <div className="grid gap-8 min-[900px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-          <div className="aspect-video bg-g-10" />
-          <div className="space-y-5"><div className="h-12 w-1/2 bg-g-10" /><div className="h-36 bg-g-10" /></div>
+          <div className="esqueleto-onda aspect-video rounded-2xl bg-g-10" />
+          <div className="space-y-5">
+            <div className="esqueleto-onda h-12 w-1/2 rounded-lg bg-g-10" />
+            <div className="esqueleto-onda h-36 rounded-xl bg-g-10" />
+          </div>
         </div>
       </div>
     );

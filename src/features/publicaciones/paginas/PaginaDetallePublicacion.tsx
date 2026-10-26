@@ -37,9 +37,9 @@ export default function PaginaDetallePublicacion() {
   if (cargando) {
     return (
       <div className="mx-auto w-full max-w-[1340px] px-4 py-10 sm:px-6 md:px-12" aria-label="Cargando artículo">
-        <div className="h-6 w-40 animate-pulse rounded bg-g-10" />
-        <div className="mt-6 h-10 w-3/4 animate-pulse rounded bg-g-10" />
-        <div className="mt-6 aspect-[16/9] animate-pulse rounded-[3px] bg-g-10" />
+        <div className="esqueleto-onda h-6 w-40 rounded bg-g-10" />
+        <div className="esqueleto-onda mt-6 h-10 w-3/4 rounded-lg bg-g-10" />
+        <div className="esqueleto-onda mt-6 aspect-[16/9] rounded-2xl bg-g-10" />
       </div>
     );
   }

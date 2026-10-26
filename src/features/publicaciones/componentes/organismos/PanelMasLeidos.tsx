@@ -16,7 +16,17 @@ export default function PanelMasLeidos({ publicaciones, cargando }: Props) {
     return (
       <div aria-label="Cargando lo mas leido" className="space-y-4">
         {[0, 1, 2].map((posicion) => (
-          <div key={posicion} className="h-16 animate-pulse rounded-[3px] bg-g-10" />
+          <div key={posicion} className="flex gap-3">
+            <span className="mt-0.5 text-[13px] font-semibold text-g-30">
+              {String(posicion + 1).padStart(2, '0')}
+            </span>
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="esqueleto-onda h-3.5 w-full rounded" />
+              <div className="esqueleto-onda h-3.5 w-3/4 rounded" />
+              <div className="esqueleto-onda h-2.5 w-1/2 rounded" />
+            </div>
+            <div className="esqueleto-onda hidden h-14 w-[70px] shrink-0 rounded-[3px] ring-1 ring-g-20 sm:block" />
+          </div>
         ))}
       </div>
     );

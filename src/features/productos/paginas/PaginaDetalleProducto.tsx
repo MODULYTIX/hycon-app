@@ -56,12 +56,12 @@ export default function PaginaDetalleProducto() {
 
   if (cargando) {
     return (
-      <div className="mx-auto grid w-full max-w-[1120px] animate-pulse gap-10 px-5 py-12 min-[700px]:grid-cols-2">
-        <div className="aspect-square max-h-[530px] bg-g-10" />
+      <div aria-label="Cargando producto" className="mx-auto grid w-full max-w-[1120px] gap-10 px-5 py-12 min-[700px]:grid-cols-2">
+        <div className="esqueleto-onda aspect-square max-h-[530px] rounded-2xl bg-g-10" />
         <div className="space-y-5">
-          <div className="h-10 w-3/4 bg-g-10" />
-          <div className="h-8 w-1/3 bg-g-10" />
-          <div className="h-28 bg-g-10" />
+          <div className="esqueleto-onda h-10 w-3/4 rounded-lg bg-g-10" />
+          <div className="esqueleto-onda h-8 w-1/3 rounded-lg bg-g-10" />
+          <div className="esqueleto-onda h-28 rounded-xl bg-g-10" />
         </div>
       </div>
     );

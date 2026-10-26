@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Icon } from '@iconify/react';
 import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
 import CampoTextoLargo from '@/shared/ui/moleculas/CampoTextoLargo';
@@ -14,6 +14,33 @@ import type {
 
 const WHATSAPP = '51902665565';
 
+export const EVALUACIONES_BASE: EvaluacionErgonomica[] = [
+  {
+    codigo: 'movimientos-repetitivos',
+    nombre: 'Movimientos repetitivos de miembros superiores',
+    norma: 'ISO 11228-3:2026',
+    precio: 250,
+  },
+  {
+    codigo: 'levantamiento-cargas',
+    nombre: 'Levantamiento de cargas',
+    norma: 'ISO 11228-1:2021',
+    precio: 200,
+  },
+  {
+    codigo: 'empuje-traccion',
+    nombre: 'Empuje y tracción',
+    norma: 'ISO 11228-2:2007',
+    precio: 250,
+  },
+  {
+    codigo: 'posturas-forzadas',
+    nombre: 'Posturas forzadas',
+    norma: 'ISO 11226:2000',
+    precio: 200,
+  },
+];
+
 interface Campos {
   name: string;
   company: string;
@@ -24,15 +51,14 @@ interface Campos {
 
 const VACIO: Campos = { name: '', company: '', phone: '', email: '', message: '' };
 
-type Errores = Partial<Record<keyof Campos | 'evaluaciones', string>>;
+type Errores = Partial<Record<keyof Campos, string>>;
 
-// Las mismas reglas que aplica el backend, para avisar antes de enviar
-const revisar = (campos: Campos, elegidas: string[]): Errores => {
+// Validación de campos de contacto del formulario
+const revisar = (campos: Campos): Errores => {
   const errores: Errores = {};
   if (campos.name.trim().length < 2) errores.name = 'Escribe tu nombre';
   if (!/^[\d+()\s-]{6,30}$/.test(campos.phone.trim())) errores.phone = 'Escribe un número de celular válido';
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(campos.email.trim())) errores.email = 'Escribe un correo válido';
-  if (elegidas.length === 0) errores.evaluaciones = 'Elige al menos una evaluación';
   return errores;
 };
 
@@ -41,18 +67,14 @@ const mensajeWhatsapp = (cotizacion: Cotizacion) =>
   cotizacion.evaluaciones.map((e) => `- ${e.nombre} (${e.norma}): ${formatearPrecio(e.precio)}`).join('\n') +
   `\n\nTotal: ${formatearPrecio(cotizacion.total)}`;
 
-/** Cotización de evaluaciones ergonómicas: se elige, se calcula y se envía. */
+/** Cotización de evaluaciones ergonómicas con detalle informativo de normativas */
 export default function FormularioCotizacion() {
-  const [evaluaciones, setEvaluaciones] = useState<EvaluacionErgonomica[]>([]);
-  const [elegidas, setElegidas] = useState<string[]>([]);
+  const [evaluaciones, setEvaluaciones] = useState<EvaluacionErgonomica[]>(EVALUACIONES_BASE);
   const [campos, setCampos] = useState<Campos>(VACIO);
   const [errores, setErrores] = useState<Errores>({});
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enviada, setEnviada] = useState<Cotizacion | null>(null);
-  // El desplegable de evaluaciones: cerrado deja el formulario corto
-  const [abierto, setAbierto] = useState(false);
-  const selectorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const controlador = new AbortController();
@@ -60,10 +82,13 @@ export default function FormularioCotizacion() {
 
     listarEvaluacionesApi(controlador.signal)
       .then((lista) => {
-        if (vigente) setEvaluaciones(lista);
+        if (vigente && Array.isArray(lista) && lista.length > 0) {
+          setEvaluaciones(lista);
+        }
       })
       .catch(() => {
-        if (vigente) setError('No se pudieron cargar las evaluaciones. Recarga la página.');
+        // En caso de que el backend no responda, se conservan las evaluaciones informativas base
+        // sin interrumpir la experiencia ni mostrar una alerta bloqueante de servidor.
       });
 
     return () => {
@@ -71,37 +96,6 @@ export default function FormularioCotizacion() {
       controlador.abort();
     };
   }, []);
-
-  // Se cierra al pulsar fuera o con Escape, como cualquier desplegable
-  useEffect(() => {
-    if (!abierto) return;
-
-    const alPulsarFuera = (evento: PointerEvent) => {
-      if (!selectorRef.current?.contains(evento.target as Node)) setAbierto(false);
-    };
-    const alTeclear = (evento: KeyboardEvent) => {
-      if (evento.key === 'Escape') setAbierto(false);
-    };
-
-    document.addEventListener('pointerdown', alPulsarFuera);
-    document.addEventListener('keydown', alTeclear);
-    return () => {
-      document.removeEventListener('pointerdown', alPulsarFuera);
-      document.removeEventListener('keydown', alTeclear);
-    };
-  }, [abierto]);
-
-  // El total se muestra con los precios que manda el servidor
-  const total = evaluaciones
-    .filter((evaluacion) => elegidas.includes(evaluacion.codigo))
-    .reduce((suma, evaluacion) => suma + evaluacion.precio, 0);
-
-  const alternar = (codigo: string) => {
-    setElegidas((previas) =>
-      previas.includes(codigo) ? previas.filter((c) => c !== codigo) : [...previas, codigo]
-    );
-    setErrores((previo) => ({ ...previo, evaluaciones: undefined }));
-  };
 
   const cambiar = (campo: keyof Campos, valor: string) => {
     setCampos((previo) => ({ ...previo, [campo]: valor }));
@@ -111,7 +105,7 @@ export default function FormularioCotizacion() {
 
   const enviar = async (evento: FormEvent) => {
     evento.preventDefault();
-    const fallos = revisar(campos, elegidas);
+    const fallos = revisar(campos);
     setErrores(fallos);
     if (Object.keys(fallos).length > 0) return;
 
@@ -124,11 +118,10 @@ export default function FormularioCotizacion() {
         phone: campos.phone.trim(),
         email: campos.email.trim(),
         message: campos.message.trim() || undefined,
-        evaluaciones: elegidas,
+        evaluaciones: evaluaciones.map((e) => e.codigo),
       });
       setEnviada(cotizacion);
       setCampos(VACIO);
-      setElegidas([]);
     } catch (fallo: unknown) {
       setError(fallo instanceof Error ? fallo.message : 'No se pudo enviar la solicitud');
     } finally {
@@ -203,123 +196,53 @@ export default function FormularioCotizacion() {
         Cotización de evaluaciones ergonómicas
       </h2>
       <p className="mt-1.5 text-[14px] leading-relaxed text-g-50">
-        Elige las evaluaciones que necesitas y déjanos tus datos. Te respondemos con el alcance y las
-        fechas disponibles.
+        Evaluaciones de riesgo ergonómico para puestos administrativos y operativos. Déjanos tus datos
+        y te responderemos con el alcance y las fechas disponibles.
       </p>
+
+      {/* Bloque informativo de evaluaciones ergonómicas (no seleccionables) */}
+      <div className="mt-5 rounded-2xl border border-hy-20/80 bg-gradient-to-br from-hy-5/60 via-white to-hy-5/30 p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-[14px] font-semibold text-g-90">
+            <Icon icon="solar:shield-check-linear" width="20" height="20" className="text-primary" aria-hidden />
+            <span>Evaluaciones ergonómicas que realizamos</span>
+          </div>
+
+        </div>
+
+        <p className="mt-1.5 text-[12.5px] leading-relaxed text-g-60">
+          Nuestras evaluaciones técnicas se aplican según la R.M. 375-2008-TR y metodologías ISO internacionales:
+        </p>
+
+        <ul aria-label="Evaluaciones informativas" className="mt-3 grid gap-2.5 sm:grid-cols-2">
+          {evaluaciones.map((evaluacion) => (
+            <li
+              key={evaluacion.codigo}
+              className="flex items-start gap-2.5 rounded-xl border border-g-20/80 bg-white p-3 shadow-xs transition-shadow hover:shadow-sm"
+            >
+              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-hy-10 text-primary">
+                <Icon icon="solar:check-read-linear" width="13" height="13" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[13px] font-medium leading-snug text-g-90">
+                  {evaluacion.nombre}
+                </span>
+                <span className="block mt-0.5 text-[11.5px] font-mono text-primary font-medium">
+                  {evaluacion.norma}
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       <form onSubmit={enviar} noValidate className="mt-6 space-y-5">
         <fieldset disabled={enviando}>
-          <legend className="text-[14px] font-semibold text-g-90">¿Qué necesitas evaluar?</legend>
+          <legend className="text-[14.5px] font-semibold text-g-90">
+            Datos de contacto y requerimiento
+          </legend>
 
-          <div ref={selectorRef} className="relative mt-3">
-            <button
-              type="button"
-              aria-expanded={abierto}
-              aria-controls="lista-evaluaciones"
-              onClick={() => setAbierto((valor) => !valor)}
-              className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left transition-colors ${
-                errores.evaluaciones
-                  ? 'border-red-300'
-                  : abierto
-                    ? 'border-primary ring-2 ring-primary/15'
-                    : 'border-g-20 hover:border-g-30'
-              }`}
-            >
-              <span className="min-w-0">
-                <span className="block text-[14px] font-medium text-g-90">
-                  {elegidas.length === 0
-                    ? 'Elige las evaluaciones'
-                    : `${elegidas.length} ${elegidas.length === 1 ? 'evaluación elegida' : 'evaluaciones elegidas'}`}
-                </span>
-                <span className="block text-[12.5px] text-g-50">
-                  {evaluaciones.length > 0
-                    ? `${evaluaciones.length} disponibles, cada una con su norma ISO`
-                    : 'Cargando las evaluaciones...'}
-                </span>
-              </span>
-
-              <Icon
-                icon={abierto ? 'solar:alt-arrow-up-linear' : 'solar:alt-arrow-down-linear'}
-                width="18"
-                height="18"
-                aria-hidden
-                className="shrink-0 text-g-50"
-              />
-            </button>
-
-            {abierto && (
-              <ul
-                id="lista-evaluaciones"
-                className="absolute left-0 right-0 z-20 mt-1.5 max-h-[320px] overflow-y-auto rounded-xl border border-g-20 bg-white p-1.5 shadow-[0_18px_40px_rgba(28,58,57,0.14)]"
-              >
-                {evaluaciones.map((evaluacion) => {
-                  const marcada = elegidas.includes(evaluacion.codigo);
-
-                  return (
-                    <li key={evaluacion.codigo}>
-                      <label
-                        className={`flex cursor-pointer items-start gap-3 rounded-lg px-3 py-2.5 transition-colors ${
-                          marcada ? 'bg-hy-5' : 'hover:bg-g-5'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={marcada}
-                          onChange={() => alternar(evaluacion.codigo)}
-                          className="mt-0.5 h-4 w-4 shrink-0 accent-hy-60"
-                        />
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[13.5px] font-medium text-g-90">
-                            {evaluacion.nombre}
-                          </span>
-                          <span className="block text-[12px] text-g-50">{evaluacion.norma}</span>
-                        </span>
-                        <span className="shrink-0 text-[13.5px] font-semibold tabular-nums text-primary">
-                          {formatearPrecio(evaluacion.precio)}
-                        </span>
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-
-          {/* Lo elegido se ve aunque el desplegable este cerrado */}
-          {elegidas.length > 0 && (
-            <ul className="mt-2.5 flex flex-wrap gap-2">
-              {evaluaciones
-                .filter((evaluacion) => elegidas.includes(evaluacion.codigo))
-                .map((evaluacion) => (
-                  <li key={evaluacion.codigo}>
-                    <button
-                      type="button"
-                      onClick={() => alternar(evaluacion.codigo)}
-                      aria-label={`Quitar ${evaluacion.nombre}`}
-                      className="inline-flex items-center gap-1.5 rounded-full bg-hy-5 py-1 pl-3 pr-2 text-[12.5px] font-medium text-primary transition-colors hover:bg-hy-10"
-                    >
-                      {evaluacion.nombre}
-                      <Icon icon="solar:close-circle-bold" width="15" height="15" aria-hidden />
-                    </button>
-                  </li>
-                ))}
-            </ul>
-          )}
-
-          {errores.evaluaciones && (
-            <p className="mt-2 text-[12.5px] text-red-600">{errores.evaluaciones}</p>
-          )}
-
-          {elegidas.length > 0 && (
-            <p className="mt-3 flex items-baseline justify-between gap-4 rounded-xl bg-hy-5 px-4 py-3">
-              <span className="text-[13px] uppercase tracking-[0.12em] text-g-50">Total estimado</span>
-              <span className="text-[20px] font-semibold tabular-nums text-primary">
-                {formatearPrecio(total)}
-              </span>
-            </p>
-          )}
-
-          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+          <div className="mt-3.5 grid gap-4 sm:grid-cols-2">
             <CampoTexto
               id="cotizacion-nombre"
               etiqueta="Nombre y apellido"
@@ -372,15 +295,19 @@ export default function FormularioCotizacion() {
         </fieldset>
 
         {error && (
-          <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-[13.5px] text-red-700">
-            {error}
-          </p>
+          <div
+            role="alert"
+            className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50/90 p-3.5 text-[13px] text-red-800"
+          >
+            <Icon icon="solar:danger-triangle-linear" width="18" height="18" className="mt-0.5 shrink-0 text-red-600" aria-hidden />
+            <p className="leading-relaxed">{error}</p>
+          </div>
         )}
 
         <button
           type="submit"
           disabled={enviando}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-medium text-white transition-colors hover:bg-marca-oscuro disabled:opacity-60"
+          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-medium text-white shadow-xs transition-colors hover:bg-marca-oscuro disabled:opacity-60"
         >
           {enviando ? 'Enviando...' : 'Solicitar cotización'}
         </button>

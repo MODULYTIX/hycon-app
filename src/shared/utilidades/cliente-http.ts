@@ -65,7 +65,7 @@ async function enviar<T>(ruta: string, opciones: OpcionesPeticion): Promise<T> {
     // Una cancelacion no es un fallo de red: se relanza para que quien la pidio la ignore
     if (error instanceof DOMException && error.name === 'AbortError') throw error;
     // fetch solo rechaza por problemas de red o CORS, nunca por codigo de estado
-    throw new ErrorHttp('No se pudo conectar con el servidor. Intentalo de nuevo', 0);
+    throw new ErrorHttp('No fue posible sincronizar los datos en este momento. Inténtalo de nuevo.', 0);
   }
 
   let sobre: SobreRespuesta<T> = {};
