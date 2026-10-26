@@ -14,7 +14,7 @@ import type {
 
 const WHATSAPP = '51902665565';
 
-export const EVALUACIONES_BASE: EvaluacionErgonomica[] = [
+const EVALUACIONES_BASE: EvaluacionErgonomica[] = [
   {
     codigo: 'movimientos-repetitivos',
     nombre: 'Movimientos repetitivos de miembros superiores',
