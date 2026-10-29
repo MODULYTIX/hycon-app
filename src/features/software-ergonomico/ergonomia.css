@@ -163,3 +163,50 @@ button.er-choice-help:hover { text-decoration: underline; color: var(--color-pri
   .er-summary-factor { gap: 10px; }
   .er-results-grid { grid-template-columns: 1fr; }
 }
+
+/* Tabla comparativa: una fila por ficha, resultados agrupados por método. */
+.ergo .er-page:has(.er-evaluaciones) { max-width: 1600px; }
+.er-vistas { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid var(--color-g-20); }
+.er-vistas button { padding: 10px 16px; font-size: 13px; border-bottom: 2px solid transparent; color: var(--color-g-50); }
+.er-vistas button[aria-pressed="true"] { color: var(--color-primary); border-bottom-color: var(--color-primary); font-weight: 600; }
+.er-evaluaciones .er-toolbar h2 { font-size: 17px; }
+.er-evaluaciones .er-toolbar p { margin-top: 5px; }
+.er-column-toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-g-50); cursor: pointer; }
+.er-column-toggle input { accent-color: var(--color-primary); width: 15px; height: 15px; }
+.er-filtros-tabla { display: grid; grid-template-columns: minmax(230px, 1.4fr) repeat(4, minmax(140px, 1fr)); gap: 14px; padding: 18px 22px; }
+.er-tabla-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 22px 14px; font-size: 12px; color: var(--color-g-50); }
+.er-tabla-meta .hy-select { width: 205px; }
+.er-tabla-ayuda { font-size: 11px; color: var(--color-g-50); padding: 0 22px 14px; }
+.er-tabla-scroll { overflow: auto; max-height: 85dvh; overscroll-behavior: contain; border-top: 1px solid var(--color-g-20); }
+.er-tabla-evaluaciones { width: 100%; min-width: 1120px; border-collapse: separate; border-spacing: 0; font-size: 12px; text-align: left; }
+.er-tabla-evaluaciones th, .er-tabla-evaluaciones td { padding: 16px 14px; vertical-align: top; border-bottom: 1px solid var(--color-g-20); border-right: 1px solid #edf0ef; }
+.er-tabla-evaluaciones thead th { position: sticky; top: 0; z-index: 2; background: #f1f6f5; font-size: 11px; font-weight: 600; color: var(--color-hy-80); }
+.er-tabla-evaluaciones th:first-child { position: sticky; left: 0; width: 220px; min-width: 200px; background: white; z-index: 1; border-right-color: var(--color-g-20); }
+.er-tabla-evaluaciones thead th:first-child { z-index: 3; background: #f1f6f5; }
+.er-tabla-evaluaciones tbody tr:hover > * { background-color: #f8fbfa; }
+.er-tabla-evaluaciones td { min-width: 150px; }
+.er-tabla-evaluaciones .er-col-acciones { width: 100px; min-width: 100px; }
+.er-tabla-evaluaciones .er-col-estado { width: 135px; min-width: 135px; }
+.er-tabla-evaluaciones small, .er-tabla-evaluaciones time { display: block; font-size: 10px; font-weight: 400; margin-top: 5px; line-height: 1.5; overflow-wrap: anywhere; }
+.er-tabla-evaluaciones time { color: var(--color-g-50); }
+.er-puesto-link { text-align: left; font-weight: 600; color: var(--color-hy-80); overflow-wrap: anywhere; }
+.er-puesto-link:hover { text-decoration: underline; }
+.er-resultados-celda { display: flex; flex-direction: column; gap: 6px; }
+.er-valor-tabla { display: flex; align-items: flex-start; gap: 7px; border-radius: 3px; padding: 6px 8px; font-size: 12px; line-height: 1.4; }
+.er-valor-tabla b { font-size: 10px; min-width: 18px; padding-top: 2px; }
+.er-tabla-evaluaciones .er-valor-tabla small { margin-top: 2px; }
+.er-valor-pendiente { background: #f1f3f2; color: #6a7573; }
+.er-sin-resultado { font-size: 11px; color: var(--color-g-50); }
+.er-tabla-acciones { display: flex; align-items: center; gap: 6px; }
+.er-tabla-icono { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex-shrink: 0; border: 1px solid var(--color-g-20); border-radius: 3px; background: white; color: var(--color-primary); transition: background-color .15s, border-color .15s; }
+.er-tabla-icono:hover { background: var(--color-hy-5); border-color: var(--color-hy-30); }
+@media (max-width: 1100px) { .er-filtros-tabla { grid-template-columns: repeat(3, minmax(0, 1fr)); } .er-buscar-tabla { grid-column: span 2; } }
+@media (max-width: 600px) {
+  .er-filtros-tabla { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 16px; gap: 12px; }
+  .er-buscar-tabla { grid-column: 1 / -1; }
+  .er-tabla-meta { padding-inline: 16px; align-items: flex-start; flex-direction: column; }
+  .er-tabla-meta .er-actions { width: 100%; justify-content: space-between; }
+  .er-tabla-ayuda { padding-inline: 16px; }
+  .er-tabla-evaluaciones th:first-child { position: static; min-width: 170px; }
+  .er-tabla-evaluaciones thead th:first-child { position: sticky; }
+}

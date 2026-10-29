@@ -1,3 +1,4 @@
+import EvaluacionesEmpresas from '../componentes/EvaluacionesEmpresas';
 import EntradaBase from '@/shared/ui/atomos/EntradaBase';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
@@ -35,6 +36,7 @@ function NuevaEmpresa({ onCerrar, onCreada }: { onCerrar: () => void; onCreada: 
 }
 
 function RegistroEmpresas() {
+  const [vista, setVista] = useState<'evaluaciones' | 'empresas'>('evaluaciones');
   const [empresas, setEmpresas] = useState<EmpresaErgo[]>([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
@@ -50,7 +52,7 @@ function RegistroEmpresas() {
   const visibles = empresas.filter(e => e.nombre.toLocaleLowerCase().includes(busqueda.toLocaleLowerCase().trim()));
   return <div className="ergo"><div className="er-page">
     <header className="er-page-heading">
-      <div><p className="er-eyebrow">Hycon / Ergonomía</p><h1>Empresas y evaluaciones</h1><p className="er-muted">Organiza tus fichas ergonómicas por empresa y puesto de trabajo.</p></div>
+      <div><p className="er-eyebrow">Hycon / Ergonomía</p><h1>Empresas y evaluaciones</h1><p className="er-muted">Consulta y filtra los resultados por empresa, área y puesto de trabajo.</p></div>
       <button className="er-button er-button-primary" onClick={() => setNueva(true)}><span aria-hidden>＋</span> Registrar empresa</button>
     </header>
     {aviso && <p className="er-notice" role="status" style={{ marginBottom: 20 }}>{aviso}</p>}
@@ -58,7 +60,12 @@ function RegistroEmpresas() {
       <div className="er-stat"><strong>{empresas.length}</strong><span>Empresas registradas</span></div>
       <div className="er-stat"><strong>{empresas.reduce((s, e) => s + e.totalFichas, 0)}</strong><span>Fichas ergonómicas</span></div>
     </div>}
-    <section className="er-surface" aria-label="Mis empresas">
+    <div className="er-vistas" role="group" aria-label="Vista del listado">
+      <button type="button" aria-pressed={vista === 'evaluaciones'} onClick={() => setVista('evaluaciones')}>Evaluaciones</button>
+      <button type="button" aria-pressed={vista === 'empresas'} onClick={() => setVista('empresas')}>Empresas</button>
+    </div>
+    {vista === 'evaluaciones' && !cargando && !error && <EvaluacionesEmpresas empresas={empresas} />}
+    {(vista === 'empresas' || cargando || !!error) && <section className="er-surface" aria-label="Mis empresas">
       <div className="er-toolbar"><h2 style={{ fontSize: 16 }}>Mis empresas</h2><label className="er-search"><span className="sr-only">Buscar empresa</span><EntradaBase  type="search" placeholder="Buscar por nombre de empresa…" value={busqueda} onChange={e => setBusqueda(e.target.value)} /></label></div>
       {cargando ? <p className="er-empty er-muted" role="status">Cargando empresas…</p>
         : error ? <div className="er-empty"><p role="alert" className="er-notice er-notice-error">{error}</p><button className="er-button" onClick={() => setRevision(v => v + 1)}>Reintentar</button></div>
@@ -72,8 +79,8 @@ function RegistroEmpresas() {
             <Link className="er-button" to={rutaEmpresaErgo(e.id)} aria-label={`Abrir empresa ${e.nombre}`}>Abrir empresa <span aria-hidden>→</span></Link>
           </li>)}</ul>
         </>}
-    </section>
-    {nueva && <NuevaEmpresa onCerrar={() => setNueva(false)} onCreada={e => { setEmpresas(prev => [e, ...prev]); setNueva(false); setAviso(`Empresa «${e.nombre}» registrada. Abre su espacio para crear una ficha.`); }} />}
+    </section>}
+    {nueva && <NuevaEmpresa onCerrar={() => setNueva(false)} onCreada={e => { setEmpresas(prev => [e, ...prev]); setNueva(false); setVista('empresas'); setAviso(`Empresa «${e.nombre}» registrada. Abre su espacio para crear una ficha.`); }} />}
   </div></div>;
 }
 
