@@ -10,7 +10,7 @@ export const RUTAS = {
   aulaCurso: '/cursos/:uuid/aula',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
-  acercaDe: '/acerca-de',
+  // acercaDe: '/acerca-de',
   contactanos: '/contactanos',
   carrito: '/carrito',
   perfil: '/perfil',
@@ -42,6 +42,6 @@ export const NAVEGACION_PRINCIPAL: EnlaceNavegacion[] = [
   { id: 'productos', etiqueta: 'PRODUCTOS', ruta: RUTAS.productos },
   { id: 'cursos', etiqueta: 'CURSOS', ruta: RUTAS.cursos },
   { id: 'publicaciones', etiqueta: 'PUBLICACIONES', ruta: RUTAS.publicaciones },
-  { id: 'acerca-de', etiqueta: 'ACERCA DE', ruta: RUTAS.acercaDe },
+  // { id: 'acerca-de', etiqueta: 'ACERCA DE', ruta: RUTAS.acercaDe },
   { id: 'contactanos', etiqueta: 'CONTACTANOS', ruta: RUTAS.contactanos },
 ];
