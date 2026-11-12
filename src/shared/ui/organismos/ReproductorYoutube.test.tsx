@@ -404,3 +404,64 @@ describe('ReproductorYoutube: subtitulos', () => {
     expect(boton).toHaveAttribute('aria-pressed', 'false');
   });
 });
+
+describe('ReproductorYoutube: aviso al llegar al final', () => {
+  beforeEach(() => {
+    const falso = crearYoutubeFalso();
+    jugadores = falso.jugadores;
+    vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(falso.api);
+  });
+
+  const renderizarConAviso = async (alLlegarAlFinal: () => void) => {
+    render(
+      <ReproductorYoutube id={ID} titulo="Pausas activas" alLlegarAlFinal={alLlegarAlFinal} />
+    );
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    return jugadores[0];
+  };
+
+  // El video del doble dura 327 segundos
+  it('avisa en los ultimos cinco segundos', async () => {
+    const alLlegarAlFinal = vi.fn();
+    const jugador = await renderizarConAviso(alLlegarAlFinal);
+    await listoYReproduciendo(jugador);
+
+    jugador.avanzarA(100);
+    await waitFor(() => expect(screen.getByText(/1:40/)).toBeInTheDocument());
+    expect(alLlegarAlFinal).not.toHaveBeenCalled();
+
+    jugador.avanzarA(323);
+    await waitFor(() => expect(alLlegarAlFinal).toHaveBeenCalledTimes(1));
+  });
+
+  // Saltar hasta el final tambien cuenta como haberla visto
+  it('tambien avisa si se salta hasta el final', async () => {
+    const alLlegarAlFinal = vi.fn();
+    const jugador = await renderizarConAviso(alLlegarAlFinal);
+    await listoYReproduciendo(jugador);
+
+    jugador.avanzarA(326);
+
+    await waitFor(() => expect(alLlegarAlFinal).toHaveBeenCalledTimes(1));
+  });
+
+  it('en una muestra recortada no avisa', async () => {
+    const alLlegarAlFinal = vi.fn();
+    render(
+      <ReproductorYoutube
+        id={ID}
+        titulo="Pausas activas"
+        limiteSegundos={10}
+        alLlegarAlFinal={alLlegarAlFinal}
+      />
+    );
+    await vi.waitFor(() => expect(jugadores).toHaveLength(1));
+    const jugador = jugadores[0];
+    await listoYReproduciendo(jugador);
+
+    jugador.avanzarA(326);
+    await waitFor(() => expect(screen.getByText(/terminó la vista previa/i)).toBeInTheDocument());
+
+    expect(alLlegarAlFinal).not.toHaveBeenCalled();
+  });
+});

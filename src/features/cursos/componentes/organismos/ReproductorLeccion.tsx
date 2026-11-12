@@ -12,6 +12,10 @@ interface Props {
   inicio?: number;
   limiteSegundos?: number | null;
   alTerminarMuestra?: ReactNode;
+  // Avisa al llegar al tramo final del video; el reproductor incrustado no lo sabe
+  alLlegarAlFinal?: () => void;
+  // Arranca el video solo; el de YouTube ya lo hace en cuanto esta listo
+  autoReproducir?: boolean;
 }
 
 /**
@@ -25,6 +29,8 @@ export default function ReproductorLeccion({
   inicio = 0,
   limiteSegundos = null,
   alTerminarMuestra,
+  alLlegarAlFinal,
+  autoReproducir = false,
 }: Props) {
   if (tipo === 'youtube') {
     return (
@@ -34,6 +40,7 @@ export default function ReproductorLeccion({
         inicio={inicio}
         limiteSegundos={limiteSegundos}
         alTerminarMuestra={alTerminarMuestra}
+        alLlegarAlFinal={alLlegarAlFinal}
       />
     );
   }
@@ -55,6 +62,8 @@ export default function ReproductorLeccion({
       titulo={titulo}
       limiteSegundos={limiteSegundos}
       alTerminarMuestra={alTerminarMuestra}
+      alLlegarAlFinal={alLlegarAlFinal}
+      autoReproducir={autoReproducir}
     />
   );
 }

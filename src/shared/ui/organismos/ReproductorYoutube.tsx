@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import AvisoMuestraAgotada from '@/shared/ui/moleculas/AvisoMuestraAgotada';
 import { useReproductorYoutube } from '@/shared/hooks/useReproductorYoutube';
 import { formatearTiempo } from '@/shared/utilidades/youtube';
+import { estaEnElFinal } from '@/shared/utilidades/final-de-video';
 
 interface Props {
   id: string;
@@ -12,6 +13,8 @@ interface Props {
   limiteSegundos?: number | null;
   // Que mostrar cuando la muestra termina
   alTerminarMuestra?: ReactNode;
+  // Se avisa una vez al llegar al tramo final, aunque se haya saltado hasta ahi
+  alLlegarAlFinal?: () => void;
 }
 
 // Tras este tiempo sin mover el raton, los controles se esconden mientras se reproduce
@@ -34,8 +37,10 @@ export default function ReproductorYoutube({
   inicio = 0,
   limiteSegundos = null,
   alTerminarMuestra,
+  alLlegarAlFinal,
 }: Props) {
   const marcoRef = useRef<HTMLDivElement>(null);
+  const avisado = useRef(false);
   const contenedorRef = useRef<HTMLDivElement>(null);
   const temporizador = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [controlesVisibles, setControlesVisibles] = useState(true);
@@ -99,6 +104,19 @@ export default function ReproductorYoutube({
     mostrarControles();
     accion();
   };
+
+  // Al llegar al tramo final la parte ya cuenta como vista, una sola vez
+  useEffect(() => {
+    avisado.current = false;
+  }, [id]);
+
+  useEffect(() => {
+    if (limiteSegundos !== null || avisado.current) return;
+    if (!estaEnElFinal(actual, duracion)) return;
+
+    avisado.current = true;
+    alLlegarAlFinal?.();
+  }, [actual, duracion, limiteSegundos, alLlegarAlFinal]);
 
   // La muestra se detiene sola al llegar al limite; lo que sigue solo lo tiene quien compro
   const muestraAgotada = limiteSegundos !== null && actual >= limiteSegundos;

@@ -1,11 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PaginaAulaCurso from './PaginaAulaCurso';
 import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
 import * as cursosApi from '@/features/cursos/servicios/cursos.api';
 import * as leccionesApi from '@/features/cursos/servicios/lecciones.api';
+import * as aprendizajeApi from '@/features/aprendizaje/servicios/aprendizaje.api';
 import * as autenticacionApi from '@/features/autenticacion/servicios/autenticacion.api';
 import * as youtubeApi from '@/shared/servicios/youtube-api';
 import { crearYoutubeFalso } from '@/pruebas/youtube-falso';
@@ -15,6 +16,7 @@ import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 import type { Leccion, Temario } from '@/features/cursos/tipos/leccion.tipos';
 
 vi.mock('@/features/cursos/servicios/cursos.api');
+vi.mock('@/features/aprendizaje/servicios/aprendizaje.api');
 vi.mock('@/features/cursos/servicios/lecciones.api');
 vi.mock('@/features/autenticacion/servicios/autenticacion.api');
 vi.mock('@/shared/servicios/youtube-api');
@@ -83,6 +85,30 @@ const temario = (lecciones: Leccion[], tieneAcceso = true): Temario => ({
   lecciones,
 });
 
+// El avance del alumno: por defecto, sin ninguna parte vista
+const progreso = (vistas: string[] = [], certificado: null | { codigo: string } = null) => ({
+  cursoUuid: UUID,
+  curso: curso.name,
+  partes: [parte(), segunda].map((p) => ({
+    uuid: p.uuid,
+    titulo: p.titulo,
+    posicion: p.posicion,
+    vista: vistas.includes(p.uuid),
+  })),
+  vistas: vistas.length,
+  total: 2,
+  completado: vistas.length === 2,
+  certificado: certificado
+    ? {
+        codigo: certificado.codigo,
+        nombre: 'Ana Quispe',
+        curso: curso.name,
+        duracionMinutos: 150,
+        emitidoEl: '2026-11-04T12:00:00.000Z',
+      }
+    : null,
+});
+
 const renderizar = () =>
   render(
     <AutenticacionProveedor>
@@ -110,6 +136,10 @@ beforeEach(() => {
   vi.mocked(cursosApi.obtenerCursoApi).mockResolvedValue(curso);
   vi.mocked(leccionesApi.obtenerTemarioApi).mockResolvedValue(temario([parte(), segunda]));
   vi.mocked(youtubeApi.cargarApiYoutube).mockResolvedValue(crearYoutubeFalso().api);
+  vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(progreso());
+  vi.mocked(aprendizajeApi.marcarParteVistaApi).mockImplementation(async (_curso, leccion) =>
+    progreso([leccion])
+  );
 });
 
 describe('aula del curso', () => {
@@ -223,5 +253,189 @@ describe('quien no deberia estar en el aula', () => {
       'href',
       '/panel-de-cursos'
     );
+  });
+});
+
+describe('avance del alumno y certificado', () => {
+  beforeEach(() => {
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(progreso());
+    vi.mocked(aprendizajeApi.marcarParteVistaApi).mockImplementation(async (_curso, leccion) =>
+      progreso([leccion])
+    );
+  });
+
+  it('marca la parte como vista y lo guarda en el servidor', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    await usuario.click(screen.getByRole('button', { name: /marcar como vista/i }));
+
+    expect(aprendizajeApi.marcarParteVistaApi).toHaveBeenCalledWith(UUID, parte().uuid);
+    expect(await screen.findByRole('button', { name: /parte vista/i })).toBeDisabled();
+  });
+
+  it('una parte ya vista llega marcada y no se vuelve a guardar', async () => {
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(progreso([parte().uuid]));
+    renderizar();
+
+    expect(await screen.findByRole('button', { name: /parte vista/i })).toBeDisabled();
+    expect(aprendizajeApi.marcarParteVistaApi).not.toHaveBeenCalled();
+  });
+
+  // El certificado solo aparece con el curso entero visto
+  it('sin terminar el curso no se ofrece el certificado', async () => {
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    expect(screen.queryByRole('link', { name: /certificado/i })).not.toBeInTheDocument();
+  });
+
+  it('al ver todas las partes ofrece obtener el certificado', async () => {
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(
+      progreso([parte().uuid, segunda.uuid])
+    );
+    renderizar();
+
+    expect(await screen.findByText(/terminaste el curso/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /obtener certificado/i })).toHaveAttribute(
+      'href',
+      `/cursos/${UUID}/certificado`
+    );
+  });
+
+  it('con el certificado ya emitido lo dice y lleva a verlo', async () => {
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(
+      progreso([parte().uuid, segunda.uuid], { codigo: 'HY-ABCD1234' })
+    );
+    renderizar();
+
+    expect(await screen.findByText(/HY-ABCD1234/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /ver certificado/i })).toBeInTheDocument();
+  });
+
+  // Si el avance no carga, el curso tiene que verse igual
+  it('si falla el avance el curso se sigue viendo', async () => {
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockRejectedValue(new Error('sin conexión'));
+    renderizar();
+
+    expect(await screen.findByRole('list', { name: /partes del curso/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /marcar como vista/i })).not.toBeInTheDocument();
+  });
+});
+
+describe('paso automatico a la siguiente parte', () => {
+  // El reproductor avisa cuando el video llega a su tramo final
+  const llegarAlFinalDelVideo = async () => {
+    const video = screen.getByLabelText(/^Reproductor: /) as HTMLVideoElement;
+    video.pause = vi.fn();
+    Object.defineProperty(video, 'duration', { value: 600, configurable: true });
+    Object.defineProperty(video, 'currentTime', { value: 599, writable: true, configurable: true });
+    await act(async () => {
+      fireEvent.timeUpdate(video);
+    });
+  };
+
+  // jsdom no reproduce: se vigila la llamada que haria arrancar el video
+  const reproducir = vi.fn();
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  beforeEach(() => {
+    reproducir.mockReset();
+    vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(reproducir);
+    // Solo la preferencia: limpiar todo borraria la marca de sesion
+    window.localStorage.removeItem('hycon.aula.autoavance');
+    vi.mocked(aprendizajeApi.obtenerProgresoApi).mockResolvedValue(progreso());
+    vi.mocked(aprendizajeApi.marcarParteVistaApi).mockImplementation(async (_curso, leccion) =>
+      progreso([leccion])
+    );
+  });
+
+  it('la opcion viene apagada y se puede encender', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    const interruptor = await screen.findByRole('switch', { name: /siguiente parte/i });
+
+    expect(interruptor).not.toBeChecked();
+    await usuario.click(interruptor);
+
+    expect(interruptor).toBeChecked();
+    expect(window.localStorage.getItem('hycon.aula.autoavance')).toBe('1');
+  });
+
+  it('la opcion se recuerda al volver', async () => {
+    window.localStorage.setItem('hycon.aula.autoavance', '1');
+    renderizar();
+
+    expect(await screen.findByRole('switch', { name: /siguiente parte/i })).toBeChecked();
+  });
+
+  // Llegar al final marca la parte, se haya saltado o no
+  it('al llegar al final la parte queda vista sin tocar nada', async () => {
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    await llegarAlFinalDelVideo();
+
+    expect(aprendizajeApi.marcarParteVistaApi).toHaveBeenCalledWith(UUID, parte().uuid);
+  });
+
+  it('con la opcion apagada no pasa a la siguiente', async () => {
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+
+    await llegarAlFinalDelVideo();
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(parte().titulo);
+  });
+
+  it('con la opcion encendida salta a la siguiente parte', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+    await usuario.click(screen.getByRole('switch', { name: /siguiente parte/i }));
+
+    await llegarAlFinalDelVideo();
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(segunda.titulo);
+  });
+
+  // Al saltar solo, la parte siguiente tiene que empezar sin pulsar play
+  it('la parte a la que salta empieza sola', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+    await usuario.click(screen.getByRole('switch', { name: /siguiente parte/i }));
+
+    await llegarAlFinalDelVideo();
+
+    expect(reproducir).toHaveBeenCalled();
+  });
+
+  // Elegir parte a mano no arranca nada: manda quien mira
+  it('al elegir una parte en el temario no empieza sola', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    const lista = within(await screen.findByRole('list', { name: /partes del curso/i }));
+
+    await usuario.click(lista.getByRole('button', { name: /evaluación de puestos/i }));
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(segunda.titulo);
+    expect(reproducir).not.toHaveBeenCalled();
+  });
+
+  it('en la ultima parte no hay a donde saltar', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('list', { name: /partes del curso/i });
+    await usuario.click(screen.getByRole('switch', { name: /siguiente parte/i }));
+    await usuario.click(screen.getByRole('button', { name: /siguiente parte$/i }));
+
+    await llegarAlFinalDelVideo();
+
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(segunda.titulo);
   });
 });

@@ -1,17 +1,26 @@
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { RUTAS, rutaCursoDetalle } from '@/app/rutas/rutas';
+import { RUTAS, rutaCertificadoCurso, rutaCursoDetalle } from '@/app/rutas/rutas';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import { obtenerCursoApi } from '@/features/cursos/servicios/cursos.api';
 import { obtenerTemarioApi } from '@/features/cursos/servicios/lecciones.api';
+import {
+  marcarParteVistaApi,
+  obtenerProgresoApi,
+} from '@/features/aprendizaje/servicios/aprendizaje.api';
 import ReproductorLeccion from '@/features/cursos/componentes/organismos/ReproductorLeccion';
 import BarraLateralAula from '@/features/aprendizaje/componentes/organismos/BarraLateralAula';
 import { fuenteDeLeccion, inicioDeLeccion } from '@/features/cursos/utilidades/video-leccion';
 import { formatearDuracion } from '@/shared/utilidades/formato';
+import {
+  guardarAutoavance,
+  leerAutoavance,
+} from '@/features/aprendizaje/utilidades/preferencias-aula';
 import { esUuid } from '@/shared/utilidades/identificador';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 import type { Leccion, Temario } from '@/features/cursos/tipos/leccion.tipos';
+import type { ProgresoCurso } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
 
 // Un curso sin partes se ve igual: su propio video pasa a ser la unica parte
 const comoParte = (curso: Curso): Leccion[] =>
@@ -45,6 +54,11 @@ export default function PaginaAulaCurso() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activaUuid, setActivaUuid] = useState<string | null>(null);
+  const [progreso, setProgreso] = useState<ProgresoCurso | null>(null);
+  const [marcando, setMarcando] = useState(false);
+  const [autoavance, setAutoavance] = useState(leerAutoavance);
+  // Solo el salto automatico arranca el video: al elegir parte a mano se espera al play
+  const [autoReproducir, setAutoReproducir] = useState(false);
   const [panelAbierto, setPanelAbierto] = useState(true);
 
   useEffect(() => {
@@ -64,11 +78,14 @@ export default function PaginaAulaCurso() {
     Promise.all([
       obtenerCursoApi(uuid, controlador.signal),
       obtenerTemarioApi(uuid, controlador.signal),
+      // El avance es opcional: si falla, el curso se ve igual
+      obtenerProgresoApi(uuid, controlador.signal).catch(() => null),
     ])
-      .then(([detalle, contenido]) => {
+      .then(([detalle, contenido, avance]) => {
         if (!vigente) return;
         setCurso(detalle);
         setTemario(contenido);
+        setProgreso(avance);
         setActivaUuid(contenido.lecciones[0]?.uuid ?? detalle.uuid);
       })
       .catch((fallo: unknown) => {
@@ -131,9 +148,37 @@ export default function PaginaAulaCurso() {
   const actual: Leccion | undefined = partes[indice];
   const fuente = fuenteDeLeccion(actual);
 
-  const irA = (destino: number) => {
+  const vistas = progreso?.partes.filter((parte) => parte.vista).map((parte) => parte.uuid) ?? [];
+  const actualVista = actual ? vistas.includes(actual.uuid) : false;
+
+  const marcarVista = async ({ avanzar = false } = {}) => {
+    if (!actual) return;
+
+    if (!actualVista && !marcando) {
+      setMarcando(true);
+      try {
+        setProgreso(await marcarParteVistaApi(uuid, actual.uuid));
+      } catch {
+        // Si no se pudo guardar la marca, el curso se sigue viendo igual
+      } finally {
+        setMarcando(false);
+      }
+    }
+
+    // El salto solo ocurre con la opcion activada y si queda parte siguiente
+    if (avanzar && indice < partes.length - 1) irA(indice + 1, { reproducir: true });
+  };
+
+  const cambiarAutoavance = (activo: boolean) => {
+    setAutoavance(activo);
+    guardarAutoavance(activo);
+  };
+
+  const irA = (destino: number, { reproducir = false } = {}) => {
     const parte = partes[destino];
-    if (parte) setActivaUuid(parte.uuid);
+    if (!parte) return;
+    setAutoReproducir(reproducir);
+    setActivaUuid(parte.uuid);
   };
 
   return (
@@ -143,7 +188,11 @@ export default function PaginaAulaCurso() {
           cursoNombre={curso.name}
           partes={partes}
           activaUuid={actual?.uuid ?? null}
-          onElegir={(parte) => setActivaUuid(parte.uuid)}
+          vistas={vistas}
+          onElegir={(parte) => {
+            setAutoReproducir(false);
+            setActivaUuid(parte.uuid);
+          }}
           onCerrar={() => setPanelAbierto(false)}
         />
       )}
@@ -192,6 +241,9 @@ export default function PaginaAulaCurso() {
                 fuente={fuente}
                 titulo={actual.titulo}
                 inicio={inicioDeLeccion(actual)}
+                // Al llegar al tramo final la parte ya cuenta como vista
+                alLlegarAlFinal={() => void marcarVista({ avanzar: autoavance })}
+                autoReproducir={autoReproducir}
               />
             </div>
           ) : (
@@ -235,7 +287,73 @@ export default function PaginaAulaCurso() {
                 {actual.descripcion}
               </p>
             )}
+
+            {/* La marca de parte vista es la que suma para el certificado */}
+            {progreso && actual && (
+              <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <button
+                type="button"
+                onClick={() => void marcarVista()}
+                disabled={actualVista || marcando}
+                className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-[13px] font-medium transition-colors ${
+                  actualVista
+                    ? 'cursor-default bg-hy-5 text-primary'
+                    : 'border border-g-30 text-g-70 hover:border-primary hover:text-primary'
+                }`}
+              >
+                <Icon
+                  icon={actualVista ? 'solar:check-circle-bold' : 'solar:check-circle-linear'}
+                  width="17"
+                  height="17"
+                  aria-hidden
+                />
+                {actualVista ? 'Parte vista' : marcando ? 'Guardando...' : 'Marcar como vista'}
+              </button>
+
+              {/* Con esto puesto, al acabar el video se pasa solo a la siguiente parte */}
+              <label className="inline-flex cursor-pointer items-center gap-2.5 text-[13px] text-g-60">
+                <input
+                  type="checkbox"
+                  role="switch"
+                  checked={autoavance}
+                  onChange={(evento) => cambiarAutoavance(evento.target.checked)}
+                  className="h-4 w-4 accent-hy-60"
+                />
+                Pasar a la siguiente parte automáticamente
+              </label>
+              </div>
+            )}
           </section>
+
+          {/* Al ver todas las partes se ofrece el certificado */}
+          {progreso?.completado && (
+            <section className="mt-4 flex flex-col gap-3 bg-hy-5 px-5 py-5 ring-1 ring-hy-20 sm:flex-row sm:items-center sm:justify-between sm:rounded-2xl sm:px-7">
+              <div className="flex items-start gap-3">
+                <span
+                  aria-hidden
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-primary"
+                >
+                  <Icon icon="solar:diploma-verified-linear" width="21" height="21" />
+                </span>
+                <div>
+                  <p className="text-[15px] font-semibold text-g-90">Terminaste el curso</p>
+                  <p className="mt-0.5 text-[13px] text-g-60">
+                    {progreso.certificado
+                      ? `Tu certificado ${progreso.certificado.codigo} ya está emitido.`
+                      : 'Ya puedes pedir tu certificado con tu nombre.'}
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                to={rutaCertificadoCurso(uuid)}
+                className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-[13.5px] font-medium text-white transition-colors hover:bg-marca-oscuro"
+              >
+                <Icon icon="solar:diploma-linear" width="17" height="17" aria-hidden />
+                {progreso.certificado ? 'Ver certificado' : 'Obtener certificado'}
+              </Link>
+            </section>
+          )}
 
           <nav
             aria-label="Ir a otra parte"

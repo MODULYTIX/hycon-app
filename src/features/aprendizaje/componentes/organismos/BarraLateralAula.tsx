@@ -6,6 +6,8 @@ interface Props {
   cursoNombre: string;
   partes: Leccion[];
   activaUuid: string | null;
+  // Partes que el alumno ya marco como vistas
+  vistas?: string[];
   onElegir: (parte: Leccion) => void;
   onCerrar: () => void;
 }
@@ -15,6 +17,7 @@ export default function BarraLateralAula({
   cursoNombre,
   partes,
   activaUuid,
+  vistas = [],
   onElegir,
   onCerrar,
 }: Props) {
@@ -71,6 +74,7 @@ export default function BarraLateralAula({
       <ol aria-label="Partes del curso" className="p-2">
         {partes.map((parte, indice) => {
           const esActiva = parte.uuid === activaUuid;
+          const yaVista = vistas.includes(parte.uuid);
 
           return (
             <li key={parte.uuid}>
@@ -114,11 +118,20 @@ export default function BarraLateralAula({
                 </span>
 
                 <Icon
-                  icon={esActiva ? 'solar:play-circle-bold' : 'solar:play-circle-linear'}
+                  icon={
+                    yaVista
+                      ? 'solar:check-circle-bold'
+                      : esActiva
+                        ? 'solar:play-circle-bold'
+                        : 'solar:play-circle-linear'
+                  }
                   width="17"
                   height="17"
-                  aria-hidden
-                  className={`mt-0.5 shrink-0 ${esActiva ? 'text-primary' : 'text-g-30'}`}
+                  aria-label={yaVista ? 'Parte vista' : undefined}
+                  aria-hidden={yaVista ? undefined : true}
+                  className={`mt-0.5 shrink-0 ${
+                    yaVista ? 'text-primary' : esActiva ? 'text-primary' : 'text-g-30'
+                  }`}
                 />
               </button>
             </li>
