@@ -34,13 +34,13 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
           )}
 
           {enOferta && (
-            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[9px] font-semibold tracking-[0.08em] text-g-90">
+            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[length:var(--hy-texto-nota)] font-semibold tracking-[0.08em] text-g-90">
               OFERTA
             </span>
           )}
 
           {sinStock && (
-            <span className="absolute right-4 top-4 bg-g-90/85 px-3 py-1.5 text-[10.5px] font-medium tracking-wide text-white">
+            <span className="absolute right-4 top-4 bg-g-90/85 px-3 py-1.5 text-[length:var(--hy-texto-nota)] font-medium tracking-wide text-white">
               Sin stock
             </span>
           )}
@@ -48,18 +48,18 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
 
         <div className="flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4">
           {referencia && (
-            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">{referencia}</p>
+            <p className="text-[length:var(--hy-texto-nota)] font-medium uppercase tracking-[0.14em] text-primary">{referencia}</p>
           )}
 
-          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug tracking-tight text-g-90">
+          <h3 className="line-clamp-2 text-[length:var(--hy-titulo-menor)] font-semibold leading-snug tracking-tight text-g-90">
             {producto.name}
           </h3>
 
           {producto.description && (
-            <p className="line-clamp-2 text-[12px] leading-relaxed text-g-50">{producto.description}</p>
+            <p className="line-clamp-2 text-[length:var(--hy-texto-control)] leading-relaxed text-g-50">{producto.description}</p>
           )}
 
-          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] text-g-50">
+          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[length:var(--hy-texto-control)] text-g-50">
             {producto.color && (
               <span className="inline-flex items-center gap-1.5">
                 <Icon icon="solar:palette-linear" width="14" height="14" aria-hidden />
@@ -71,15 +71,15 @@ export default function TarjetaProducto({ producto }: { producto: Producto }) {
 
           <div className="flex items-end justify-between gap-3 border-t border-g-20 pt-3">
             <div>
-              <p className="text-[19px] font-semibold leading-none text-primary">
+              <p className="text-[length:var(--hy-titulo-seccion)] font-semibold leading-none text-primary">
                 {formatearPrecio(enOferta ? (producto.discountPrice as number) : producto.price)}
               </p>
               {enOferta && (
-                <p className="mt-1 text-[12px] text-g-50 line-through">{formatearPrecio(producto.price)}</p>
+                <p className="mt-1 text-[length:var(--hy-texto-control)] text-g-50 line-through">{formatearPrecio(producto.price)}</p>
               )}
             </div>
 
-            <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
+            <span className="inline-flex items-center gap-1 text-[length:var(--hy-texto-control)] font-medium text-g-70 transition-colors group-hover:text-primary">
               Ver detalle
               <Icon
                 icon="solar:arrow-right-linear"

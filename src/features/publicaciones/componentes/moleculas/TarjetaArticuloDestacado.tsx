@@ -45,11 +45,11 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
           horizontal ? 'md:justify-center md:border-l md:border-t-0 md:p-7' : ''
         }`}
       >
-        <span className="w-fit bg-hy-10 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-primary">
+        <span className="w-fit bg-hy-10 px-2 py-1 text-[length:var(--hy-texto-nota)] font-bold uppercase tracking-[0.16em] text-primary">
           {etiqueta}
         </span>
 
-        <h2 className="text-[15px] font-semibold leading-snug tracking-tight text-g-90 sm:text-[16px]">
+        <h2 className="text-[length:var(--hy-titulo-menor)] font-semibold leading-snug tracking-tight text-g-90">
           <Link
             to={rutaPublicacionDetalle(publicacion.slug)}
             className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
@@ -60,11 +60,11 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
 
         <MetaArticulo publicacion={publicacion} />
 
-        <p className="line-clamp-2 text-[12px] leading-relaxed text-g-60">{resumenDe(publicacion, 200)}</p>
+        <p className="line-clamp-2 text-[length:var(--hy-texto-control)] leading-relaxed text-g-60">{resumenDe(publicacion, 200)}</p>
 
         <Link
           to={rutaPublicacionDetalle(publicacion.slug)}
-          className="mt-1 inline-flex h-9 w-fit items-center gap-1.5 rounded-lg bg-primary px-4 text-[12px] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-lg bg-primary px-4 text-[length:var(--hy-texto-control)] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           Leer artículo completo
           <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />

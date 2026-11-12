@@ -1,7 +1,8 @@
 import CatalogoConFiltros from '@/shared/ui/plantillas/CatalogoConFiltros';
 import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
 import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import Paginador from '@/shared/ui/moleculas/Paginador';
 import RejillaProductos from '@/features/productos/componentes/organismos/RejillaProductos';
@@ -9,7 +10,23 @@ import { listarProductosApi } from '@/features/productos/servicios/productos.api
 import { useListadoPaginado } from '@/shared/hooks/useListadoPaginado';
 
 export default function PaginaProductos() {
-  const { filtros, clave, aplicar } = useFiltrosListado();
+  const [parametros, actualizarParametros] = useSearchParams();
+  const busquedaInicial = (parametros.get('buscar') || '').trim().slice(0, 120);
+  const { filtros, clave, aplicar } = useFiltrosListado(busquedaInicial ? { buscar: busquedaInicial } : {});
+  const omitirLimpieza = useRef(false);
+  const primeraLectura = useRef(true);
+  useEffect(() => {
+    if (primeraLectura.current) { primeraLectura.current = false; return; }
+    if (omitirLimpieza.current) { omitirLimpieza.current = false; return; }
+    aplicar(busquedaInicial ? { buscar: busquedaInicial } : {});
+  }, [busquedaInicial, aplicar]);
+  const aplicarFiltros = (valores: Parameters<typeof aplicar>[0]) => {
+    aplicar(valores);
+    if (busquedaInicial) {
+      omitirLimpieza.current = true;
+      actualizarParametros({}, { replace: true });
+    }
+  };
   // El catalogo publico solo pide los activos
   const cargar = useCallback(
     (pagina: number, senal: AbortSignal) => listarProductosApi('active', pagina, senal, 12, filtros),
@@ -33,7 +50,7 @@ export default function PaginaProductos() {
       titulo="Productos"
       descripcion="Brindamos equipamiento de uso ergonómico para tu personal administrativo y opertivo."
     >
-      <CatalogoConFiltros filtros={<FiltrosListado modulo="productos" onAplicar={aplicar} />}>
+      <CatalogoConFiltros filtros={<FiltrosListado modulo="productos" busquedaInicial={busquedaInicial} onAplicar={aplicarFiltros} />}>
         <RejillaProductos
           filtrado={Boolean(clave)}
           productos={elementos}

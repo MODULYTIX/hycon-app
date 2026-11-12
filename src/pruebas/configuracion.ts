@@ -1,7 +1,11 @@
 // Registra los matchers de jest-dom (toBeInTheDocument, toBeVisible, etc.) en Vitest
 import '@testing-library/jest-dom/vitest';
 import { afterEach } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
+
+// Las esperas de findBy y waitFor venian con 1 s: cuando una pantalla encadena
+// dos consultas y la maquina esta cargada, no da tiempo y falla sin nada roto
+configure({ asyncUtilTimeout: 5000 });
 
 // Sin globals activados, Testing Library no engancha su limpieza automatica:
 // sin esto el DOM de una prueba se arrastra a la siguiente

@@ -35,7 +35,7 @@ export default function Boton({
       type={type}
       disabled={disabled || cargando}
       aria-busy={cargando || undefined}
-      className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-[14px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hy-60 disabled:cursor-not-allowed disabled:opacity-60 ${VARIANTES[variante]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-[length:var(--hy-texto-control)] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hy-60 disabled:cursor-not-allowed disabled:opacity-60 ${VARIANTES[variante]} ${className}`}
       {...props}
     >
       {cargando ? (

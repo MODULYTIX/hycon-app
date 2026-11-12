@@ -11,7 +11,7 @@ export const RUTAS = {
   certificadoCurso: '/cursos/:uuid/certificado',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
-  // acercaDe: '/acerca-de',
+  acercaDe: '/acerca-de',
   contactanos: '/contactanos',
   carrito: '/carrito',
   perfil: '/perfil',

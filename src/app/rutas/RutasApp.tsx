@@ -20,7 +20,7 @@ import PaginaCursos from '@/features/cursos/paginas/PaginaCursos';
 import PaginaDetalleCurso from '@/features/cursos/paginas/PaginaDetalleCurso';
 import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
 import PaginaDetallePublicacion from '@/features/publicaciones/paginas/PaginaDetallePublicacion';
-// import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
+import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaCarrito from '@/features/carrito/paginas/PaginaCarrito';
 import PaginaMisCompras from '@/features/pedidos/paginas/PaginaMisCompras';
 import PaginaPerfil from '@/features/perfil/paginas/PaginaPerfil';
@@ -57,8 +57,7 @@ export default function RutasApp() {
           <Route path={RUTAS.cursoDetalle} element={<PaginaDetalleCurso />} />
           <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
           <Route path={RUTAS.publicacionDetalle} element={<PaginaDetallePublicacion />} />
-          {/* Acerca de queda fuera del sitio: la ruta esta comentada en rutas.ts
-          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} /> */}
+          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
           <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
 
           <Route path={RUTAS.carrito} element={<PaginaCarrito />} />

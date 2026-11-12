@@ -1,8 +1,10 @@
-import { Link } from 'react-router-dom';
-import HyconLogo from '@/assets/images/logo_ergonomia.png'
+import { Link, useLocation } from 'react-router-dom';
+import HyconLogo from '@/assets/images/home/logo-transparente.png';
+
 import AccesoCuenta from '@/features/autenticacion/componentes/organismos/AccesoCuenta';
 import NavegacionPrincipal from '@/shared/ui/organismos/NavegacionPrincipal';
 import { RUTAS } from '@/app/rutas/rutas';
+import './sitio-publico.css';
 
 // 'publico' lleva la barra de secciones del sitio.
 // 'panel' reutiliza la misma cabecera sin esa barra, porque dentro del panel
@@ -16,20 +18,22 @@ export default function Encabezado({
   variante?: VarianteEncabezado;
 }) {
   const esPanel = variante === 'panel';
+  const esHome = useLocation().pathname === RUTAS.home && variante === 'publico';
 
   return (
-    <header className="flex w-full flex-col">
-      {/* El color sale de --color-encabezado en index.css */}
-      <div className="flex h-[74px] items-center justify-between bg-encabezado px-4 text-encabezado-texto sm:px-10">
-        <Link to={RUTAS.home} className="shrink-0  outline-encabezado-texto scale-100" aria-label="Ir al inicio">
-          <img src={HyconLogo} alt="Hycon" className="w-36 p-2" draggable="false" />
+    <header className={esHome ? 'hy-header hy-header-home' : 'hy-header'}>
+      <div className="hy-header-inner">
+        <Link to={RUTAS.home} className="hy-header-logo" aria-label="Ir al inicio">
+          <img src={HyconLogo} alt="Hycon" draggable="false" />
         </Link>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        {!esPanel && variante !== 'sin-navegacion' && <NavegacionPrincipal />}
+
+        <div className="hy-header-cuenta">
           {esPanel && (
             <Link
               to={RUTAS.home}
-              className="hidden rounded-full bg-g-70 px-6 py-2 text-[15px] font-medium text-white transition-colors hover:bg-g-80 sm:block"
+              className="hy-header-ver-sitio"
             >
               Ver sitio
             </Link>
@@ -38,8 +42,6 @@ export default function Encabezado({
           <AccesoCuenta />
         </div>
       </div>
-
-      {!esPanel && variante !== 'sin-navegacion' && <NavegacionPrincipal />}
     </header>
   );
 }

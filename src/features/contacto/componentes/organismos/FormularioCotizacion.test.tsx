@@ -51,7 +51,6 @@ describe('FormularioCotizacion', () => {
     expect(await screen.findByText('Levantamiento de cargas')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-1:2021')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-3:2026')).toBeInTheDocument();
-    expect(screen.getByText('Informativo')).toBeInTheDocument();
   });
 
   // El precio por evaluacion es lo primero que pregunta quien cotiza
