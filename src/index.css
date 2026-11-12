@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+/* Escala de lectura para controles y pantallas de trabajo. */
+:root {
+    --hy-texto-nota: 0.75rem;
+    --hy-texto-secundario: 0.8125rem;
+    --hy-texto-control: 0.875rem;
+    --hy-texto-base: 1rem;
+    --hy-titulo-menor: 1.125rem;
+    --hy-titulo-seccion: 1.375rem;
+    --hy-titulo-pagina: clamp(1.625rem, 1.3rem + 1vw, 2.25rem);
+}
+
+
 /* Si la cabecera y las acciones dejan muy poco espacio, el formulario completo
    se desplaza con el fondo del modal. Así no hay dos scrolls ni controles cortados. */
 @media (max-height: 400px) {

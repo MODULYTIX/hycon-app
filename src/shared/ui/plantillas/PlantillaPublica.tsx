@@ -9,11 +9,11 @@ import PiePagina from '@/shared/ui/organismos/PiePagina';
 export default function PlantillaPublica() {
   const esHome = useLocation().pathname === '/';
   return (
-    <div className="flex min-h-screen w-full flex-col">
+    <div className={`flex min-h-screen w-full flex-col ${esHome ? 'hy-portada' : ''}`}>
       {esHome && <Hero />}
       <Encabezado />
 
-      <main className={esHome ? undefined : 'flex-1'}>
+      <main className={esHome ? 'hy-portada-contenido' : 'flex-1'}>
         <Outlet />
       </main>
 

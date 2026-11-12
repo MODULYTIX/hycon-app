@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
 
 interface Props {
@@ -83,7 +84,9 @@ export default function Modal({
 
   const idConfirmacion = `${idTitulo}-confirmar`;
 
-  return (
+  // El desenfoque del encabezado crea su propio bloque para elementos fijos.
+  // Montar el modal en el body lo posiciona respecto a la pantalla.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-g-90/60 p-3 backdrop-blur-sm animate-fadeIn sm:p-4"
       onMouseDown={(evento) => {
@@ -156,6 +159,7 @@ export default function Modal({
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

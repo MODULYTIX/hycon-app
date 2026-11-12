@@ -10,7 +10,7 @@ import '../../paginas/home.css';
 const escenas = [
   { imagen: hero, nombre: 'Tu espacio de trabajo' },
   { imagen: escritorio, nombre: 'Un escritorio a tu medida' },
-  { imagen: ambiente, nombre: 'Comodidad para cada jornada' },
+  { imagen: ambiente, nombre: 'Comodidad para cada jornada', invertida: true },
 ];
 
 export default function Hero() {
@@ -39,7 +39,7 @@ export default function Hero() {
     onFocusCapture={() => setInteraccion(true)}
     onBlurCapture={evento => { if (!evento.currentTarget.contains(evento.relatedTarget)) setInteraccion(false); }}>
     {escenas.map((escena, indice) => <img key={escena.imagen}
-      className={`home-hero-foto home-hero-escena ${actual === indice ? 'home-hero-escena-activa' : ''}`}
+      className={`home-hero-foto home-hero-escena ${escena.invertida ? 'home-hero-foto-invertida' : ''} ${actual === indice ? 'home-hero-escena-activa' : ''}`}
       src={escena.imagen} alt="" aria-hidden fetchPriority={indice === 0 ? 'high' : 'low'} />)}
     <div className="home-hero-sombra" />
     <div className="home-hero-contenido home-contenedor">

@@ -40,13 +40,13 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
           )}
 
           {enOferta && (
-            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[9px] font-semibold tracking-[0.08em] text-g-90">
+            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[length:var(--hy-texto-nota)] font-semibold tracking-[0.08em] text-g-90">
               OFERTA
             </span>
           )}
 
           {curso.durationMinutes !== null && (
-            <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 bg-g-90/85 px-2.5 py-1 text-[11px] font-medium text-white">
+            <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 bg-g-90/85 px-2.5 py-1 text-[length:var(--hy-texto-nota)] font-medium text-white">
               <Icon icon="solar:clock-circle-linear" width="13" height="13" aria-hidden />
               {formatearDuracion(curso.durationMinutes)}
             </span>
@@ -54,27 +54,27 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
         </div>
 
         <div className="flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4">
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">Curso</p>
+          <p className="text-[length:var(--hy-texto-nota)] font-medium uppercase tracking-[0.14em] text-primary">Curso</p>
 
-          <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug tracking-tight text-g-90">
+          <h3 className="line-clamp-2 text-[length:var(--hy-titulo-menor)] font-semibold leading-snug tracking-tight text-g-90">
             {curso.name}
           </h3>
 
           {curso.description && (
-            <p className="line-clamp-2 text-[12px] leading-relaxed text-g-50">{curso.description}</p>
+            <p className="line-clamp-2 text-[length:var(--hy-texto-control)] leading-relaxed text-g-50">{curso.description}</p>
           )}
 
           <div className="mt-auto flex items-end justify-between gap-3 border-t border-g-20 pt-3">
             <div>
-              <p className="text-[19px] font-semibold leading-none text-primary">
+              <p className="text-[length:var(--hy-titulo-seccion)] font-semibold leading-none text-primary">
                 {formatearPrecio(enOferta ? (curso.discountPrice as number) : curso.price)}
               </p>
               {enOferta && (
-                <p className="mt-1 text-[12px] text-g-50 line-through">{formatearPrecio(curso.price)}</p>
+                <p className="mt-1 text-[length:var(--hy-texto-control)] text-g-50 line-through">{formatearPrecio(curso.price)}</p>
               )}
             </div>
 
-            <span className="inline-flex items-center gap-1 text-[11.5px] font-medium text-g-70 transition-colors group-hover:text-primary">
+            <span className="inline-flex items-center gap-1 text-[length:var(--hy-texto-control)] font-medium text-g-70 transition-colors group-hover:text-primary">
               Ver detalle
               <Icon
                 icon="solar:arrow-right-linear"
@@ -93,7 +93,7 @@ export default function TarjetaCurso({ curso, onVerAvance }: Props) {
         <button
           type="button"
           onClick={() => onVerAvance?.(curso)}
-          className="flex items-center justify-center gap-2 border-t border-g-20 bg-g-5 py-2.5 text-[12px] font-medium text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
+          className="flex items-center justify-center gap-2 border-t border-g-20 bg-g-5 min-h-11 py-2.5 text-[length:var(--hy-texto-control)] font-medium text-g-70 transition-colors hover:bg-hy-5 hover:text-primary"
         >
           <Icon icon="solar:play-circle-linear" width="16" height="16" aria-hidden />
           Ver avance
