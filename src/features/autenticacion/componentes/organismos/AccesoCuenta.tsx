@@ -15,17 +15,17 @@ export default function AccesoCuenta() {
   const [modalAbierto, setModalAbierto] = useState(false);
 
   return (
-    <div className="flex items-center gap-2 sm:gap-4">
+    <div className="hy-cuenta flex items-center gap-2 sm:gap-3">
       <Link
         to={RUTAS.carrito}
         aria-label={articulos > 0 ? `Ver carrito, ${articulos} artículos` : 'Ver carrito'}
-        className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-encabezado-texto text-encabezado-texto transition-colors hover:bg-encabezado-texto/10"
+        className="hy-cart relative flex h-11 w-11 shrink-0 items-center justify-center"
       >
         <Icon icon="solar:cart-large-2-linear" width="22" height="22" />
         {articulos > 0 && (
           <span
             aria-hidden
-            className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[11px] font-bold tabular-nums text-g-90"
+            className="hy-cart-cantidad absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold tabular-nums"
           >
             {articulos > 99 ? '99+' : articulos}
           </span>
@@ -43,7 +43,7 @@ export default function AccesoCuenta() {
             type="button"
             onClick={() => setModalAbierto(true)}
             aria-label="Iniciar sesion"
-            className="flex shrink-0 items-center gap-2 rounded-full bg-g-70 px-4 py-2.5 text-[15px] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-g-80 sm:px-7"
+            className="hy-login flex shrink-0 items-center gap-2"
           >
             <Icon icon="solar:login-3-bold" width="18" height="18" aria-hidden className="sm:hidden" />
             {/* En movil el boton se reduce al icono, pero conserva su nombre accesible */}

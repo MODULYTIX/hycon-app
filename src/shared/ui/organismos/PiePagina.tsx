@@ -1,74 +1,28 @@
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { RUTAS } from '@/app/rutas/rutas';
-import LOGOHYCON from '@/assets/images/logo_hycon.webp';
+import logo from '@/assets/images/home/logo-transparente.png';
+
+const enlaces = [
+  { titulo: 'Productos', ruta: RUTAS.productos },
+  { titulo: 'Cursos', ruta: RUTAS.cursos },
+  { titulo: 'Publicaciones', ruta: RUTAS.publicaciones },
+  { titulo: 'Contáctanos', ruta: RUTAS.contactanos },
+];
 
 export default function PiePagina() {
-  return (
-    <footer className="w-full bg-primary text-white flex flex-col text-sm">
-      <div className="max-w-[1340px] mx-auto w-full p-4 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6">
-        {/* Bloque superior: logo + links */}
-        <div className="flex flex-wrap lg:flex-row items-center lg:items-start gap-16 lg:gap-48 justify-center sm:flex sm:flex-wrap md:flex md:flex-row">
-          {/* Logo */}
-          <div className="flex">
-            <img
-              src={LOGOHYCON}
-              alt="logo hycon"
-              draggable="false"
-              width={80}
-              className="p-2 outline-2 outline-white"
-            />
-          </div>
-
-          {/* Links legales y contacto */}
-          <div className="flex flex-wrap sm:flex-row gap-8 text-center lg:text-left">
-            <div>
-              <p>Términos y condiciones</p>
-              <p>Política de privacidad</p>
-              <p>Libro de reclamaciones</p>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Link to={RUTAS.contactanos} className="hover:underline">
-                Contactanos
-              </Link>
-              <Link to={RUTAS.acercaDe} className="hover:underline">
-                Acerca de
-              </Link>
-              <Link to={RUTAS.cursos} className="hover:underline">
-                Cursos
-              </Link>
-            </div>
-          </div>
+  return <footer className="hy-footer">
+    <div className="hy-footer-superior">
+      <div className="hy-footer-contenedor hy-footer-principal">
+        <div className="hy-footer-marca">
+          <Link to={RUTAS.home} aria-label="Hycon, volver al inicio"><img src={logo} alt="Hycon" /></Link>
+          <p>Equipamiento y conocimiento para trabajar con más comodidad.</p>
         </div>
-
-        {/* Redes sociales */}
-        <div className="flex flex-col items-center text-center lg:items-center">
-          <div className="font-semibold lg:flex lg:items-center lg:text-center lg:justify-center items-center sm:items-center  md:items-center">
-            <p>Nuestras redes</p>
-          </div>
-          <div className="flex gap-4 mt-1 flex-wrap justify-center lg:justify-start">
-            <a
-              href="https://www.facebook.com/profile.php?id=100063509954652"
-              className="flex items-center gap-0.5" target='_blank'>
-              <Icon icon="ic:baseline-facebook" width="16" height="16" />
-              Facebook
-            </a>
-            <p className="flex items-center gap-0.5">
-              <Icon icon="lets-icons:insta-fill" width="16" height="16" />
-              Instagram
-            </p>
-            <p className="flex items-center gap-0.5">
-              <Icon icon="mingcute:linkedin-fill" width="16" height="16" />
-              LinkedIn
-            </p>
-          </div>
-        </div>
+        <div className="hy-footer-columna"><h2>Explora</h2><ul>{enlaces.map(e => <li key={e.ruta}><Link to={e.ruta}>{e.titulo}</Link></li>)}</ul></div>
+        <div className="hy-footer-columna"><h2>Tu cuenta</h2><ul><li><Link to={RUTAS.carrito}>Carrito</Link></li><li><Link to={RUTAS.historial}>Mis compras</Link></li><li><Link to={RUTAS.panelCursos}>Mis cursos</Link></li></ul></div>
+        <div className="hy-footer-contacto"><h2>¿Necesitas ayuda para elegir?</h2><p>Conversemos sobre los productos que buscas para tu espacio de trabajo.</p><a href="https://wa.me/51902665565" target="_blank" rel="noreferrer">Escríbenos por WhatsApp <Icon icon="solar:arrow-up-right-linear" width="17" aria-hidden /></a></div>
       </div>
-
-      {/* Copyright */}
-      <div className="bg-g-80 w-full text-center h-12 flex items-center justify-center font-extralight">
-        Design copyright BizNovaTech. All rights reserved. © {new Date().getFullYear()}
-      </div>
-    </footer>
-  );
+    </div>
+    <div className="hy-footer-inferior hy-footer-contenedor"><span>© {new Date().getFullYear()} Hycon. Todos los derechos reservados.</span><span>Ergonomía para cada jornada.</span><a href="https://www.facebook.com/profile.php?id=100063509954652" target="_blank" rel="noreferrer" aria-label="Hycon en Facebook"><Icon icon="ic:baseline-facebook" width="20" aria-hidden /></a></div>
+  </footer>;
 }

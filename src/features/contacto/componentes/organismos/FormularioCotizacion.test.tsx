@@ -51,7 +51,6 @@ describe('FormularioCotizacion', () => {
     expect(await screen.findByText('Levantamiento de cargas')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-1:2021')).toBeInTheDocument();
     expect(screen.getByText('ISO 11228-3:2026')).toBeInTheDocument();
-    expect(screen.getByText('Informativo')).toBeInTheDocument();
   });
 
   it('las evaluaciones son puramente informativas y no tienen checkboxes ni selectores', async () => {

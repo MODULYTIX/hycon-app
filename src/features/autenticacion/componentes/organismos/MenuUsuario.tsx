@@ -1,6 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { Icon } from '@iconify/react';
-import AvatarUsuario from '@/features/autenticacion/componentes/atomos/AvatarUsuario';
 import ItemMenuCuenta from '@/features/autenticacion/componentes/moleculas/ItemMenuCuenta';
 import { filtrarOpcionesPorRol } from '@/features/autenticacion/utilidades/opciones-cuenta';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
@@ -42,12 +41,11 @@ export default function MenuUsuario({ usuario }: { usuario: Usuario }) {
         aria-haspopup="menu"
         aria-expanded={abierto}
         aria-controls={idMenu}
-        className="flex items-center gap-2 rounded-full py-1 pl-1 pr-2 transition-colors hover:bg-encabezado-texto/10"
+        aria-label={`Mi cuenta: ${usuario.name} ${usuario.lastname}`}
+        className="hy-cuenta-disparador"
       >
-        <AvatarUsuario usuario={usuario} />
-        <span className="hidden max-w-[160px] truncate text-[16px] font-bold text-encabezado-texto sm:inline">
-          {usuario.name} {usuario.lastname}
-        </span>
+        <Icon icon="solar:user-rounded-linear" width="21" aria-hidden />
+        <span className="hy-cuenta-etiqueta">Mi cuenta</span>
         <Icon
           icon="solar:alt-arrow-down-linear"
           width="18"
@@ -62,7 +60,7 @@ export default function MenuUsuario({ usuario }: { usuario: Usuario }) {
           id={idMenu}
           role="menu"
           aria-label="Opciones de la cuenta"
-          className="absolute right-0 top-[calc(100%+10px)] z-30 w-[288px] overflow-hidden rounded-xl border border-g-20 bg-white shadow-2xl animate-menuIn"
+          className="hy-cuenta-menu absolute right-0 top-[calc(100%+10px)] z-30 w-[288px] overflow-hidden border border-g-20 bg-white shadow-2xl animate-menuIn"
         >
           <div className="border-b border-g-20 bg-g-5 px-4 py-3">
             <p className="truncate text-[15px] font-semibold text-g-80">

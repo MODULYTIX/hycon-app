@@ -10,7 +10,7 @@ export const RUTAS = {
   aulaCurso: '/cursos/:uuid/aula',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
-  // acercaDe: '/acerca-de',
+  acercaDe: '/acerca-de',
   contactanos: '/contactanos',
   carrito: '/carrito',
   perfil: '/perfil',

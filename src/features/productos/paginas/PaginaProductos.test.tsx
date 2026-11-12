@@ -49,9 +49,9 @@ const pagina = (elementos: Producto[], extra = {}) => ({
   paginacion: { pagina: 1, porPagina: 6, total: elementos.length, totalPaginas: 1, ...extra },
 });
 
-const renderizar = () =>
+const renderizar = (ruta = '/productos') =>
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[ruta]}>
       <PaginaProductos />
     </MemoryRouter>
   );
@@ -68,6 +68,14 @@ describe('PaginaProductos (publica)', () => {
     await screen.findByText('Silla ergonomica Pro');
 
     expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, {});
+  });
+
+  it('abre una búsqueda de producto desde el home', async () => {
+    renderizar('/productos?buscar=silla');
+    await screen.findByText('Silla ergonomica Pro');
+
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, { buscar: 'silla' });
+    expect(screen.getByRole('textbox', { name: /buscar/i })).toHaveValue('silla');
   });
 
   it('muestra una tarjeta por producto', async () => {

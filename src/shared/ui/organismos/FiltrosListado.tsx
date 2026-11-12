@@ -6,12 +6,12 @@ import { Icon } from '@iconify/react';
 import type { FiltrosListado as Valores } from '@/shared/utilidades/filtros-listado';
 
 type Modulo = 'productos' | 'cursos' | 'publicaciones';
-interface Props { modulo: Modulo; admin?: boolean; onAplicar: (filtros: Valores) => void; }
-export default function FiltrosListado({ modulo, admin = false, onAplicar }: Props) {
+interface Props { modulo: Modulo; admin?: boolean; busquedaInicial?: string; onAplicar: (filtros: Valores) => void; }
+export default function FiltrosListado({ modulo, admin = false, busquedaInicial = '', onAplicar }: Props) {
   const id = useId();
   const [abierto, setAbierto] = useState(!admin);
   const [error, setError] = useState<string | null>(null);
-  const [activos, setActivos] = useState(false);
+  const [activos, setActivos] = useState(Boolean(busquedaInicial));
   const [version, setVersion] = useState(0);
   const aplicar = (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
@@ -43,7 +43,7 @@ export default function FiltrosListado({ modulo, admin = false, onAplicar }: Pro
       <div id={`${id}-contenido`} hidden={!abierto}>
       <div className={admin ? "filtros-campos grid gap-4 sm:grid-cols-2 xl:grid-cols-4" : "filtros-campos flex flex-col gap-5"}>
         <label htmlFor={`${id}-buscar`} className="text-[12px] font-medium text-g-60">Buscar
-          <EntradaBase id={`${id}-buscar`} name="buscar" maxLength={120} placeholder={modulo === 'publicaciones' ? 'Título o contenido' : 'Nombre o descripción'} className="mt-1" />
+          <EntradaBase id={`${id}-buscar`} name="buscar" maxLength={120} defaultValue={busquedaInicial} placeholder={modulo === 'publicaciones' ? 'Título o contenido' : 'Nombre o descripción'} className="mt-1" />
         </label>
         <label htmlFor={`${id}-orden`} className="text-[12px] font-medium text-g-60">Ordenar por
           <Selector id={`${id}-orden`} name="orden" aria-label="Ordenar por" className="mt-1" opciones={[{ valor: 'recientes', etiqueta: 'Más recientes' }, { valor: 'antiguos', etiqueta: 'Más antiguos' }, ...(modulo === 'publicaciones' ? [{ valor: 'leidos', etiqueta: 'Más leídos' }, { valor: 'titulo', etiqueta: 'Título: A a Z' }] : [{ valor: 'nombre', etiqueta: 'Nombre: A a Z' }, { valor: 'precio-asc', etiqueta: 'Precio de lista: menor a mayor' }, { valor: 'precio-desc', etiqueta: 'Precio de lista: mayor a menor' }])]} />

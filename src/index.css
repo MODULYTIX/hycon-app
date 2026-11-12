@@ -17,7 +17,7 @@
 @theme {
     /* colores globales. El principal sale de --color-marca (el verde del logo) */
     --color-primary: var(--color-marca);
-    --color-secondary: #ff9e1b;
+    --color-secondary: #d8b77d;
 
     /* colores grises */
     --color-g-5: #fafafa;
