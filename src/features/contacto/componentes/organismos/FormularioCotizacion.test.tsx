@@ -54,6 +54,16 @@ describe('FormularioCotizacion', () => {
     expect(screen.getByText('Informativo')).toBeInTheDocument();
   });
 
+  // El precio por evaluacion es lo primero que pregunta quien cotiza
+  it('cada evaluacion muestra su precio referencial', async () => {
+    render(<FormularioCotizacion />);
+    await screen.findByText('Levantamiento de cargas');
+
+    const lista = within(screen.getByRole('list', { name: /evaluaciones informativas/i }));
+    expect(lista.getAllByText('S/ 250.00')).toHaveLength(2);
+    expect(lista.getAllByText('S/ 200.00')).toHaveLength(2);
+  });
+
   it('las evaluaciones son puramente informativas y no tienen checkboxes ni selectores', async () => {
     render(<FormularioCotizacion />);
 

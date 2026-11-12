@@ -208,10 +208,15 @@ export default function FormularioCotizacion() {
             <span>Evaluaciones ergonómicas que realizamos</span>
           </div>
 
+          {/* Deja claro que el bloque solo informa: no se elige nada aqui */}
+          <span className="rounded-full bg-hy-10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+            Informativo
+          </span>
         </div>
 
         <p className="mt-1.5 text-[12.5px] leading-relaxed text-g-60">
-          Nuestras evaluaciones técnicas se aplican según la R.M. 375-2008-TR y metodologías ISO internacionales:
+          Nuestras evaluaciones técnicas se aplican según la R.M. 375-2008-TR y metodologías ISO internacionales.
+          Los precios son referenciales por evaluación; el alcance final se confirma al responderte.
         </p>
 
         <ul aria-label="Evaluaciones informativas" className="mt-3 grid gap-2.5 sm:grid-cols-2">
@@ -227,8 +232,13 @@ export default function FormularioCotizacion() {
                 <span className="block text-[13px] font-medium leading-snug text-g-90">
                   {evaluacion.nombre}
                 </span>
-                <span className="block mt-0.5 text-[11.5px] font-mono text-primary font-medium">
-                  {evaluacion.norma}
+                <span className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-[11.5px] font-mono font-medium text-primary">
+                    {evaluacion.norma}
+                  </span>
+                  <span className="text-[12.5px] font-semibold tabular-nums text-g-80">
+                    {formatearPrecio(evaluacion.precio)}
+                  </span>
                 </span>
               </div>
             </li>

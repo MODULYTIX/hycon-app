@@ -12,7 +12,7 @@ const renderizar = (ruta = '/') =>
   );
 
 describe('NavegacionPrincipal', () => {
-  it('muestra las seis secciones del sitio en orden', () => {
+  it('muestra las secciones del sitio en orden', () => {
     renderizar();
 
     const enlaces = screen.getAllByRole('link');
@@ -21,7 +21,6 @@ describe('NavegacionPrincipal', () => {
       'PRODUCTOS',
       'CURSOS',
       'PUBLICACIONES',
-      'ACERCA DE',
       'CONTACTANOS',
     ]);
   });

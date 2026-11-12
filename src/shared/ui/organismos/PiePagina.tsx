@@ -31,9 +31,10 @@ export default function PiePagina() {
               <Link to={RUTAS.contactanos} className="hover:underline">
                 Contactanos
               </Link>
+              {/* Acerca de esta fuera del sitio mientras la ruta siga comentada
               <Link to={RUTAS.acercaDe} className="hover:underline">
                 Acerca de
-              </Link>
+              </Link> */}
               <Link to={RUTAS.cursos} className="hover:underline">
                 Cursos
               </Link>
