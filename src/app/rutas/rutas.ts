@@ -8,6 +8,7 @@ export const RUTAS = {
   cursoDetalle: '/cursos/:uuid',
   // Donde se ve un curso ya comprado, con su temario al lado
   aulaCurso: '/cursos/:uuid/aula',
+  certificadoCurso: '/cursos/:uuid/certificado',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
   // acercaDe: '/acerca-de',
@@ -28,6 +29,7 @@ export const rutaProductoDetalle = (uuid: string) => `/productos/${uuid}`;
 export const rutaEmpresaErgo = (id: string) => `/software-ergonomico/empresas/${id}`;
 export const rutaCursoDetalle = (uuid: string) => `/cursos/${uuid}`;
 export const rutaAulaCurso = (uuid: string) => `/cursos/${uuid}/aula`;
+export const rutaCertificadoCurso = (uuid: string) => `/cursos/${uuid}/certificado`;
 export const rutaPublicacionDetalle = (slug: string) => `/publicaciones/${slug}`;
 
 export interface EnlaceNavegacion {

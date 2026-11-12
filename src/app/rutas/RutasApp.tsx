@@ -20,12 +20,13 @@ import PaginaCursos from '@/features/cursos/paginas/PaginaCursos';
 import PaginaDetalleCurso from '@/features/cursos/paginas/PaginaDetalleCurso';
 import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
 import PaginaDetallePublicacion from '@/features/publicaciones/paginas/PaginaDetallePublicacion';
-import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
+// import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaCarrito from '@/features/carrito/paginas/PaginaCarrito';
 import PaginaMisCompras from '@/features/pedidos/paginas/PaginaMisCompras';
 import PaginaPerfil from '@/features/perfil/paginas/PaginaPerfil';
 import PaginaMisCursos from '@/features/aprendizaje/paginas/PaginaMisCursos';
 import PaginaAulaCurso from '@/features/aprendizaje/paginas/PaginaAulaCurso';
+import PaginaCertificado from '@/features/aprendizaje/paginas/PaginaCertificado';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 const PaginaPanelProductos = lazy(() => import('@/features/administracion/paginas/PaginaPanelProductos'));
 const PaginaPanelCursos = lazy(() => import('@/features/administracion/paginas/PaginaPanelCursos'));
@@ -56,7 +57,8 @@ export default function RutasApp() {
           <Route path={RUTAS.cursoDetalle} element={<PaginaDetalleCurso />} />
           <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
           <Route path={RUTAS.publicacionDetalle} element={<PaginaDetallePublicacion />} />
-          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
+          {/* Acerca de queda fuera del sitio: la ruta esta comentada en rutas.ts
+          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} /> */}
           <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
 
           <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
@@ -74,6 +76,7 @@ export default function RutasApp() {
           <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
           {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
           <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
+          <Route path={RUTAS.certificadoCurso} element={<PaginaCertificado />} />
           <Route path={RUTAS.empresaErgo} element={<PaginaEmpresaErgo />} />
         </Route>
 

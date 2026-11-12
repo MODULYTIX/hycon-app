@@ -37,6 +37,10 @@ const logistica: CursoComprado = {
   thumbnailUrl: null,
   durationMinutes: 150,
   compradoEl: '2026-10-07T12:00:00.000Z',
+  partes: 3,
+  vistas: 0,
+  completado: false,
+  certificado: null,
 };
 
 // Respuesta del backend: siempre con su paginacion
@@ -253,5 +257,60 @@ describe('los filtros ocupan poco mientras no se usan', () => {
     await usuario.click(screen.getByRole('button', { name: /filtrar mis cursos/i }));
 
     expect(screen.getByRole('status')).toHaveTextContent('1 filtro activo');
+  });
+});
+
+describe('avance y certificado en la tarjeta', () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    conSesion();
+  });
+
+  it('muestra cuantas partes lleva vistas', async () => {
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(
+      pagina([{ ...logistica, partes: 3, vistas: 2 }])
+    );
+    renderizar();
+
+    const tarjeta = (await screen.findByRole('heading', { name: logistica.name })).closest(
+      'li'
+    ) as HTMLElement;
+    expect(within(tarjeta).getByText('2 de 3 partes')).toBeInTheDocument();
+    expect(within(tarjeta).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
+  });
+
+  // El certificado solo se ofrece con el curso terminado
+  it('sin terminar el curso no ofrece certificado', async () => {
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(
+      pagina([{ ...logistica, partes: 3, vistas: 1 }])
+    );
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+
+    expect(screen.queryByRole('link', { name: /certificado/i })).not.toBeInTheDocument();
+  });
+
+  it('al terminarlo ofrece obtener el certificado', async () => {
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(
+      pagina([{ ...logistica, partes: 3, vistas: 3, completado: true }])
+    );
+    renderizar();
+
+    expect(await screen.findByRole('link', { name: /obtener certificado/i })).toHaveAttribute(
+      'href',
+      `/cursos/${logistica.uuid}/certificado`
+    );
+    expect(screen.getByText('Terminado')).toBeInTheDocument();
+  });
+
+  it('con el certificado emitido lleva a verlo', async () => {
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(
+      pagina([
+        { ...logistica, partes: 3, vistas: 3, completado: true, certificado: 'HY-ABCD1234' },
+      ])
+    );
+    renderizar();
+
+    expect(await screen.findByRole('link', { name: /ver certificado/i })).toBeInTheDocument();
   });
 });

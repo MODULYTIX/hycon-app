@@ -7,7 +7,7 @@ import PaginaHome from '@/features/home/paginas/PaginaHome';
 import PaginaProductos from '@/features/productos/paginas/PaginaProductos';
 import PaginaCursos from '@/features/cursos/paginas/PaginaCursos';
 import PaginaPublicaciones from '@/features/publicaciones/paginas/PaginaPublicaciones';
-import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
+// import PaginaAcercaDe from '@/features/acerca-de/paginas/PaginaAcercaDe';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 import PaginaNoEncontrada from '@/app/rutas/PaginaNoEncontrada';
 import AutenticacionProveedor from '@/features/autenticacion/contexto/AutenticacionProveedor';
@@ -29,7 +29,6 @@ const renderizar = (ruta: string = RUTAS.home) =>
             <Route path={RUTAS.productos} element={<PaginaProductos />} />
             <Route path={RUTAS.cursos} element={<PaginaCursos />} />
             <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
-            <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
             <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
             <Route path="*" element={<PaginaNoEncontrada />} />
           </Route>
@@ -65,14 +64,6 @@ describe('rutas publicas', () => {
     }
   });
 
-  it('acerca de reune quienes somos, por que elegirnos y alcance', () => {
-    renderizar(RUTAS.acercaDe);
-
-    expect(screen.getByRole('heading', { name: /acerca de hycon/i, level: 1 })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /qui[eé]nes somos/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /por qu[eé] elegirnos/i })).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /alcance en arequipa/i })).toBeInTheDocument();
-  });
 
   it('contactanos muestra la cotizacion de evaluaciones', () => {
     renderizar(RUTAS.contactanos);

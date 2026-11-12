@@ -79,6 +79,8 @@
     --color-marca-oscuro: var(--color-hy-70);
     --color-encabezado: var(--color-marca);
     --color-encabezado-texto: #ffffff;
+    /* El papel del certificado: crema, para que no parezca una pantalla impresa */
+    --color-certificado-papel: #fdfcf6;
 
     /* Fonts */
     --font-BostNoBillsColombo: BostNoBillsColombo;
@@ -566,4 +568,37 @@ body::-webkit-scrollbar {
 .filtros-admin .filtro-precio legend {
     padding-inline: 4px;
     margin-bottom: 2px;
+}
+
+/* Al imprimir el certificado solo sale la lamina: ni menus, ni botones, ni pie */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .lamina-certificado,
+  .lamina-certificado * {
+    visibility: visible;
+  }
+
+  .lamina-certificado {
+    /* Sin esto el navegador imprime el marco y el papel en blanco */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    max-width: none;
+    box-shadow: none;
+    --tw-ring-color: transparent;
+  }
+
+  .sin-imprimir {
+    display: none !important;
+  }
 }

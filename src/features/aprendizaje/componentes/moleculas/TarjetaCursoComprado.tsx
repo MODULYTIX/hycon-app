@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
-import { rutaAulaCurso } from '@/app/rutas/rutas';
+import { rutaAulaCurso, rutaCertificadoCurso } from '@/app/rutas/rutas';
 import { formatearDuracion, formatearFecha } from '@/shared/utilidades/formato';
 import { miniaturaYoutube } from '@/shared/utilidades/youtube';
 import type { CursoComprado } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
@@ -54,7 +54,36 @@ export default function TarjetaCursoComprado({ curso }: { curso: CursoComprado }
           <p className="line-clamp-2 text-[13px] leading-relaxed text-g-50">{curso.description}</p>
         )}
 
-        <p className="mt-auto pt-2 text-[12px] text-g-50">
+        {curso.partes > 0 && (
+          <div className="mt-auto pt-2">
+            <p className="flex items-center justify-between gap-2 text-[12px] text-g-50">
+              <span>
+                {curso.vistas} de {curso.partes} {curso.partes === 1 ? 'parte' : 'partes'}
+              </span>
+              {curso.completado && (
+                <span className="inline-flex items-center gap-1 font-medium text-primary">
+                  <Icon icon="solar:check-circle-bold" width="13" height="13" aria-hidden />
+                  Terminado
+                </span>
+              )}
+            </p>
+            <div
+              role="progressbar"
+              aria-label={`Avance de ${curso.name}`}
+              aria-valuenow={curso.vistas}
+              aria-valuemin={0}
+              aria-valuemax={curso.partes}
+              className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-g-10"
+            >
+              <div
+                className="h-full bg-primary"
+                style={{ width: `${Math.round((curso.vistas / curso.partes) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <p className="pt-2 text-[12px] text-g-50">
           Comprado el {formatearFecha(curso.compradoEl)}
         </p>
 
@@ -65,6 +94,17 @@ export default function TarjetaCursoComprado({ curso }: { curso: CursoComprado }
           <Icon icon="solar:play-circle-linear" width="16" height="16" aria-hidden />
           Entrar al curso
         </Link>
+
+        {/* El certificado aparece al terminar todas las partes */}
+        {(curso.completado || curso.certificado) && (
+          <Link
+            to={rutaCertificadoCurso(curso.uuid)}
+            className="mt-2 inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-g-30 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary"
+          >
+            <Icon icon="solar:diploma-linear" width="16" height="16" aria-hidden />
+            {curso.certificado ? 'Ver certificado' : 'Obtener certificado'}
+          </Link>
+        )}
       </div>
     </li>
   );
