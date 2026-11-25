@@ -1,6 +1,6 @@
 import { parametrosFiltros, type FiltrosListado } from '@/shared/utilidades/filtros-listado';
 import { peticion } from '@/shared/utilidades/cliente-http';
-import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
+import { paginaDe, type Pagina, type Paginacion } from '@/shared/utilidades/paginacion';
 import { POR_PAGINA, type EstadoListado } from '@/features/productos/servicios/productos.api';
 import type {
   DatosPublicacion,
@@ -27,7 +27,7 @@ export const listarPublicacionesApi = (
   peticion<{ publicaciones: Publicacion[]; paginacion: Paginacion }>(
     `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}&orden=${filtros.orden ?? orden}${parametrosFiltros({ ...filtros, orden: undefined })}`,
     { senal }
-  ).then((r) => ({ elementos: r.publicaciones, paginacion: r.paginacion }));
+  ).then((r) => paginaDe(r.publicaciones, r.paginacion));
 
 // La web publica pide por slug; esa lectura suma al contador del articulo
 export const obtenerPublicacionApi = (slug: string, senal?: AbortSignal) =>

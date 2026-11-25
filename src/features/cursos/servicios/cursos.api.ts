@@ -1,6 +1,6 @@
 import { parametrosFiltros, type FiltrosListado } from '@/shared/utilidades/filtros-listado';
 import { peticion } from '@/shared/utilidades/cliente-http';
-import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
+import { paginaDe, type Pagina, type Paginacion } from '@/shared/utilidades/paginacion';
 import type { Curso, DatosCurso } from '@/features/cursos/tipos/curso.tipos';
 import { POR_PAGINA, type EstadoListado } from '@/features/productos/servicios/productos.api';
 
@@ -16,7 +16,7 @@ export const listarCursosApi = (
   peticion<{ cursos: Curso[]; paginacion: Paginacion }>(
     `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}${parametrosFiltros(filtros)}`,
     { senal }
-  ).then((r) => ({ elementos: r.cursos, paginacion: r.paginacion }));
+  ).then((r) => paginaDe(r.cursos, r.paginacion));
 
 export const obtenerCursoApi = (uuid: string, senal?: AbortSignal) =>
   peticion<{ curso: Curso }>(`${BASE}/${uuid}`, { senal }).then((r) => r.curso);

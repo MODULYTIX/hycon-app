@@ -3,6 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import DesplazarAlInicio from '@/app/rutas/DesplazarAlInicio';
 import RutaSoloAdmin from '@/app/rutas/RutaSoloAdmin';
 import PaginaNoEncontrada from '@/app/rutas/PaginaNoEncontrada';
+import LimiteDeError from '@/app/errores/LimiteDeError';
 import { RUTAS } from '@/app/rutas/rutas';
 
 import PlantillaPublica from '@/shared/ui/plantillas/PlantillaPublica';
@@ -46,55 +47,58 @@ export default function RutasApp() {
     <BrowserRouter>
       <DesplazarAlInicio />
 
-      <Suspense fallback={<CargandoPantalla />}>
-        <Routes>
-        {/* Sitio publico: encabezado, navegacion y pie compartidos por todas las paginas */}
-        <Route element={<PlantillaPublica />}>
-          <Route path={RUTAS.home} element={<PaginaHome />} />
-          <Route path={RUTAS.productos} element={<PaginaProductos />} />
-          <Route path={RUTAS.productoDetalle} element={<PaginaDetalleProducto />} />
-          <Route path={RUTAS.cursos} element={<PaginaCursos />} />
-          <Route path={RUTAS.cursoDetalle} element={<PaginaDetalleCurso />} />
-          <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
-          <Route path={RUTAS.publicacionDetalle} element={<PaginaDetallePublicacion />} />
-          <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
-          <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
+      {/* Ultimo recurso: cubre tambien un fallo del propio layout */}
+      <LimiteDeError>
+        <Suspense fallback={<CargandoPantalla />}>
+          <Routes>
+          {/* Sitio publico: encabezado, navegacion y pie compartidos por todas las paginas */}
+          <Route element={<PlantillaPublica />}>
+            <Route path={RUTAS.home} element={<PaginaHome />} />
+            <Route path={RUTAS.productos} element={<PaginaProductos />} />
+            <Route path={RUTAS.productoDetalle} element={<PaginaDetalleProducto />} />
+            <Route path={RUTAS.cursos} element={<PaginaCursos />} />
+            <Route path={RUTAS.cursoDetalle} element={<PaginaDetalleCurso />} />
+            <Route path={RUTAS.publicaciones} element={<PaginaPublicaciones />} />
+            <Route path={RUTAS.publicacionDetalle} element={<PaginaDetallePublicacion />} />
+            <Route path={RUTAS.acercaDe} element={<PaginaAcercaDe />} />
+            <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
 
-          <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
+            <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
 
-          {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
-          <Route path={RUTAS.perfil} element={<PaginaPerfil />} />
-          <Route path={RUTAS.historial} element={<PaginaMisCompras />} />
-          <Route path={RUTAS.panelCursos} element={<PaginaMisCursos />} />
+            {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
+            <Route path={RUTAS.perfil} element={<PaginaPerfil />} />
+            <Route path={RUTAS.historial} element={<PaginaMisCompras />} />
+            <Route path={RUTAS.panelCursos} element={<PaginaMisCursos />} />
 
-          <Route path="*" element={<PaginaNoEncontrada />} />
-        </Route>
+            <Route path="*" element={<PaginaNoEncontrada />} />
+          </Route>
 
-        {/* Layout sin navegacion principal para flujos especificos */}
-        <Route element={<PlantillaSinNavegacion />}>
-          <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
-          {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
-          <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
-          <Route path={RUTAS.certificadoCurso} element={<PaginaCertificado />} />
-          <Route path={RUTAS.empresaErgo} element={<PaginaEmpresaErgo />} />
-        </Route>
+          {/* Layout sin navegacion principal para flujos especificos */}
+          <Route element={<PlantillaSinNavegacion />}>
+            <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
+            {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
+            <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
+            <Route path={RUTAS.certificadoCurso} element={<PaginaCertificado />} />
+            <Route path={RUTAS.empresaErgo} element={<PaginaEmpresaErgo />} />
+          </Route>
 
-        {/* Panel de administracion: layout propio con barra lateral */}
-        <Route
-          path={RUTAS.panel}
-          element={
-            <RutaSoloAdmin>
-              <PlantillaPanel />
-            </RutaSoloAdmin>
-          }
-        >
-          <Route index element={<Navigate to="productos" replace />} />
-          <Route path="productos" element={<PaginaPanelProductos />} />
-          <Route path="cursos" element={<PaginaPanelCursos />} />
-          <Route path="publicaciones" element={<PaginaPanelPublicaciones />} />
-        </Route>
-        </Routes>
-      </Suspense>
+          {/* Panel de administracion: layout propio con barra lateral */}
+          <Route
+            path={RUTAS.panel}
+            element={
+              <RutaSoloAdmin>
+                <PlantillaPanel />
+              </RutaSoloAdmin>
+            }
+          >
+            <Route index element={<Navigate to="productos" replace />} />
+            <Route path="productos" element={<PaginaPanelProductos />} />
+            <Route path="cursos" element={<PaginaPanelCursos />} />
+            <Route path="publicaciones" element={<PaginaPanelPublicaciones />} />
+          </Route>
+          </Routes>
+        </Suspense>
+      </LimiteDeError>
     </BrowserRouter>
   );
 }

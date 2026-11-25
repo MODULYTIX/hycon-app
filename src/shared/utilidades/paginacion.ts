@@ -18,6 +18,16 @@ export const PAGINACION_INICIAL: Paginacion = {
   totalPaginas: 1,
 };
 
+// El backend siempre manda la lista y sus metadatos; si alguna vez llegara otra cosa
+// la pantalla se queda vacia en vez de romperse al recorrerla
+export const paginaDe = <T,>(
+  lista: T[] | undefined,
+  paginacion: Paginacion | undefined
+): Pagina<T> => ({
+  elementos: Array.isArray(lista) ? lista : [],
+  paginacion: typeof paginacion?.totalPaginas === 'number' ? paginacion : PAGINACION_INICIAL,
+});
+
 export type ElementoPaginador = number | 'hueco';
 
 // Siempre devuelve como mucho 7 posiciones para que el paginador no cambie de ancho

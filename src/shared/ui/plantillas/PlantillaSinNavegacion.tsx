@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Encabezado from '@/shared/ui/organismos/Encabezado';
 import PiePagina from '@/shared/ui/organismos/PiePagina';
+import LimiteDeError from '@/app/errores/LimiteDeError';
 // import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
 
 // Layout para vistas que no deben mostrar la navegación principal,
@@ -11,7 +12,9 @@ export default function PlantillaSinNavegacion() {
       <Encabezado variante="sin-navegacion" />
 
       <main className="flex-1 bg-g-10">
-        <Outlet />
+        <LimiteDeError>
+          <Outlet />
+        </LimiteDeError>
       </main>
 
       <PiePagina />

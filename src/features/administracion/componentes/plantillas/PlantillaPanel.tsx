@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Encabezado from '@/shared/ui/organismos/Encabezado';
 import BarraLateral from '@/features/administracion/componentes/organismos/BarraLateral';
+import LimiteDeError from '@/app/errores/LimiteDeError';
 
 // Layout del panel. Se monta una sola vez: al cambiar de seccion React solo
 // sustituye lo que hay dentro del Outlet, no el encabezado ni la barra lateral.
@@ -15,7 +16,9 @@ export default function PlantillaPanel() {
 
         <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-9 lg:px-10">
           <div className="mx-auto w-full max-w-[1180px]">
-            <Outlet />
+            <LimiteDeError>
+              <Outlet />
+            </LimiteDeError>
           </div>
         </main>
       </div>

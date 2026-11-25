@@ -1,6 +1,6 @@
 import { peticion } from '@/shared/utilidades/cliente-http';
 import { parametrosCuenta, type FiltrosCuenta } from '@/shared/utilidades/filtros-listado';
-import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
+import { paginaDe, type Pagina, type Paginacion } from '@/shared/utilidades/paginacion';
 import type { ItemPedido, MetodoPago, Pedido } from '@/features/pedidos/tipos/pedido.tipos';
 
 const BASE = '/api/v1/orders';
@@ -23,4 +23,4 @@ export const listarMisPedidosApi = (
   peticion<{ pedidos: Pedido[]; paginacion: Paginacion }>(
     `${BASE}/mios?pagina=${pagina}&porPagina=${POR_PAGINA}${parametrosCuenta(filtros)}`,
     { autenticada: true, senal }
-  ).then((r) => ({ elementos: r.pedidos, paginacion: r.paginacion }));
+  ).then((r) => paginaDe(r.pedidos, r.paginacion));

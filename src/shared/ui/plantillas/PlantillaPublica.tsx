@@ -2,6 +2,7 @@ import Hero from '@/features/home/componentes/organismos/Hero';
 import { Outlet, useLocation } from 'react-router-dom';
 import Encabezado from '@/shared/ui/organismos/Encabezado';
 import PiePagina from '@/shared/ui/organismos/PiePagina';
+import LimiteDeError from '@/app/errores/LimiteDeError';
 // import { BotonWhatsapp } from '@/features/contacto/componentes/atomos/BotonWhatsapp';
 
 // Layout del sitio publico. Se monta una vez: al cambiar de seccion solo
@@ -14,7 +15,10 @@ export default function PlantillaPublica() {
       <Encabezado />
 
       <main className={esHome ? 'hy-portada-contenido' : 'flex-1'}>
-        <Outlet />
+        {/* Si la pantalla se rompe, el menu y el pie siguen aqui */}
+        <LimiteDeError>
+          <Outlet />
+        </LimiteDeError>
       </main>
 
       <PiePagina />

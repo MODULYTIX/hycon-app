@@ -1,6 +1,6 @@
 import { peticion } from '@/shared/utilidades/cliente-http';
 import { parametrosCuenta, type FiltrosCuenta } from '@/shared/utilidades/filtros-listado';
-import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
+import { paginaDe, type Pagina, type Paginacion } from '@/shared/utilidades/paginacion';
 import type {
   Certificado,
   CursoComprado,
@@ -18,7 +18,7 @@ export const listarMisCursosApi = (
   peticion<{ cursos: CursoComprado[]; paginacion: Paginacion }>(
     `/api/v1/lms/mis-cursos?pagina=${pagina}&porPagina=${POR_PAGINA}${parametrosCuenta(filtros)}`,
     { autenticada: true, senal }
-  ).then((r) => ({ elementos: r.cursos, paginacion: r.paginacion }));
+  ).then((r) => paginaDe(r.cursos, r.paginacion));
 
 const BASE_CURSO = (cursoUuid: string) => `/api/v1/lms/cursos/${cursoUuid}`;
 

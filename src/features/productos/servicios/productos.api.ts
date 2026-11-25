@@ -1,6 +1,6 @@
 import { parametrosFiltros, type FiltrosListado } from '@/shared/utilidades/filtros-listado';
 import { peticion } from '@/shared/utilidades/cliente-http';
-import type { Pagina, Paginacion } from '@/shared/utilidades/paginacion';
+import { paginaDe, type Pagina, type Paginacion } from '@/shared/utilidades/paginacion';
 import type {
   AgenciaEnvio,
   DatosProducto,
@@ -25,7 +25,7 @@ export const listarProductosApi = (
   peticion<{ productos: Producto[]; paginacion: Paginacion }>(
     `${BASE}?estado=${estado}&pagina=${pagina}&porPagina=${porPagina}${parametrosFiltros(filtros)}`,
     { senal }
-  ).then((r) => ({ elementos: r.productos, paginacion: r.paginacion }));
+  ).then((r) => paginaDe(r.productos, r.paginacion));
 
 export const listarAgenciasApi = (senal?: AbortSignal) =>
   peticion<{ agencias: AgenciaEnvio[] }>('/api/v1/catalog/shipping-agencies', { senal }).then(
