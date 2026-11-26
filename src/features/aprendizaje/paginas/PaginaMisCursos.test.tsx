@@ -85,16 +85,15 @@ describe('PaginaMisCursos', () => {
     conSesion();
     renderizar();
 
-    const tarjeta = (await screen.findByRole('heading', { name: logistica.name })).closest(
+    const fila = (await screen.findByRole('heading', { name: logistica.name })).closest(
       'li'
     ) as HTMLElement;
-    const curso = within(tarjeta);
+    const curso = within(fila);
 
-    expect(curso.getByText('Con acceso')).toBeInTheDocument();
-    expect(curso.getByText('2 h 30 min')).toBeInTheDocument();
     expect(curso.getByText(/comprado el 07\/10\/2026/i)).toBeInTheDocument();
+    expect(curso.getByText(/2 h 30 min/)).toBeInTheDocument();
     // Un curso comprado entra directo al aula, no a la ficha donde se vende
-    expect(curso.getByRole('link', { name: /entrar al curso/i })).toHaveAttribute(
+    expect(curso.getByRole('link', { name: /empezar curso/i })).toHaveAttribute(
       'href',
       `/cursos/${logistica.uuid}/aula`
     );
@@ -260,7 +259,7 @@ describe('los filtros ocupan poco mientras no se usan', () => {
   });
 });
 
-describe('avance y certificado en la tarjeta', () => {
+describe('avance y certificado en la fila', () => {
   beforeEach(() => {
     window.localStorage.clear();
     conSesion();
@@ -272,11 +271,12 @@ describe('avance y certificado en la tarjeta', () => {
     );
     renderizar();
 
-    const tarjeta = (await screen.findByRole('heading', { name: logistica.name })).closest(
+    const fila = (await screen.findByRole('heading', { name: logistica.name })).closest(
       'li'
     ) as HTMLElement;
-    expect(within(tarjeta).getByText('2 de 3 partes')).toBeInTheDocument();
-    expect(within(tarjeta).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
+    expect(within(fila).getByText('2 de 3 partes')).toBeInTheDocument();
+    expect(within(fila).getByText(/67% completado/)).toBeInTheDocument();
+    expect(within(fila).getByRole('progressbar')).toHaveAttribute('aria-valuenow', '2');
   });
 
   // El certificado solo se ofrece con el curso terminado
@@ -310,7 +310,120 @@ describe('avance y certificado en la tarjeta', () => {
       ])
     );
     renderizar();
+    const lista = within(await screen.findByRole('list', { name: /mis cursos/i }));
 
-    expect(await screen.findByRole('link', { name: /ver certificado/i })).toBeInTheDocument();
+    // El lateral tambien lo enlaza: aqui interesa el de la fila
+    expect(lista.getByRole('link', { name: /ver certificado/i })).toBeInTheDocument();
   });
 });
+
+describe('panel de mis cursos', () => {
+  const terminado: CursoComprado = {
+    ...logistica,
+    uuid: '0f4c3a0e-8f5f-4f0a-9a0e-2f3b4c5d6e7f',
+    name: 'Ergonomia en almacen',
+    partes: 2,
+    vistas: 2,
+    completado: true,
+    certificado: 'HY-ABCD1234',
+  };
+
+  beforeEach(() => {
+    window.localStorage.clear();
+    conSesion();
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(pagina([logistica, terminado]));
+  });
+
+  it('saluda por el nombre de quien entra', async () => {
+    renderizar();
+
+    expect(await screen.findByRole('heading', { level: 1, name: /ana/i })).toBeInTheDocument();
+  });
+
+  // Al entrar se ven todos: esconder los terminados de entrada sorprende
+  it('empieza mostrando todos los cursos', async () => {
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+
+    expect(screen.getByRole('heading', { name: terminado.name })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /todos/i })).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('la pestana Terminados deja solo los acabados', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+
+    await usuario.click(screen.getByRole('tab', { name: /terminados/i }));
+
+    expect(screen.getByRole('heading', { name: terminado.name })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: logistica.name })).not.toBeInTheDocument();
+  });
+
+  it('la pestana En curso deja solo los que faltan por terminar', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+
+    await usuario.click(screen.getByRole('tab', { name: /en curso/i }));
+
+    expect(screen.getByRole('heading', { name: logistica.name })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: terminado.name })).not.toBeInTheDocument();
+  });
+
+  it('cada pestana dice cuantos cursos tiene', async () => {
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+
+    expect(screen.getByRole('tab', { name: /todos/i })).toHaveTextContent('2');
+    expect(screen.getByRole('tab', { name: /en curso/i })).toHaveTextContent('1');
+    expect(screen.getByRole('tab', { name: /terminados/i })).toHaveTextContent('1');
+  });
+
+  // El resumen cuenta sobre todos los cursos, no sobre la pestana abierta
+  it('el resumen lateral no cambia al filtrar', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+    const lateral = within(screen.getByRole('complementary', { name: /resumen/i }));
+
+    await usuario.click(screen.getByRole('tab', { name: /terminados/i }));
+
+    expect(lateral.getByText('Por terminar').previousSibling).toHaveTextContent('1');
+    expect(lateral.getByText('Terminados').previousSibling).toHaveTextContent('1');
+    expect(lateral.getByText('Certificados').previousSibling).toHaveTextContent('1');
+  });
+
+  it('el lateral enlaza los certificados que ya tiene', async () => {
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+    const lateral = within(screen.getByRole('complementary', { name: /resumen/i }));
+
+    expect(lateral.getByRole('link', { name: /ver certificado/i })).toHaveAttribute(
+      'href',
+      `/cursos/${terminado.uuid}/certificado`
+    );
+  });
+
+  it('sin ningun certificado el lateral lo explica', async () => {
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(pagina([logistica]));
+    renderizar();
+    await screen.findByRole('heading', { name: logistica.name });
+    const lateral = within(screen.getByRole('complementary', { name: /resumen/i }));
+
+    expect(lateral.getByText(/puedes emitir su certificado/i)).toBeInTheDocument();
+  });
+
+  it('con todo terminado la pestana En curso lo dice', async () => {
+    const usuario = userEvent.setup();
+    vi.mocked(api.listarMisCursosApi).mockResolvedValue(pagina([terminado]));
+    renderizar();
+    await screen.findByRole('heading', { name: terminado.name });
+
+    await usuario.click(screen.getByRole('tab', { name: /en curso/i }));
+
+    expect(screen.getByText(/no tienes cursos pendientes/i)).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /ver los cursos/i })).not.toBeInTheDocument();
+  });
+});
+

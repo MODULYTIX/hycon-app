@@ -7,7 +7,9 @@ import type {
   ProgresoCurso,
 } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
 
-export const POR_PAGINA = 6;
+// Los cursos de una cuenta son unas decenas: caben en una pagina y asi las
+// pestanas cuentan sobre todos, no sobre un trozo
+export const POR_PAGINA = 50;
 
 /** Los cursos comprados: el backend filtra, ordena y pagina. */
 export const listarMisCursosApi = (
