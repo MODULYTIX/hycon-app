@@ -1,0 +1,32 @@
+# Copia master a la cuenta de despliegue cada vez que se sube algo aqui.
+# Mientras no exista la variable REPO_DESPLIEGUE no hace nada, asi que se puede
+# tener puesto sin configurar.
+name: Espejo a despliegue
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  copiar:
+    if: vars.REPO_DESPLIEGUE != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # El espejo necesita el historial entero, no el ultimo commit
+          fetch-depth: 0
+
+      - name: Empujar a la cuenta de despliegue
+        env:
+          TOKEN: ${{ secrets.TOKEN_DESPLIEGUE }}
+          DESTINO: ${{ vars.REPO_DESPLIEGUE }}
+        run: |
+          if [ -z "$TOKEN" ]; then
+            echo "Falta el secreto TOKEN_DESPLIEGUE"
+            exit 1
+          fi
+          # El destino es solo para desplegar: siempre queda igual que este repo
+          git push --force "https://x-access-token:${TOKEN}@github.com/${DESTINO}.git" HEAD:master
+          git push --force --tags "https://x-access-token:${TOKEN}@github.com/${DESTINO}.git"
