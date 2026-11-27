@@ -12,6 +12,9 @@ import type { ProductoDetalle } from '@/features/productos/tipos/producto.tipos'
 const UUID_7 = '00000007-0000-4000-8000-000000000000';
 
 vi.mock('@/features/productos/servicios/productos.api');
+vi.mock('@/features/autenticacion/hooks/useAutenticacion', () => ({
+  useAutenticacion: () => ({ usuario: { userId: 1 }, cargando: false }),
+}));
 
 const producto: ProductoDetalle = {
   uuid: UUID_7,

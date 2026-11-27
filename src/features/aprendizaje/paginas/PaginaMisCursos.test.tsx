@@ -150,7 +150,8 @@ describe('filtros y paginacion de mis cursos', () => {
 
     await abrirFiltros(usuario);
     await usuario.type(screen.getByLabelText(/buscar/i), 'ergonomia');
-    await usuario.selectOptions(screen.getByLabelText(/ordenar por/i), 'nombre');
+    await usuario.click(screen.getByRole('combobox', { name: /ordenar por/i }));
+    await usuario.click(screen.getByRole('option', { name: 'Nombre: A a Z' }));
     await usuario.click(screen.getByRole('button', { name: /aplicar filtros/i }));
 
     await waitFor(() =>

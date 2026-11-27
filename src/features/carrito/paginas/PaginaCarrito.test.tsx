@@ -129,6 +129,7 @@ describe('PaginaCarrito', () => {
   });
 
   it('sube y baja unidades, y recalcula el total', async () => {
+    conSesion();
     const usuario = userEvent.setup({ delay: null });
     agregarAlCarrito({ tipo: 'producto', uuid: CAJA, cantidad: 1 }, 3);
     renderizar();
@@ -139,6 +140,7 @@ describe('PaginaCarrito', () => {
 
     await waitFor(() => expect(leerCarrito()[0].cantidad).toBe(2));
     expect(resumen.getByText(/39\.80/)).toBeInTheDocument();
+    expect(screen.getByText(/Ahorras .*12\.00/)).toBeInTheDocument();
 
     await usuario.click(screen.getByRole('button', { name: `Una unidad menos de ${caja.name}` }));
 
@@ -164,7 +166,12 @@ describe('PaginaCarrito', () => {
     renderizar();
     const fila = (await screen.findByRole('heading', { name: caja.name })).closest('li') as HTMLElement;
 
+    await usuario.click(within(fila).getByRole('button', { name: `Una unidad menos de ${caja.name}` }));
+    expect(leerCarrito()[0].cantidad).toBe(1);
+    await usuario.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(leerCarrito()[0].cantidad).toBe(1);
     await usuario.click(within(fila).getByRole('button', { name: `Quitar ${caja.name} del carrito` }));
+    await usuario.click(screen.getByRole('button', { name: 'Sí, quitar' }));
 
     await waitFor(() => expect(screen.queryByRole('heading', { name: caja.name })).not.toBeInTheDocument());
     expect(leerCarrito()).toEqual([{ tipo: 'curso', uuid: CURSO, cantidad: 1 }]);

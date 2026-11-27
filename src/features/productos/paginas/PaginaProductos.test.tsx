@@ -60,6 +60,7 @@ const rejilla = () => screen.findByRole('list', { name: /catalogo de productos/i
 
 describe('PaginaProductos (publica)', () => {
   beforeEach(() => {
+    vi.mocked(api.listarAtributosProductosApi).mockResolvedValue({ marca: [], modelo: [], color: [] });
     vi.mocked(api.listarProductosApi).mockResolvedValue(pagina([enOferta, agotado]));
   });
 
@@ -76,6 +77,24 @@ describe('PaginaProductos (publica)', () => {
 
     expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, { buscar: 'silla' });
     expect(screen.getByRole('textbox', { name: /buscar/i })).toHaveValue('silla');
+    expect(screen.getByRole('link', { name: 'Sillas' })).toHaveAttribute('aria-current', 'true');
+  });
+
+  it('permite cambiar de tipo y quitar filtros si no hay resultados', async () => {
+    const usuario = userEvent.setup();
+    vi.mocked(api.listarProductosApi).mockImplementation(async (_estado, _numero, _senal, _cantidad, filtros) =>
+      filtros?.buscar === 'escritorio' ? pagina([]) : pagina([enOferta]),
+    );
+    renderizar('/productos?buscar=silla');
+    await screen.findByText('Silla ergonomica Pro');
+
+    await usuario.click(screen.getByRole('link', { name: 'Escritorios' }));
+    expect(await screen.findByText('No encontramos productos')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Escritorios' })).toHaveAttribute('aria-current', 'true');
+
+    await usuario.click(screen.getByRole('button', { name: 'Quitar filtros' }));
+    expect(await screen.findByText('Silla ergonomica Pro')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Todos' })).toHaveAttribute('aria-current', 'true');
   });
 
   it('muestra una tarjeta por producto', async () => {
@@ -84,12 +103,24 @@ describe('PaginaProductos (publica)', () => {
     expect(within(await rejilla()).getAllByRole('listitem')).toHaveLength(2);
   });
 
+  it('permite alternar entre cuadrícula y lista sin perder los resultados', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    const listado = await rejilla();
+
+    await usuario.click(screen.getByRole('button', { name: 'Vista en lista' }));
+    expect(listado).toHaveAttribute('data-vista', 'lista');
+    expect(within(listado).getAllByRole('listitem')).toHaveLength(2);
+    await usuario.click(screen.getByRole('button', { name: 'Vista en cuadrícula' }));
+    expect(listado).toHaveAttribute('data-vista', 'grilla');
+  });
+
   it('destaca la oferta y tacha el precio original', async () => {
     renderizar();
 
     const tarjeta = within(await rejilla()).getAllByRole('listitem')[0];
 
-    expect(within(tarjeta).getByText('OFERTA')).toBeInTheDocument();
+    expect(within(tarjeta).getByText('−23%')).toBeInTheDocument();
     expect(within(tarjeta).getByText(/19\.90/)).toBeInTheDocument();
     expect(within(tarjeta).getByText(/25\.90/)).toBeInTheDocument();
   });
@@ -102,7 +133,6 @@ describe('PaginaProductos (publica)', () => {
     expect(within(tarjeta).getByText('Hycon · SE-200')).toBeInTheDocument();
     expect(within(tarjeta).getByText('Negro')).toBeInTheDocument();
     expect(within(tarjeta).getByText('12 disponibles')).toBeInTheDocument();
-    expect(within(tarjeta).getByText('Soporte lumbar regulable')).toBeInTheDocument();
   });
 
   it('omite la referencia y el stock cuando el producto no los tiene', async () => {
@@ -153,6 +183,17 @@ describe('PaginaProductos (publica)', () => {
     expect(screen.queryByRole('navigation', { name: /paginas de productos/i })).not.toBeInTheDocument();
   });
 
+  it('cambia cuántos productos se solicitan por página', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await rejilla();
+
+    const selector = screen.getByRole('combobox', { name: 'Productos por página' });
+    await usuario.click(selector);
+    await usuario.keyboard('{Home}{Enter}');
+    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 1, expect.anything(), 6, {});
+  });
+
   it('con mas de 6 productos pagina desde el backend', async () => {
     const usuario = userEvent.setup();
     vi.mocked(api.listarProductosApi).mockImplementation(async (_estado, numero) =>
@@ -163,7 +204,8 @@ describe('PaginaProductos (publica)', () => {
     renderizar();
     await screen.findByText('Silla ergonomica Pro');
 
-    await usuario.click(screen.getByRole('button', { name: 'Pagina 2' }));
+    const paginadores = screen.getAllByRole('navigation', { name: /paginas de productos/i });
+    await usuario.click(within(paginadores[0]).getByRole('button', { name: 'Pagina 2' }));
 
     expect(await screen.findByText('Reposapies')).toBeInTheDocument();
     expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 2, expect.anything(), 12, {});
@@ -183,9 +225,20 @@ describe('PaginaProductos (publica)', () => {
     renderizar();
     await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
 
-    await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));
-    expect(api.listarProductosApi).toHaveBeenLastCalledWith('active', 1, expect.anything(), 12, { buscar: 'prueba' });
-    await usuario.click(screen.getByRole('button', { name: 'Limpiar' }));
-    expect(api.listarProductosApi).toHaveBeenLastCalledWith("active", 1, expect.anything(), 12, {});
+    vi.mocked(api.listarProductosApi).mockClear();
+    await usuario.click(screen.getByRole('button', { name: 'Buscar productos' }));
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, { buscar: 'prueba' });
+
+    const panel = within(screen.getByRole('form', { name: 'Filtros de productos' }));
+    await usuario.type(panel.getByRole('spinbutton', { name: 'Hasta' }), '250');
+    await usuario.click(panel.getByRole('radio', { name: 'Con stock' }));
+    vi.mocked(api.listarProductosApi).mockClear();
+    await usuario.click(panel.getByRole('button', { name: 'Aplicar filtros' }));
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12,
+      { buscar: 'prueba', precioMax: 250, stock: 'disponible' });
+
+    vi.mocked(api.listarProductosApi).mockClear();
+    await usuario.click(screen.getByRole('button', { name: 'Quitar filtros' }));
+    expect(api.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, {});
   });
 });

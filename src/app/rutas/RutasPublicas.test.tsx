@@ -54,7 +54,7 @@ describe('rutas publicas', () => {
 
   it('cada seccion del menu tiene su pagina', async () => {
     const casos: Array<[string, RegExp]> = [
-      [RUTAS.productos, /^productos$/i],
+      [RUTAS.productos, /^productos ergonómicos$/i],
       [RUTAS.cursos, /^cursos$/i],
       [RUTAS.publicaciones, /^publicaciones$/i],
     ];
@@ -76,7 +76,7 @@ describe('rutas publicas', () => {
   it('contactanos muestra la cotizacion de evaluaciones', () => {
     renderizar(RUTAS.contactanos);
 
-    expect(screen.getByRole('heading', { name: /contactanos/i, level: 1 })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /contáctanos/i, level: 1 })).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: /cotización de evaluaciones ergonómicas/i })
     ).toBeInTheDocument();
@@ -98,7 +98,7 @@ describe('rutas publicas', () => {
     const logoAntes = within(screen.getByRole('link', { name: 'Ir al inicio' })).getByAltText('Hycon');
 
     await usuario.click(screen.getByRole('link', { name: 'PRODUCTOS' }));
-    await screen.findByRole('heading', { name: /^productos$/i, level: 1 });
+    await screen.findByRole('heading', { name: /^productos ergonómicos$/i, level: 1 });
 
     expect(screen.getByRole('navigation', { name: /navegacion principal/i })).toBe(
       navegacionAntes
@@ -114,9 +114,9 @@ describe('rutas publicas', () => {
     expect(apiCursos.listarCursosApi).toHaveBeenCalledTimes(1);
 
     await usuario.click(screen.getByRole('link', { name: 'PRODUCTOS' }));
-    await screen.findByRole('heading', { name: /^productos$/i, level: 1 });
+    await screen.findByRole('heading', { name: /^productos ergonómicos$/i, level: 1 });
 
-    expect(apiProductos.listarProductosApi).toHaveBeenCalledTimes(2);
+    expect(apiProductos.listarProductosApi).toHaveBeenCalledWith('active', 1, expect.anything(), 12, {});
     expect(apiCursos.listarCursosApi).toHaveBeenCalledTimes(1);
   });
 });

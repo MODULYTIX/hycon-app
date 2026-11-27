@@ -167,7 +167,8 @@ describe('filtros de mis compras', () => {
 
     await abrirFiltros(usuario);
     await usuario.type(screen.getByLabelText(/buscar/i), 'caja');
-    await usuario.selectOptions(screen.getByLabelText(/estado del pago/i), 'pendiente');
+    await usuario.click(screen.getByRole('combobox', { name: /estado del pago/i }));
+    await usuario.click(screen.getByRole('option', { name: 'Pendientes de pago' }));
     await usuario.type(screen.getByLabelText(/^desde$/i), '2026-01-01');
     await usuario.type(screen.getByLabelText(/^hasta$/i), '2026-06-30');
     await usuario.click(screen.getByRole('button', { name: /aplicar filtros/i }));

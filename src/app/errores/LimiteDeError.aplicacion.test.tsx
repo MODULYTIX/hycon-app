@@ -65,7 +65,7 @@ describe('una pantalla rota dentro de la aplicacion', () => {
     const menu = screen.getByRole('navigation', { name: /principal/i });
     await usuario.click(within(menu).getByRole('link', { name: /^productos$/i }));
 
-    expect(await screen.findByRole('heading', { name: /^productos$/i })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: /^productos ergonómicos$/i })).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(window.location.pathname).toBe(RUTAS.productos);
   });

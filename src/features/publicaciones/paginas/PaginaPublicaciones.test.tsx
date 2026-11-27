@@ -94,7 +94,7 @@ describe('PaginaPublicaciones (publica)', () => {
 
     expect(api.listarPublicacionesApi).toHaveBeenCalledWith(
       'active',
-      expect.objectContaining({ orden: 'leidos', porPagina: 3 })
+      expect.objectContaining({ orden: 'leidos', porPagina: 6 })
     );
     const panel = within(screen.getByRole('heading', { name: 'Lo más leído' }).closest('section') as HTMLElement);
     expect(panel.getByRole('link', { name: 'El más leído' })).toBeInTheDocument();
@@ -145,7 +145,7 @@ describe('PaginaPublicaciones (publica)', () => {
 
     const destacado = (await screen.findByRole('heading', { name: 'Artículo 1' })).closest('article');
     expect(destacado?.parentElement?.className).not.toMatch(/lg:grid-cols/);
-    expect(screen.getByText(/por ahora solo están los artículos de arriba/i)).toBeInTheDocument();
+    expect(screen.queryByRole('list', { name: /listado de artículos/i })).not.toBeInTheDocument();
   });
 
   it('muestra un estado vacio si todavia no hay articulos', async () => {
@@ -165,6 +165,7 @@ describe('PaginaPublicaciones (publica)', () => {
   it('aplica filtros mediante el backend y los limpia volviendo a la página uno', async () => {
     const usuario = userEvent.setup();
     renderizar();
+    await usuario.click(screen.getByRole('button', { name: /^Filtros$/ }));
     await usuario.type(screen.getByLabelText('Buscar'), 'prueba');
 
     await usuario.click(screen.getByRole('button', { name: 'Aplicar filtros' }));

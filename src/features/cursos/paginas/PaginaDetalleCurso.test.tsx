@@ -150,6 +150,8 @@ describe('detalle del curso', () => {
   });
 
   it('agrega una sola inscripcion al carrito y conserva lo que ya habia', async () => {
+    marcarSesionActiva(true);
+    vi.mocked(autenticacionApi.restaurarSesionApi).mockResolvedValue(sesion);
     agregarAlCarrito({ tipo: 'producto', uuid: UUID_2, cantidad: 2 }, 5);
     const usuario = userEvent.setup({ delay: null });
     renderizar();
@@ -275,7 +277,9 @@ describe('detalle de un curso ya comprado', () => {
     renderizar();
     await screen.findByRole('heading', { level: 1, name: curso.name });
 
-    expect(await screen.findByRole('button', { name: 'Agregar al carrito' })).toBeInTheDocument();
+    await userEvent.click(await screen.findByRole('button', { name: 'Agregar al carrito' }));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(leerCarrito()).toEqual([]);
     expect(screen.queryByText('Acceso activo')).not.toBeInTheDocument();
   });
 });

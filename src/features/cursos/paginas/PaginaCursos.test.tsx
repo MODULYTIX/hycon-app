@@ -84,7 +84,7 @@ describe('PaginaCursos (publica)', () => {
     const avance = within(tarjeta).getByRole('button', { name: /ver avance/i });
 
     expect(avance.closest('a')).toBeNull();
-    expect(within(tarjeta).getByText('Ver detalle').closest('a')).toHaveAttribute('href', `/cursos/${UUID_1}`);
+    expect(within(tarjeta).getByRole('link', { name: /ver detalles de logistica/i })).toHaveAttribute('href', `/cursos/${UUID_1}`);
     expect(within(tarjeta).getByText('Ruteo y tiempos de entrega')).toBeInTheDocument();
   });
 

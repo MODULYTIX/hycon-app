@@ -102,7 +102,7 @@ beforeEach(() => {
 describe('todas las rutas abren su pagina', () => {
   const paginas: [string, string, RegExp][] = [
     ['home', RUTAS.home, /productos destacados/i],
-    ['productos', RUTAS.productos, /^productos$/i],
+    ['productos', RUTAS.productos, /^productos ergonómicos$/i],
     ['detalle de producto', `/productos/${UUID}`, /silla ergonomica de prueba/i],
     ['cursos', RUTAS.cursos, /^cursos$/i],
     ['detalle de curso', `/cursos/${UUID}`, /curso de prueba/i],
@@ -174,7 +174,7 @@ describe('cambiar de pagina desde el menu', () => {
     const pie = screen.getByRole('contentinfo');
 
     const recorrido: [RegExp, RegExp, string][] = [
-      [/^productos$/i, /^productos$/i, RUTAS.productos],
+      [/^productos$/i, /^productos ergonómicos$/i, RUTAS.productos],
       [/^cursos$/i, /^cursos$/i, RUTAS.cursos],
       [/^publicaciones$/i, /^publicaciones$/i, RUTAS.publicaciones],
       [/^contactanos$/i, /^contactanos$/i, RUTAS.contactanos],
