@@ -1,3 +1,4 @@
+import BotonCerrarModal from '@/shared/ui/atomos/BotonCerrarModal';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
@@ -13,6 +14,7 @@ interface Props {
   protegido?: boolean;
   // Clase de ancho maximo del panel
   ancho?: string;
+  bordesRectos?: boolean;
 }
 
 export default function Modal({
@@ -22,6 +24,7 @@ export default function Modal({
   children,
   protegido = false,
   ancho = 'max-w-[880px]',
+  bordesRectos = false,
 }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
   const botonSeguirRef = useRef<HTMLButtonElement>(null);
@@ -100,16 +103,9 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={idTitulo}
-        className={`relative my-auto w-full shrink-0 ${ancho} overflow-hidden rounded-2xl bg-white shadow-2xl outline-none animate-modalIn`}
+        className={`relative my-auto w-full shrink-0 ${ancho} overflow-hidden ${bordesRectos ? 'rounded-none' : 'rounded-2xl'} bg-white shadow-2xl outline-none animate-modalIn`}
       >
-        <button
-          type="button"
-          onClick={solicitarCierre}
-          aria-label="Cerrar"
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full text-g-50 transition-colors hover:bg-g-10 hover:text-g-80"
-        >
-          <Icon icon="solar:close-circle-linear" width="22" height="22" />
-        </button>
+        <BotonCerrarModal onClick={solicitarCierre} className="absolute right-3 top-3 z-10" />
 
         {typeof children === 'function' ? children(solicitarCierre) : children}
 

@@ -75,7 +75,7 @@ export default function PaginaCertificado() {
 
   if (cargando || restaurandoSesion) {
     return (
-      <div role="status" aria-label="Abriendo el certificado" className="mx-auto w-full max-w-[920px] animate-pulse px-5 py-10">
+      <div role="status" aria-label="Abriendo el certificado" className="hy-contenedor [--hy-ancho-contenedor:920px] animate-pulse py-10">
         <div className="h-[420px] w-full rounded-2xl bg-g-20" />
       </div>
     );
@@ -83,7 +83,7 @@ export default function PaginaCertificado() {
 
   if (error || !progreso) {
     return (
-      <div className="mx-auto max-w-[640px] px-5 py-24 text-center">
+      <div className="hy-contenedor [--hy-ancho-contenedor:640px] py-24 text-center">
         <h1 className="text-2xl font-medium text-g-80">No pudimos abrir el certificado</h1>
         <p role="alert" className="mt-3 text-g-50">
           {error ?? 'Vuelve a intentarlo en un momento.'}
@@ -118,7 +118,7 @@ export default function PaginaCertificado() {
   // Ya emitido: solo queda verlo y descargarlo
   if (certificado) {
     return (
-      <div className="mx-auto w-full max-w-[920px] px-4 py-8 sm:px-6">
+      <div className="hy-contenedor [--hy-ancho-contenedor:920px] py-8">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sin-imprimir">
           <Link
             to={RUTAS.panelCursos}
@@ -152,7 +152,7 @@ export default function PaginaCertificado() {
     const faltan = progreso.total - progreso.vistas;
 
     return (
-      <div className="mx-auto max-w-[620px] px-5 py-16 text-center">
+      <div className="hy-contenedor [--hy-ancho-contenedor:620px] py-16 text-center">
         <span
           aria-hidden
           className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-hy-5 text-primary"
@@ -180,7 +180,7 @@ export default function PaginaCertificado() {
 
   // Terminado y sin emitir: se confirma el nombre, una sola vez
   return (
-    <div className="mx-auto w-full max-w-[620px] px-5 py-12">
+    <div className="hy-contenedor [--hy-ancho-contenedor:620px] py-12">
       <div className="rounded-2xl bg-white p-6 ring-1 ring-g-20 sm:p-8">
         <span
           aria-hidden

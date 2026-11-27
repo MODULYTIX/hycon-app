@@ -35,8 +35,9 @@
 .hy-input-grupo { display: flex; align-items: center; min-height: 42px; }
 .hy-input-grupo .hy-input { height: 40px; border: 0; border-radius: 3px; background: transparent; box-shadow: none; }
 .hy-select { display: block; min-width: 0; width: 100%; }
-.hy-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; text-align: left; }
+.hy-select-trigger { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-block: 0; padding-inline: 12px 0; cursor: pointer; text-align: left; font-weight: var(--hy-peso-texto); }
 .hy-select-value { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hy-select-indicador { display: grid; align-self: stretch; flex: 0 0 auto; width: 2.375rem; place-items: center; border-inline-start: 1px solid #dce5df; }
 .hy-select-chevron { flex-shrink: 0; color: #6a807d; transition: transform 150ms; }
 .hy-select-trigger[aria-expanded="true"] .hy-select-chevron { transform: rotate(180deg); }
 .hy-select-menu {

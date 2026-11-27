@@ -79,7 +79,7 @@ export default function PaginaMisCursos() {
   const vacio = VACIO_POR_PESTANA[pestana];
 
   return (
-    <div className="pagina-interior mx-auto w-full max-w-[1340px] px-5 py-10 sm:px-8 sm:py-12 md:px-12">
+    <div className="pagina-interior hy-contenedor py-10 sm:py-12">
       <SaludoAprendizaje nombre={usuario?.name ?? ''} />
 
       <div className="mt-7 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">

@@ -111,7 +111,7 @@ export default function PaginaAulaCurso() {
       <div
         role="status"
         aria-label="Abriendo el curso"
-        className="mx-auto w-full max-w-[1040px] animate-pulse px-5 py-8"
+        className="hy-contenedor [--hy-ancho-contenedor:1040px] animate-pulse py-8"
       >
         <div className="aspect-video w-full rounded-2xl bg-g-20" />
         <div className="mt-6 h-7 w-2/3 rounded bg-g-20" />
@@ -122,7 +122,7 @@ export default function PaginaAulaCurso() {
 
   if (error || !curso || !temario) {
     return (
-      <div className="mx-auto max-w-[640px] px-5 py-24 text-center">
+      <div className="hy-contenedor [--hy-ancho-contenedor:640px] py-24 text-center">
         <h1 className="text-2xl font-medium text-g-80">No pudimos abrir el curso</h1>
         <p role="alert" className="mt-3 text-g-50">
           {error ?? 'Vuelve a intentarlo en un momento.'}
@@ -232,7 +232,7 @@ export default function PaginaAulaCurso() {
           </Link>
         </div>
 
-        <div className="mx-auto w-full max-w-[1040px] px-0 pb-12 sm:px-6 sm:py-6">
+        <div className="hy-contenedor [--hy-ancho-contenedor:1040px] pb-12 sm:py-6">
           {actual && fuente ? (
             <div className="overflow-hidden bg-black shadow-[0_18px_50px_rgba(28,58,57,0.18)] sm:rounded-2xl">
               <ReproductorLeccion
@@ -357,7 +357,7 @@ export default function PaginaAulaCurso() {
 
           <nav
             aria-label="Ir a otra parte"
-            className="mt-4 flex items-center justify-between gap-3 px-5 sm:px-0"
+            className="mt-4 flex items-center justify-between gap-3"
           >
             <button
               type="button"

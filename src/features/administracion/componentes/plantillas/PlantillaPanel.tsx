@@ -14,8 +14,8 @@ export default function PlantillaPanel() {
       <div className="panel-diseno tema-panel flex flex-1 flex-col lg:flex-row">
         <BarraLateral />
 
-        <main className="min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-9 lg:px-10">
-          <div className="mx-auto w-full max-w-[1180px]">
+        <main className="min-w-0 flex-1 py-6 sm:py-9">
+          <div className="hy-contenedor [--hy-ancho-contenedor:1180px]">
             <LimiteDeError>
               <Outlet />
             </LimiteDeError>

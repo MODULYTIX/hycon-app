@@ -165,7 +165,7 @@ export default function Selector({ id, name, opciones, value, defaultValue, onCh
         }
       }}>
       <span className="hy-select-value">{etiqueta}</span>
-      <svg className="hy-select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+      <span className="hy-select-indicador" aria-hidden="true"><svg className="hy-select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m7 10 5 5 5-5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg></span>
     </button>
     {name && <input type="hidden" name={name} value={valor} disabled={disabled} />}
     {abierto && <div ref={lista} id={listaId} role="listbox" popover={typeof HTMLElement !== 'undefined' && 'showPopover' in HTMLElement.prototype ? 'manual' : undefined} className="hy-select-menu"

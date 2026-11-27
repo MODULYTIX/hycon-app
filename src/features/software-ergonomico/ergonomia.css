@@ -7,7 +7,7 @@
 .ergo :focus-visible:not(.hy-input):not(.hy-textarea):not(.hy-select-trigger) { outline: 2px solid var(--color-primary); }
 .ergo button { cursor: pointer; }
 .ergo button:disabled { opacity: .5; cursor: not-allowed; }
-.ergo .er-page { max-width: 1240px; margin: auto; padding: 32px 28px 64px; }
+.ergo .er-page { width: min(100% - 2 * var(--hy-margen-pagina), 1240px); margin-inline: auto; padding-block: 32px 64px; }
 .er-eyebrow { font-size: var(--hy-texto-nota); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--color-primary); margin-bottom: 7px; }
 .er-muted { color: var(--color-g-50); font-size: var(--hy-texto-control); line-height: 1.65; }
 .er-page-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 26px; }
@@ -115,7 +115,7 @@ button.er-choice-help:hover { text-decoration: underline; color: var(--color-pri
 .er-summary-block summary { cursor: pointer; font-weight: 500; }
 @media(max-width: 1000px) { .er-editor-middle { grid-template-columns: 190px minmax(0,1fr); } .er-editor-content { padding: 22px 18px; } .er-factor { grid-template-columns: minmax(0,1fr) 110px; gap: 12px; } .er-factor > .er-field { grid-column: 2; } .er-factor > div:first-child { grid-row: span 2; } }
 @media(max-width: 720px) {
-  .ergo .er-page { padding: 24px 16px 40px; }
+  .ergo .er-page { padding-block: 24px 40px; }
   .er-page-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
   .er-page-heading .er-actions { width: 100%; }
   .er-page-heading .er-button-primary { flex: 1; }

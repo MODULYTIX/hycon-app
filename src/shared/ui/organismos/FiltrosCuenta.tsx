@@ -1,3 +1,4 @@
+import Selector from '@/shared/ui/moleculas/Selector';
 import { useId, useState, type FormEvent } from 'react';
 import { Icon } from '@iconify/react';
 import type { FiltrosCuenta as Valores } from '@/shared/utilidades/filtros-listado';
@@ -115,22 +116,22 @@ export default function FiltrosCuenta({ modulo, onAplicar }: Props) {
 
         <label htmlFor={`${id}-orden`} className={ETIQUETA}>
           Ordenar por
-          <select id={`${id}-orden`} name="orden" className={`${CAMPO} mt-1`}>
-            <option value="recientes">{esCompras ? 'Compra más reciente' : 'Comprado hace poco'}</option>
-            <option value="antiguos">{esCompras ? 'Compra más antigua' : 'Comprado hace tiempo'}</option>
-            {!esCompras && <option value="nombre">Nombre: A a Z</option>}
-          </select>
+          <Selector id={`${id}-orden`} name="orden" className="mt-1" opciones={[
+            { valor: 'recientes', etiqueta: esCompras ? 'Compra más reciente' : 'Comprado hace poco' },
+            { valor: 'antiguos', etiqueta: esCompras ? 'Compra más antigua' : 'Comprado hace tiempo' },
+            ...(!esCompras ? [{ valor: 'nombre', etiqueta: 'Nombre: A a Z' }] : []),
+          ]} />
         </label>
 
         {esCompras && (
           <>
             <label htmlFor={`${id}-estado`} className={ETIQUETA}>
               Estado del pago
-              <select id={`${id}-estado`} name="estado" className={`${CAMPO} mt-1`}>
-                <option value="todos">Todos</option>
-                <option value="pagado">Pagadas</option>
-                <option value="pendiente">Pendientes de pago</option>
-              </select>
+              <Selector id={`${id}-estado`} name="estado" className="mt-1" opciones={[
+                { valor: 'todos', etiqueta: 'Todos' },
+                { valor: 'pagado', etiqueta: 'Pagadas' },
+                { valor: 'pendiente', etiqueta: 'Pendientes de pago' },
+              ]} />
             </label>
 
             <div className="grid grid-cols-2 gap-2">

@@ -14,7 +14,7 @@ export default function PlantillaSeccion({
   compacto?: boolean;
 }) {
   return (
-    <div className={compacto ? "pagina-interior catalogo-compacto mx-auto w-full max-w-[1340px] px-5 py-7 sm:px-8 sm:py-9 md:px-12" : "pagina-interior mx-auto w-full max-w-[1340px] px-5 py-10 sm:px-8 sm:py-14 md:px-12"}>
+    <div className={compacto ? "pagina-interior catalogo-compacto hy-contenedor py-7 sm:py-9" : "pagina-interior hy-contenedor py-10 sm:py-14"}>
       <CabeceraPagina titulo={titulo} descripcion={descripcion} compacto={compacto} />
       {children}
     </div>

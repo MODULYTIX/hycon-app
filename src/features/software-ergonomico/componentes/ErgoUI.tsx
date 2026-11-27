@@ -1,11 +1,12 @@
+import BotonCerrarModal from '@/shared/ui/atomos/BotonCerrarModal';
 import { useEffect, useRef, useState, useId, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 const bloqueosScroll = new Set<symbol>();
 let overflowAnterior = '';
 
-export function DialogoErgo({ titulo, children, onCerrar, sucio = false, bloqueado = false, amplio = false }: {
-  titulo: string; children: (cerrar: () => void) => ReactNode; onCerrar: () => void; sucio?: boolean; bloqueado?: boolean; amplio?: boolean;
+export function DialogoErgo({ titulo, children, onCerrar, sucio = false, bloqueado = false, amplio = false, cierreEnContenido = false }: {
+  titulo: string; children: (cerrar: () => void) => ReactNode; onCerrar: () => void; sucio?: boolean; bloqueado?: boolean; amplio?: boolean; cierreEnContenido?: boolean;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const id = useId();
@@ -36,7 +37,8 @@ export function DialogoErgo({ titulo, children, onCerrar, sucio = false, bloquea
     <dialog ref={ref} aria-labelledby={id} className={`ergo er-dialog ${amplio ? 'er-dialog-wide' : ''}`}
       onCancel={e => { e.preventDefault(); cerrar(); }}
       onClick={e => { if (e.target === e.currentTarget) cerrar(); }}>
-      <div className="er-dialog-inner">
+      <div className="er-dialog-inner relative">
+        {!cierreEnContenido && <BotonCerrarModal onClick={cerrar} disabled={bloqueado} className="absolute right-2 top-2 z-10" /> }
         <span id={id} className="sr-only">{titulo}</span>
         {children(cerrar)}
       </div>

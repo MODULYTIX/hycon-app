@@ -22,7 +22,7 @@ export default function Encabezado({
 
   return (
     <header className={esHome ? 'hy-header hy-header-home' : 'hy-header'}>
-      <div className="hy-header-inner">
+      <div className="hy-header-inner hy-contenedor">
         <Link to={RUTAS.home} className="hy-header-logo" aria-label="Ir al inicio">
           <img src={HyconLogo} alt="Hycon" draggable="false" />
         </Link>

@@ -2,15 +2,33 @@
 
 /* Escala de lectura para controles y pantallas de trabajo. */
 :root {
+    --hy-margen-pagina: 1rem;
+    --hy-ancho-pagina: 80rem;
     --hy-texto-nota: 0.75rem;
     --hy-texto-secundario: 0.8125rem;
     --hy-texto-control: 0.875rem;
     --hy-texto-base: 1rem;
+    --hy-peso-texto: 400;
+    --hy-peso-etiqueta: 500;
+    --hy-peso-titulo: 600;
     --hy-titulo-menor: 1.125rem;
     --hy-titulo-seccion: 1.375rem;
     --hy-titulo-pagina: clamp(1.625rem, 1.3rem + 1vw, 2.25rem);
 }
 
+
+@media (min-width: 640px) {
+    :root { --hy-margen-pagina: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+    :root { --hy-margen-pagina: 2rem; }
+}
+
+.hy-contenedor {
+    width: min(100% - 2 * var(--hy-margen-pagina), var(--hy-ancho-contenedor, var(--hy-ancho-pagina)));
+    margin-inline: auto;
+}
 
 /* Si la cabecera y las acciones dejan muy poco espacio, el formulario completo
    se desplaza con el fondo del modal. Así no hay dos scrolls ni controles cortados. */
@@ -95,7 +113,7 @@
     --color-certificado-papel: #fdfcf6;
 
     /* Fonts */
-    --font-BostNoBillsColombo: BostNoBillsColombo;
+    --font-sans: 'Asap', system-ui, sans-serif;
 
     /* Animaciones */
     --animate-fadeIn: fadeIn 0.25s ease-out;
@@ -275,11 +293,19 @@
 /* Fuentes */
 
 @font-face {
-    font-family: BostNoBillsColombo;
-    font-style: extrabold;
-    font-weight: 800;
+    font-family: 'Asap';
+    src: url('./assets/fonts/asap/Asap[wdth,wght].ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 900;
     font-display: swap;
-    src: url('./assets/fonts/PostNoBillsColombo-ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'Asap';
+    src: url('./assets/fonts/asap/Asap-Italic[wdth,wght].ttf') format('truetype');
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
 }
 
 /* Por ahora */

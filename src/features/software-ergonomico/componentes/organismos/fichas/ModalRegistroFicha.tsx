@@ -1,3 +1,4 @@
+import BotonCerrarModal from '@/shared/ui/atomos/BotonCerrarModal';
 import EntradaBase from '@/shared/ui/atomos/EntradaBase';
 import { useEffect, useRef, useState } from 'react';
 import type { EmpresaErgo, FichaErgo } from '../../../servicios/ergo.api';
@@ -49,11 +50,11 @@ export default function ModalRegistroFicha({ empresa, ficha, inicial = 'datos', 
     }
     finally { guardandoRef.current = false; setGuardando(false); }
   };
-  return <DialogoErgo titulo={ficha ? 'Editar ficha ergonómica' : 'Nueva ficha ergonómica'} amplio sucio={sucio} bloqueado={guardando} onCerrar={onCerrar}>
+  return <DialogoErgo titulo={ficha ? 'Editar ficha ergonómica' : 'Nueva ficha ergonómica'} amplio cierreEnContenido sucio={sucio} bloqueado={guardando} onCerrar={onCerrar}>
     {cerrar => <div className="er-editor">
       <header className="er-editor-header">
         <div><p className="er-eyebrow">{empresa.nombre} / Ficha ergonómica</p><h2>{ficha ? 'Editar ficha' : 'Nueva ficha'}</h2></div>
-        <div className="er-actions"><span className="er-tag">{resumen.estado}</span><button type="button" className="er-close" aria-label="Cerrar ficha" disabled={guardando} onClick={cerrar}>×</button></div>
+        <div className="er-actions"><span className="er-tag">{resumen.estado}</span><BotonCerrarModal aria-label="Cerrar ficha" disabled={guardando} onClick={cerrar} /></div>
       </header>
       <div className="er-editor-middle">
         <nav ref={navegacion} className="er-sidebar" aria-label="Secciones de la ficha">
