@@ -1,3 +1,4 @@
+import emblemaHycon from '@/assets/images/certificado/emblema-hycon.png';
 import { formatearDuracion, formatearFecha } from '@/shared/utilidades/formato';
 import type { Certificado } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
 
@@ -110,8 +111,20 @@ export default function LaminaCertificado({ certificado }: { certificado: Certif
           <AdornoEsquina key={posicion} posicion={posicion} />
         ))}
 
-        <p className="relative text-[10px] font-semibold uppercase tracking-[0.3em] text-hy-70 sm:text-[11px]">
-          Hycon · Formación en ergonomía
+        {/* La marca preside la lamina, como en cualquier diploma */}
+        <img
+          src={emblemaHycon}
+          alt=""
+          aria-hidden
+          className="relative mx-auto mb-4 h-[34px] w-auto sm:mb-5 sm:h-[48px]"
+        />
+
+        <p className="relative text-[13px] font-semibold uppercase tracking-[0.26em] text-hy-90 sm:text-[16px] sm:tracking-[0.3em]">
+          Hycon
+        </p>
+
+        <p className="relative mt-1 text-[9.5px] uppercase tracking-[0.22em] text-g-50 sm:text-[10.5px]">
+          Formación en ergonomía
         </p>
 
         <h1 className="relative mt-5 font-serif text-[23px] font-semibold uppercase tracking-[0.14em] text-hy-90 sm:text-[46px] sm:tracking-[0.2em]">

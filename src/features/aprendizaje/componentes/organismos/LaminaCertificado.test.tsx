@@ -48,4 +48,15 @@ describe('LaminaCertificado', () => {
 
     expect(lamina().getByText(/formación en ergonomía/i)).toBeInTheDocument();
   });
+
+  // Un diploma sin la marca encima no parece de nadie
+  it('lleva el emblema de Hycon', () => {
+    const { container } = render(<LaminaCertificado certificado={certificado()} />);
+
+    const emblema = container.querySelector('img');
+    expect(emblema).toBeInTheDocument();
+    expect(emblema).toHaveAttribute('src', expect.stringContaining('emblema-hycon'));
+    // Decorativo: el nombre de la marca ya va escrito debajo
+    expect(emblema).toHaveAttribute('alt', '');
+  });
 });
