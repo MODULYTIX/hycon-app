@@ -85,3 +85,32 @@ describe('LaminaPrograma', () => {
     expect(hoja().queryAllByRole('listitem')).toHaveLength(0);
   });
 });
+
+describe('cuando el temario es largo', () => {
+  const muchas = Array.from({ length: 10 }, (_, indice) =>
+    parte(indice + 1, `Tema numero ${indice + 1}`)
+  );
+
+  // Diez temas en una columna estiran la hoja de mas
+  it('pasa a dos columnas', () => {
+    render(<LaminaPrograma certificado={certificado} partes={muchas} />);
+
+    expect(hoja().getByRole('list')).toHaveClass('sm:columns-2');
+  });
+
+  it('con pocos temas se queda en una', () => {
+    render(<LaminaPrograma certificado={certificado} partes={PARTES} />);
+
+    expect(hoja().getByRole('list')).not.toHaveClass('sm:columns-2');
+  });
+
+  it('en dos columnas siguen estando todos y en orden', () => {
+    render(<LaminaPrograma certificado={certificado} partes={muchas} />);
+
+    const temas = hoja().getAllByRole('listitem');
+    expect(temas).toHaveLength(10);
+    expect(temas[0]).toHaveTextContent('Tema numero 1');
+    expect(temas[9]).toHaveTextContent('Tema numero 10');
+  });
+});
+

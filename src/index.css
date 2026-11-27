@@ -608,6 +608,13 @@ body::-webkit-scrollbar {
     margin-bottom: 2px;
 }
 
+/* La cara que no se esta mirando: se esconde en pantalla, pero se imprime igual */
+@media screen {
+  .cara-oculta {
+    display: none;
+  }
+}
+
 /* Al imprimir el certificado solo sale la lamina: ni menus, ni botones, ni pie */
 @media print {
   @page {
@@ -644,7 +651,7 @@ body::-webkit-scrollbar {
   }
 
   /* El programa va detras, en su propia hoja */
-  .lamina-certificado + .lamina-certificado {
+  .hojas-certificado > * + * {
     break-before: page;
   }
 

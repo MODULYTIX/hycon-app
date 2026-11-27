@@ -14,6 +14,11 @@ import {
 import { esUuid } from '@/shared/utilidades/identificador';
 import type { Certificado, ProgresoCurso } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
 
+const CARAS: ['diploma' | 'programa', string][] = [
+  ['diploma', 'Certificado'],
+  ['programa', 'Programa del curso'],
+];
+
 // Las mismas reglas que aplica el servidor, para avisar antes de enviar
 const revisarNombre = (valor: string): string | undefined => {
   const nombre = valor.trim();
@@ -36,6 +41,7 @@ export default function PaginaCertificado() {
   const [errorNombre, setErrorNombre] = useState<string>();
   const [confirmado, setConfirmado] = useState(false);
   const [emitiendo, setEmitiendo] = useState(false);
+  const [cara, setCara] = useState<'diploma' | 'programa'>('diploma');
 
   useEffect(() => {
     if (restaurandoSesion || !usuario) return;
@@ -139,14 +145,38 @@ export default function PaginaCertificado() {
           </button>
         </div>
 
-        {/* Dos caras: el diploma y, detras, el programa del curso */}
-        <div className="hojas-certificado space-y-6">
-          <LaminaCertificado certificado={certificado} />
-          <LaminaPrograma certificado={certificado} partes={progreso.partes} />
+        {/* En pantalla se mira una cara cada vez; al imprimir salen las dos */}
+        <div
+          role="group"
+          aria-label="Cara del certificado"
+          className="mb-4 flex gap-1 rounded-xl bg-g-10 p-1 sin-imprimir sm:w-fit"
+        >
+          {CARAS.map(([clave, etiqueta]) => (
+            <button
+              key={clave}
+              type="button"
+              aria-pressed={cara === clave}
+              onClick={() => setCara(clave)}
+              className={`flex-1 rounded-lg px-4 py-2 text-[13px] font-medium transition-colors sm:flex-none ${
+                cara === clave ? 'bg-white text-primary shadow-sm' : 'text-g-60 hover:text-g-80'
+              }`}
+            >
+              {etiqueta}
+            </button>
+          ))}
+        </div>
+
+        <div className="hojas-certificado">
+          <div className={cara === 'diploma' ? '' : 'cara-oculta'}>
+            <LaminaCertificado certificado={certificado} />
+          </div>
+          <div className={cara === 'programa' ? '' : 'cara-oculta'}>
+            <LaminaPrograma certificado={certificado} partes={progreso.partes} />
+          </div>
         </div>
 
         <p className="mt-4 text-center text-[12.5px] text-g-50 sin-imprimir">
-          Son dos hojas: el certificado y el programa del curso. Al descargar se abre el diálogo de
+          Al descargar salen las dos hojas, estés mirando la que estés. Se abre el diálogo de
           impresión: elige "Guardar como PDF".
         </p>
       </div>

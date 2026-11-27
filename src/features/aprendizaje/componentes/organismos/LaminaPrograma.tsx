@@ -11,8 +11,12 @@ interface Props {
  * El reverso del certificado: que se estudio. Va en su propia hoja, detras del
  * diploma, como el programa academico de cualquier titulo.
  */
+// A partir de aqui una sola columna alargaria la hoja de mas
+const PARTES_POR_COLUMNA = 6;
+
 export default function LaminaPrograma({ certificado, partes }: Props) {
   const ordenadas = [...partes].sort((una, otra) => una.posicion - otra.posicion);
+  const aDosColumnas = ordenadas.length > PARTES_POR_COLUMNA;
 
   return (
     <article
@@ -32,9 +36,9 @@ export default function LaminaPrograma({ certificado, partes }: Props) {
         </header>
 
         {ordenadas.length > 0 ? (
-          <ol className="mt-7 space-y-3.5">
+          <ol className={`mt-7 space-y-3.5 ${aDosColumnas ? 'sm:columns-2 sm:gap-10' : ''}`}>
             {ordenadas.map((parte, indice) => (
-              <li key={parte.uuid} className="flex gap-3.5">
+              <li key={parte.uuid} className="flex gap-3.5 break-inside-avoid">
                 <span
                   aria-hidden
                   className="mt-[3px] w-[22px] shrink-0 text-right font-serif text-[13px] text-hy-60"

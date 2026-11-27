@@ -261,5 +261,39 @@ describe('las dos caras del certificado', () => {
     const bloque = container.querySelector('.hojas-certificado');
     expect(bloque?.querySelectorAll('.lamina-certificado')).toHaveLength(2);
   });
+
+  // En pantalla estorba tener que bajar: se mira una cara cada vez
+  it('empieza mostrando el diploma y esconde el programa', async () => {
+    const { container } = renderizar();
+    await screen.findByRole('article', { name: /programa del curso/i });
+
+    const [diploma, programa] = [...container.querySelectorAll('.hojas-certificado > *')];
+    expect(diploma).not.toHaveClass('cara-oculta');
+    expect(programa).toHaveClass('cara-oculta');
+  });
+
+  it('el selector cambia de cara', async () => {
+    const usuario = userEvent.setup();
+    const { container } = renderizar();
+    await screen.findByRole('article', { name: /programa del curso/i });
+
+    await usuario.click(screen.getByRole('button', { name: 'Programa del curso' }));
+
+    const [diploma, programa] = [...container.querySelectorAll('.hojas-certificado > *')];
+    expect(diploma).toHaveClass('cara-oculta');
+    expect(programa).not.toHaveClass('cara-oculta');
+  });
+
+  // Da igual lo que se este mirando: al imprimir van las dos
+  it('las dos caras siguen en el documento aunque se esconda una', async () => {
+    const usuario = userEvent.setup();
+    renderizar();
+    await screen.findByRole('article', { name: /programa del curso/i });
+
+    await usuario.click(screen.getByRole('button', { name: 'Programa del curso' }));
+
+    expect(screen.getByRole('article', { name: /^certificado HY-ABCD1234$/i })).toBeInTheDocument();
+    expect(screen.getByRole('article', { name: /programa del curso/i })).toBeInTheDocument();
+  });
 });
 
