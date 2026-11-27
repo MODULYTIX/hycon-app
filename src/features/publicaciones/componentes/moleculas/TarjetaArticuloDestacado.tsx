@@ -17,7 +17,7 @@ interface Props {
 export default function TarjetaArticuloDestacado({ publicacion, horizontal = false, etiqueta = 'Lo último' }: Props) {
   return (
     <article
-      className={`tarjeta-editorial group flex h-full overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)] ${
+      className={`publicaciones-destacado group flex h-full overflow-hidden ${
         horizontal ? 'flex-col md:flex-row' : 'flex-col'
       }`}
     >
@@ -34,22 +34,22 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
           clase={
             horizontal
               ? 'aspect-[16/9] md:aspect-auto md:h-full md:min-h-[230px]'
-              : 'aspect-[16/9]'
+              : 'aspect-[16/10]'
           }
           tamanoIcono={56}
         />
       </Link>
 
       <div
-        className={`flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4 ${
-          horizontal ? 'md:justify-center md:border-l md:border-t-0 md:p-7' : ''
+        className={`publicaciones-destacado-texto flex flex-1 flex-col gap-2.5 py-4 ${
+          horizontal ? 'md:justify-center md:px-7' : ''
         }`}
       >
-        <span className="w-fit bg-hy-10 px-2 py-1 text-[length:var(--hy-texto-nota)] font-bold uppercase tracking-[0.16em] text-primary">
+        <span className="w-fit text-[length:var(--hy-texto-nota)] font-semibold uppercase tracking-[0.12em] text-primary">
           {etiqueta}
         </span>
 
-        <h2 className="text-[length:var(--hy-titulo-menor)] font-semibold leading-snug tracking-tight text-g-90">
+        <h2 className="publicaciones-titular font-semibold leading-tight tracking-tight text-g-90">
           <Link
             to={rutaPublicacionDetalle(publicacion.slug)}
             className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
@@ -64,7 +64,7 @@ export default function TarjetaArticuloDestacado({ publicacion, horizontal = fal
 
         <Link
           to={rutaPublicacionDetalle(publicacion.slug)}
-          className="mt-1 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-lg bg-primary px-4 text-[length:var(--hy-texto-control)] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+          className="mt-1 inline-flex min-h-9 w-fit items-center gap-1.5 border-b border-primary text-[length:var(--hy-texto-control)] font-medium text-marca-oscuro hover:text-g-90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
         >
           Leer artículo completo
           <Icon icon="solar:arrow-right-linear" width="15" height="15" aria-hidden />

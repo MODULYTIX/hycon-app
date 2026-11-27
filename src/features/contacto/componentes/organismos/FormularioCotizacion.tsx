@@ -133,7 +133,7 @@ export default function FormularioCotizacion() {
     return (
       <section
         aria-labelledby="titulo-cotizacion"
-        className="mx-auto w-full max-w-[760px] rounded-2xl border border-g-20 bg-white p-6 text-center shadow-sm sm:p-8"
+        className="contacto-formulario w-full min-w-0 border border-g-20 bg-white p-5 text-center sm:p-8"
       >
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-hy-10 text-primary">
           <Icon icon="solar:check-circle-bold" width="32" height="32" aria-hidden />
@@ -190,61 +190,17 @@ export default function FormularioCotizacion() {
   return (
     <section
       aria-labelledby="titulo-cotizacion"
-      className="mx-auto w-full max-w-[760px] rounded-2xl border border-g-20 bg-white p-6 shadow-sm sm:p-8"
+      className="contacto-formulario w-full min-w-0 border border-g-20 bg-white p-5 sm:p-8"
     >
-      <h2 id="titulo-cotizacion" className="text-[20px] font-semibold tracking-tight text-g-90">
-        Cotización de evaluaciones ergonómicas
-      </h2>
-      <p className="mt-1.5 text-[14px] leading-relaxed text-g-50">
-        Evaluaciones de riesgo ergonómico para puestos administrativos y operativos. Déjanos tus datos
-        y te responderemos con el alcance y las fechas disponibles.
-      </p>
-
-      {/* Bloque informativo de evaluaciones ergonómicas (no seleccionables) */}
-      <div className="mt-5 rounded-2xl border border-hy-20/80 bg-gradient-to-br from-hy-5/60 via-white to-hy-5/30 p-4 sm:p-5">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-[14px] font-semibold text-g-90">
-            <Icon icon="solar:shield-check-linear" width="20" height="20" className="text-primary" aria-hidden />
-            <span>Evaluaciones ergonómicas que realizamos</span>
-          </div>
-
-          {/* Deja claro que el bloque solo informa: no se elige nada aqui */}
-          <span className="rounded-full bg-hy-10 px-2.5 py-1 text-[11px] font-semibold text-primary">
-            Informativo
-          </span>
-        </div>
-
-        <p className="mt-1.5 text-[12.5px] leading-relaxed text-g-60">
-          Nuestras evaluaciones técnicas se aplican según la R.M. 375-2008-TR y metodologías ISO internacionales.
-          Los precios son referenciales por evaluación; el alcance final se confirma al responderte.
+      <header className="contacto-intro">
+        <h2 id="titulo-cotizacion" className="text-[20px] font-semibold tracking-tight text-g-90">
+          Cotización de evaluaciones ergonómicas
+        </h2>
+        <p className="mt-1.5 text-[14px] leading-relaxed text-g-50">
+          Evaluaciones de riesgo ergonómico para puestos administrativos y operativos. Déjanos tus datos
+          y te responderemos con el alcance y las fechas disponibles.
         </p>
-
-        <ul aria-label="Evaluaciones informativas" className="mt-3 grid gap-2.5 sm:grid-cols-2">
-          {evaluaciones.map((evaluacion) => (
-            <li
-              key={evaluacion.codigo}
-              className="flex items-start gap-2.5 rounded-xl border border-g-20/80 bg-white p-3 shadow-xs transition-shadow hover:shadow-sm"
-            >
-              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-hy-10 text-primary">
-                <Icon icon="solar:check-read-linear" width="13" height="13" aria-hidden />
-              </div>
-              <div className="min-w-0 flex-1">
-                <span className="block text-[13px] font-medium leading-snug text-g-90">
-                  {evaluacion.nombre}
-                </span>
-                <span className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="text-[11.5px] font-mono font-medium text-primary">
-                    {evaluacion.norma}
-                  </span>
-                  <span className="text-[12.5px] font-semibold tabular-nums text-g-80">
-                    {formatearPrecio(evaluacion.precio)}
-                  </span>
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+      </header>
 
       <form onSubmit={enviar} noValidate className="mt-6 space-y-5">
         <fieldset disabled={enviando}>
@@ -317,11 +273,58 @@ export default function FormularioCotizacion() {
         <button
           type="submit"
           disabled={enviando}
-          className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-primary text-[15px] font-medium text-white shadow-xs transition-colors hover:bg-marca-oscuro disabled:opacity-60"
+          className="contacto-enviar"
         >
           {enviando ? 'Enviando...' : 'Solicitar cotización'}
+          {!enviando && <Icon icon="solar:arrow-right-linear" width="17" aria-hidden />}
         </button>
       </form>
+
+      {/* Bloque informativo de evaluaciones ergonómicas (no seleccionables) */}
+      <div className="mt-7 border-t border-g-20 pt-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-[14px] font-semibold text-g-90">
+            <Icon icon="solar:shield-check-linear" width="20" height="20" className="text-primary" aria-hidden />
+            <span>Evaluaciones ergonómicas que realizamos</span>
+          </div>
+
+          {/* Deja claro que el bloque solo informa: no se elige nada aqui */}
+          <span className="rounded-full bg-hy-10 px-2.5 py-1 text-[11px] font-semibold text-primary">
+            Informativo
+          </span>
+        </div>
+
+        <p className="mt-1.5 text-[12.5px] leading-relaxed text-g-60">
+          Nuestras evaluaciones técnicas se aplican según la R.M. 375-2008-TR y metodologías ISO internacionales.
+          Los precios son referenciales por evaluación; el alcance final se confirma al responderte.
+        </p>
+
+        <ul aria-label="Evaluaciones informativas" className="mt-3 grid gap-2.5 sm:grid-cols-2">
+          {evaluaciones.map((evaluacion) => (
+            <li
+              key={evaluacion.codigo}
+              className="flex items-start gap-2.5 border border-g-20 bg-g-5 p-3"
+            >
+              <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-hy-10 text-primary">
+                <Icon icon="solar:check-read-linear" width="13" height="13" aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <span className="block text-[13px] font-medium leading-snug text-g-90">
+                  {evaluacion.nombre}
+                </span>
+                <span className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-[11.5px] font-mono font-medium text-primary">
+                    {evaluacion.norma}
+                  </span>
+                  <span className="text-[12.5px] font-semibold tabular-nums text-g-80">
+                    {formatearPrecio(evaluacion.precio)}
+                  </span>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

@@ -1,12 +1,15 @@
-import CatalogoConFiltros from '@/shared/ui/plantillas/CatalogoConFiltros';
+import portada from '@/assets/images/banners/publicaciones.webp';
+import { useId, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { RUTAS } from '@/app/rutas/rutas';
+import '@/features/productos/paginas/catalogo-productos.css';
+import './publicaciones-editorial.css';
 import FiltrosListado from '@/shared/ui/organismos/FiltrosListado';
 import { useFiltrosListado } from '@/shared/hooks/useFiltrosListado';
 import { Icon } from '@iconify/react';
-import PlantillaSeccion from '@/shared/ui/plantillas/PlantillaSeccion';
 import EstadoVacio from '@/shared/ui/atomos/EstadoVacio';
 import TarjetaArticuloDestacado from '@/features/publicaciones/componentes/moleculas/TarjetaArticuloDestacado';
 import TarjetaArticulo from '@/features/publicaciones/componentes/moleculas/TarjetaArticulo';
-import FilaArticulo from '@/features/publicaciones/componentes/moleculas/FilaArticulo';
 import PanelMasLeidos from '@/features/publicaciones/componentes/organismos/PanelMasLeidos';
 import { usePublicacionesPublicas } from '@/features/publicaciones/hooks/usePublicacionesPublicas';
 
@@ -14,106 +17,105 @@ import EsqueletoPublicaciones from '@/features/publicaciones/componentes/organis
 import AvisoErrorCatalogo from '@/shared/ui/moleculas/AvisoErrorCatalogo';
 
 export default function PaginaPublicaciones() {
-  const { filtros, aplicar } = useFiltrosListado();
+  const { filtros, clave, aplicar } = useFiltrosListado();
+  const [filtrosAbiertos, setFiltrosAbiertos] = useState(false);
+  const filtrosId = useId();
   const { publicaciones, cargando, cargandoPrimera, error, hayMas, verMas } =
     usePublicacionesPublicas({ porPagina: 9, filtros });
-  const masLeidos = usePublicacionesPublicas({ orden: 'leidos', porPagina: 3 });
+  const masLeidos = usePublicacionesPublicas({ orden: 'leidos', porPagina: 6 });
 
-  // El primero encabeza la pagina, los dos siguientes lo acompanan y el resto va al listado
   const [destacado, ...resto] = publicaciones;
   const secundarios = resto.slice(0, 2);
   const listado = resto.slice(2);
+  const articulosPortada = new Set(publicaciones.slice(0, 3).map(({ uuid }) => uuid));
+  const populares = masLeidos.publicaciones.filter(({ uuid }) => !articulosPortada.has(uuid)).slice(0, 3);
+  const mostrarPopulares = !clave && (masLeidos.cargandoPrimera || populares.length > 0);
 
   return (
-    <PlantillaSeccion
-      compacto
-      titulo="Publicaciones"
-      descripcion="Se realizan publicaciones relevantes en ergonomía para tener actualizado a nuestro clientes y lectores."
-    >
-      <CatalogoConFiltros filtros={<FiltrosListado modulo="publicaciones" onAplicar={aplicar} />}>
-        {cargandoPrimera && <EsqueletoPublicaciones />}
+    <div className="catalogo-productos publicaciones-editorial">
+      <section className="productos-portada" aria-labelledby="publicaciones-titulo">
+        <img className="productos-portada-foto-editorial" src={portada} alt="" />
+        <div className="productos-portada-texto">
+          <h1 id="publicaciones-titulo">Publicaciones</h1>
+          <nav className="productos-migas" aria-label="Ruta de navegación">
+            <Link to={RUTAS.home}>Inicio</Link>
+            <Icon icon="solar:alt-arrow-right-linear" width="14" aria-hidden />
+            <span aria-current="page">Publicaciones</span>
+          </nav>
+          <p>Ideas prácticas sobre ergonomía, capacitación y operaciones para tu equipo.</p>
+        </div>
+      </section>
 
+      <div className="hy-contenedor publicaciones-contenido">
+        <div className="publicaciones-barra">
+          <button type="button" className="publicaciones-control" aria-expanded={filtrosAbiertos}
+            aria-controls={filtrosId} onClick={() => setFiltrosAbiertos(valor => !valor)}>
+            <Icon icon="solar:filter-linear" width="16" aria-hidden />
+            Filtros
+          </button>
+        </div>
+        <div id={filtrosId} hidden={!filtrosAbiertos} className="publicaciones-filtros">
+          <FiltrosListado modulo="publicaciones" onAplicar={aplicar} />
+        </div>
+
+        {cargandoPrimera && <EsqueletoPublicaciones />}
         {!cargando && error && (
-          <div className="space-y-6">
-            <AvisoErrorCatalogo
-              error={error}
-              onReintentar={verMas}
-              reintentando={cargando}
-            />
-            <EsqueletoPublicaciones />
-          </div>
+          <AvisoErrorCatalogo error={error} onReintentar={verMas} reintentando={cargando} />
         )}
         {!cargando && !error && publicaciones.length === 0 && (
-          <div className="rounded-2xl bg-white ring-1 ring-g-20">
+          <div className="border border-g-20 bg-white">
             <EstadoVacio
               icono="solar:document-text-linear"
-              titulo={Object.keys(filtros).length ? "No encontramos publicaciones" : "Todavía no hay artículos publicados"}
-              descripcion={Object.keys(filtros).length ? "Prueba otros filtros o pulsa Limpiar para ver todas las publicaciones." : "Estamos preparando los primeros. Vuelve pronto o escríbenos por WhatsApp."}
+              titulo={clave ? 'No encontramos publicaciones' : 'Todavía no hay artículos publicados'}
+              descripcion={clave ? 'Prueba otros filtros o pulsa Limpiar para ver todas las publicaciones.' : 'Estamos preparando los primeros artículos.'}
             />
           </div>
         )}
 
         {destacado && (
           <>
-            {/* Sin articulos de apoyo el destacado ocupa todo el ancho, para no dejar media pagina vacia */}
-            <div
-              className={`grid gap-4 ${secundarios.length > 0 ? 'md:grid-cols-2 xl:grid-cols-3' : ''
-                }`}
-            >
-              <TarjetaArticuloDestacado etiqueta={filtros.orden === 'leidos' ? 'Más leído' : filtros.orden && filtros.orden !== 'recientes' ? 'Selección' : 'Lo último'} publicacion={destacado} horizontal={secundarios.length === 0} />
-
+            <div className="publicaciones-portadilla" data-apoyo={secundarios.length > 0} data-populares={mostrarPopulares}>
+              <div className="publicaciones-principal">
+                <TarjetaArticuloDestacado
+                  etiqueta={filtros.orden === 'leidos' ? 'Más leído' : filtros.orden && filtros.orden !== 'recientes' ? 'Selección' : 'Lo último'}
+                  publicacion={destacado} horizontal={secundarios.length === 0 && !mostrarPopulares}
+                />
+              </div>
               {secundarios.length > 0 && (
-                <div className="contents">
-                  {secundarios.map((publicacion) => (
-                    <TarjetaArticulo key={publicacion.uuid} publicacion={publicacion} />
-                  ))}
+                <div className="publicaciones-apoyo">
+                  {secundarios.map(publicacion => <TarjetaArticulo key={publicacion.uuid} publicacion={publicacion} />)}
                 </div>
+              )}
+              {mostrarPopulares && (
+                <aside className="publicaciones-populares">
+                  <PanelMasLeidos publicaciones={populares} cargando={masLeidos.cargandoPrimera} />
+                </aside>
               )}
             </div>
 
-            <div className="mt-7 grid gap-6 xl:grid-cols-[minmax(0,1fr)_220px] xl:gap-6">
-              <section aria-labelledby="titulo-todos">
-                <h2
-                  id="titulo-todos"
-                  className="mb-5 border-l-2 border-primary pl-3 text-[16px] font-semibold tracking-tight text-g-90"
-                >
-                  Todos los artículos
-                </h2>
-
-                {listado.length > 0 ? (
-                  <ul aria-label="Listado de artículos" className="divide-y divide-g-20 [&>li]:py-4 [&>li:first-child]:pt-0 [&>li:last-child]:pb-0">
-                    {listado.map((publicacion) => (
-                      <FilaArticulo key={publicacion.uuid} publicacion={publicacion} />
+            {(listado.length > 0 || hayMas) && (
+              <section className="publicaciones-archivo" aria-labelledby="titulo-todos">
+                <h2 id="titulo-todos">Más artículos</h2>
+                {listado.length > 0 && (
+                  <ul aria-label="Listado de artículos" className="publicaciones-rejilla">
+                    {listado.map(publicacion => (
+                      <li key={publicacion.uuid}><TarjetaArticulo publicacion={publicacion} /></li>
                     ))}
                   </ul>
-                ) : (
-                  <p className="text-[13.5px] text-g-50">
-                    Por ahora solo están los artículos de arriba. Pronto habrá más.
-                  </p>
                 )}
-
                 {hayMas && (
                   <div className="mt-7 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={verMas}
-                      disabled={cargando}
-                      className="inline-flex h-10 items-center gap-2 rounded-xl border border-g-30 px-5 text-[13px] font-medium text-g-70 transition-colors hover:border-primary hover:text-primary disabled:opacity-60"
-                    >
-                      {cargando ? 'Cargando...' : 'Ver más artículos'}
-                      <Icon icon="solar:alt-arrow-down-linear" width="16" height="16" aria-hidden />
+                    <button type="button" onClick={verMas} disabled={cargando} className="publicaciones-control">
+                      {cargando ? 'Cargando…' : 'Ver más artículos'}
+                      <Icon icon="solar:alt-arrow-down-linear" width="16" aria-hidden />
                     </button>
                   </div>
                 )}
               </section>
-
-              <aside className="h-fit rounded-2xl border border-g-20 bg-g-5 p-6">
-                <PanelMasLeidos publicaciones={masLeidos.publicaciones} cargando={masLeidos.cargandoPrimera} />
-              </aside>
-            </div>
+            )}
           </>
         )}
-      </CatalogoConFiltros>
-    </PlantillaSeccion>
+      </div>
+    </div>
   );
 }

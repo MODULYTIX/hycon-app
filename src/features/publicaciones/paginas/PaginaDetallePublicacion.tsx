@@ -36,7 +36,7 @@ export default function PaginaDetallePublicacion() {
 
   if (cargando) {
     return (
-      <div className="mx-auto w-full max-w-[1340px] px-4 py-10 sm:px-6 md:px-12" aria-label="Cargando artículo">
+      <div className="hy-contenedor py-10" aria-label="Cargando artículo">
         <div className="esqueleto-onda h-6 w-40 rounded bg-g-10" />
         <div className="esqueleto-onda mt-6 h-10 w-3/4 rounded-lg bg-g-10" />
         <div className="esqueleto-onda mt-6 aspect-[16/9] rounded-2xl bg-g-10" />
@@ -46,7 +46,7 @@ export default function PaginaDetallePublicacion() {
 
   if (error || !publicacion) {
     return (
-      <div className="mx-auto w-full max-w-[720px] px-4 py-16 text-center sm:px-6">
+      <div className="hy-contenedor [--hy-ancho-contenedor:720px] py-16 text-center">
         <Icon icon="solar:document-text-linear" width="48" height="48" aria-hidden className="mx-auto text-g-30" />
         <h1 className="mt-4 text-[24px] font-semibold text-g-90">No encontramos este artículo</h1>
         <p role="alert" className="mt-2 text-[15px] text-g-50">
@@ -66,7 +66,7 @@ export default function PaginaDetallePublicacion() {
   const relacionados = otros.publicaciones.filter((otra) => otra.uuid !== publicacion.uuid).slice(0, 3);
 
   return (
-    <div className="detalle-interior lectura-interior mx-auto w-full max-w-[1180px] px-4 py-9 sm:px-6 md:px-10">
+    <div className="detalle-interior lectura-interior hy-contenedor py-9">
       <Link
         to={RUTAS.publicaciones}
         className="inline-flex items-center gap-2 text-xs text-g-50 transition-colors hover:text-primary"
