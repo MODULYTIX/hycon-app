@@ -99,7 +99,9 @@ describe('PaginaDetallePublicacion', () => {
 
     await usuario.click(screen.getByRole('link', { name: 'Artículos' }));
 
-    expect(await screen.findByRole('heading', { name: 'Todos los artículos' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Publicaciones' })
+    ).toBeInTheDocument();
   });
 
   it('si el articulo no existe lo explica y ofrece volver', async () => {

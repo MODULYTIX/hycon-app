@@ -109,8 +109,8 @@ describe('todas las rutas abren su pagina', () => {
     ['publicaciones', RUTAS.publicaciones, /^publicaciones$/i],
     ['detalle de publicacion', `/publicaciones/${SLUG}`, /articulo de prueba/i],
     ['acerca de', RUTAS.acercaDe, /acerca de hycon/i],
-    ['contactanos', RUTAS.contactanos, /^contactanos$/i],
-    ['carrito', RUTAS.carrito, /^carrito$/i],
+    ['contactanos', RUTAS.contactanos, /^contáctanos$/i],
+    ['carrito', RUTAS.carrito, /^carrito de compras$/i],
     ['perfil', RUTAS.perfil, /mi cuenta/i],
     ['historial de compras', RUTAS.historial, /mis compras/i],
     ['panel de cursos', RUTAS.panelCursos, /mis cursos/i],
@@ -177,7 +177,7 @@ describe('cambiar de pagina desde el menu', () => {
       [/^productos$/i, /^productos ergonómicos$/i, RUTAS.productos],
       [/^cursos$/i, /^cursos$/i, RUTAS.cursos],
       [/^publicaciones$/i, /^publicaciones$/i, RUTAS.publicaciones],
-      [/^contactanos$/i, /^contactanos$/i, RUTAS.contactanos],
+      [/^contactanos$/i, /^contáctanos$/i, RUTAS.contactanos],
       [/^home$/i, /productos destacados/i, RUTAS.home],
     ];
 
