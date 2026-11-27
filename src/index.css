@@ -619,21 +619,33 @@ body::-webkit-scrollbar {
     visibility: hidden;
   }
 
-  .lamina-certificado,
-  .lamina-certificado * {
+  .hojas-certificado,
+  .hojas-certificado * {
     visibility: visible;
+  }
+
+  /* Arranca arriba del todo: si no, deja el hueco del encabezado en blanco */
+  .hojas-certificado {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
   }
 
   .lamina-certificado {
     /* Sin esto el navegador imprime el marco y el papel en blanco */
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-    position: absolute;
-    inset: 0;
     margin: 0;
     max-width: none;
     box-shadow: none;
     --tw-ring-color: transparent;
+  }
+
+  /* El programa va detras, en su propia hoja */
+  .lamina-certificado + .lamina-certificado {
+    break-before: page;
   }
 
   .sin-imprimir {

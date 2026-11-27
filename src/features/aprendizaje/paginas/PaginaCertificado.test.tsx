@@ -218,3 +218,48 @@ describe('cuando todavia no corresponde', () => {
     );
   });
 });
+
+describe('las dos caras del certificado', () => {
+  const partes = [
+    { uuid: '00000001-0000-4000-8000-000000000001', titulo: 'Que es la mejora continua', posicion: 1, vista: true },
+    { uuid: '00000002-0000-4000-8000-000000000001', titulo: 'El ciclo PDCA paso a paso', posicion: 2, vista: true },
+  ];
+
+  beforeEach(() => {
+    vi.mocked(api.obtenerProgresoApi).mockResolvedValue(
+      progreso({ certificado, partes })
+    );
+  });
+
+  // El diploma por delante y el programa por detras, como el que trajo el usuario
+  it('pinta el diploma y, detras, el programa del curso', async () => {
+    renderizar();
+
+    expect(
+      await screen.findByRole('article', { name: /^certificado HY-ABCD1234$/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('article', { name: /programa del curso HY-ABCD1234/i })
+    ).toBeInTheDocument();
+  });
+
+  it('el programa trae el temario del curso', async () => {
+    renderizar();
+    const programa = within(
+      await screen.findByRole('article', { name: /programa del curso/i })
+    );
+
+    expect(programa.getAllByRole('listitem')).toHaveLength(2);
+    expect(programa.getByText('El ciclo PDCA paso a paso')).toBeInTheDocument();
+  });
+
+  // Las dos hojas van juntas en el mismo bloque: es lo que se manda a imprimir
+  it('las dos hojas salen dentro del bloque que se imprime', async () => {
+    const { container } = renderizar();
+    await screen.findByRole('article', { name: /programa del curso/i });
+
+    const bloque = container.querySelector('.hojas-certificado');
+    expect(bloque?.querySelectorAll('.lamina-certificado')).toHaveLength(2);
+  });
+});
+

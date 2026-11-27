@@ -6,6 +6,7 @@ import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacio
 import CampoTexto from '@/shared/ui/moleculas/CampoTexto';
 import AlertaFormulario from '@/shared/ui/moleculas/AlertaFormulario';
 import LaminaCertificado from '@/features/aprendizaje/componentes/organismos/LaminaCertificado';
+import LaminaPrograma from '@/features/aprendizaje/componentes/organismos/LaminaPrograma';
 import {
   emitirCertificadoApi,
   obtenerProgresoApi,
@@ -138,10 +139,15 @@ export default function PaginaCertificado() {
           </button>
         </div>
 
-        <LaminaCertificado certificado={certificado} />
+        {/* Dos caras: el diploma y, detras, el programa del curso */}
+        <div className="hojas-certificado space-y-6">
+          <LaminaCertificado certificado={certificado} />
+          <LaminaPrograma certificado={certificado} partes={progreso.partes} />
+        </div>
 
         <p className="mt-4 text-center text-[12.5px] text-g-50 sin-imprimir">
-          Al descargar se abre el diálogo de impresión: elige "Guardar como PDF".
+          Son dos hojas: el certificado y el programa del curso. Al descargar se abre el diálogo de
+          impresión: elige "Guardar como PDF".
         </p>
       </div>
     );
