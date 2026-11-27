@@ -39,7 +39,7 @@ const guardar = (lineas: LineaCarrito[]) => {
   return lineas;
 };
 
-const topeDe = (tipo: TipoItem, stock?: number | null) =>
+export const topeDe = (tipo: TipoItem, stock?: number | null) =>
   tipo === 'curso' ? 1 : Math.min(stock ?? MAXIMO, MAXIMO);
 
 /**

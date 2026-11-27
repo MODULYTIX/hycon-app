@@ -1,3 +1,4 @@
+import SelectorCantidad from '@/shared/ui/atomos/SelectorCantidad';
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { formatearPrecio } from '@/shared/utilidades/formato';
@@ -12,13 +13,14 @@ interface Props {
 // Una fila del carrito: foto, nombre, cantidad y lo que suma esa linea
 export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Props) {
   const esCurso = linea.tipo === 'curso';
+  const ahorro = ((linea.precioAnterior ?? linea.precio) - linea.precio) * linea.cantidad;
   const tope = linea.stock ?? 1;
   const enElTope = linea.cantidad >= tope;
 
   return (
-    <li className="grid grid-cols-[64px_minmax(0,1fr)] gap-x-3 gap-y-2 py-5 sm:grid-cols-[80px_minmax(0,1fr)_auto] sm:gap-x-4">
+    <li className="grid grid-cols-[72px_minmax(0,1fr)] gap-x-3 gap-y-2 py-5 sm:grid-cols-[104px_minmax(0,1fr)_auto] sm:gap-x-6">
       <Link to={linea.ruta} tabIndex={-1} aria-hidden className="shrink-0">
-        <div className="h-16 w-16 sm:h-20 sm:w-20 overflow-hidden rounded-xl bg-hy-5 ring-1 ring-g-20">
+        <div className="aspect-[4/5] w-full overflow-hidden bg-hy-5 ring-1 ring-g-20">
           {linea.imagen ? (
             <img src={linea.imagen} alt="" loading="lazy" className="h-full w-full object-cover" />
           ) : (
@@ -33,44 +35,21 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
         <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
           {esCurso ? 'Curso' : 'Producto'}
         </p>
-        <h3 className="line-clamp-2 break-words text-[15px] font-semibold leading-snug text-g-90">
+        <h3 className="line-clamp-2 break-words text-lg font-semibold leading-snug text-g-90">
           <Link to={linea.ruta} className="outline-offset-4 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary">
             {linea.nombre}
           </Link>
         </h3>
-        <p className="text-[13px] text-g-50">
-          {formatearPrecio(linea.precio)} c/u
-          {linea.precioAnterior !== null && (
-            <span className="ml-2 line-through">{formatearPrecio(linea.precioAnterior)}</span>
-          )}
-        </p>
+        {linea.cantidad > 1 && (
+          <p className="text-sm text-g-50">{formatearPrecio(linea.precio)} por unidad</p>
+        )}
 
         <div className="mt-1 flex flex-wrap items-center gap-3">
           {esCurso ? (
-            <span className="rounded-md bg-hy-5 px-2 py-1 text-[12px] text-primary">1 inscripción</span>
+            <span className="bg-hy-5 px-2 py-1 text-[12px] text-primary">1 inscripción</span>
           ) : (
-            <div className="flex items-center rounded-lg border border-g-30">
-              <button
-                type="button"
-                onClick={() => onCambiarCantidad(linea.cantidad - 1)}
-                aria-label={`Una unidad menos de ${linea.nombre}`}
-                className="flex h-9 w-9 items-center justify-center text-g-70 transition-colors hover:text-primary"
-              >
-                <Icon icon="solar:minus-square-linear" width="17" height="17" aria-hidden />
-              </button>
-              <span aria-live="polite" className="w-9 text-center text-[14px] font-medium tabular-nums text-g-90">
-                {linea.cantidad}
-              </span>
-              <button
-                type="button"
-                onClick={() => onCambiarCantidad(linea.cantidad + 1)}
-                disabled={enElTope}
-                aria-label={`Una unidad más de ${linea.nombre}`}
-                className="flex h-9 w-9 items-center justify-center text-g-70 transition-colors hover:text-primary disabled:opacity-40"
-              >
-                <Icon icon="solar:add-square-linear" width="17" height="17" aria-hidden />
-              </button>
-            </div>
+            <SelectorCantidad cantidad={linea.cantidad} maximo={tope} nombre={linea.nombre}
+              onCambiar={onCambiarCantidad} onReducirUltima={onQuitar} />
           )}
 
           <button
@@ -89,8 +68,14 @@ export default function LineaCarrito({ linea, onCambiarCantidad, onQuitar }: Pro
         </div>
       </div>
 
-      <p className="col-start-2 text-[15px] font-semibold tabular-nums text-g-90 sm:col-start-3 sm:row-start-1 sm:text-right">
+      <p className="col-start-2 text-lg font-semibold tabular-nums text-[#846021] sm:col-start-3 sm:row-start-1 sm:text-right">
         {formatearPrecio(linea.precio * linea.cantidad)}
+        {linea.precioAnterior !== null && ahorro > 0 && (
+          <>
+            <del className="block text-sm font-normal text-g-50"><span className="sr-only">Antes: </span>{formatearPrecio(linea.precioAnterior * linea.cantidad)}</del>
+            <span className="mt-1 block text-sm font-medium text-primary">Ahorras {formatearPrecio(ahorro)}</span>
+          </>
+        )}
       </p>
     </li>
   );
