@@ -16,7 +16,7 @@ import type { Certificado, ProgresoCurso } from '@/features/aprendizaje/tipos/ap
 
 const CARAS: ['diploma' | 'programa', string][] = [
   ['diploma', 'Certificado'],
-  ['programa', 'Programa del curso'],
+  ['programa', 'Programa académico'],
 ];
 
 // Las mismas reglas que aplica el servidor, para avisar antes de enviar

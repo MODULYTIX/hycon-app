@@ -239,14 +239,14 @@ describe('las dos caras del certificado', () => {
       await screen.findByRole('article', { name: /^certificado HY-ABCD1234$/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('article', { name: /programa del curso HY-ABCD1234/i })
+      screen.getByRole('article', { name: /programa académico HY-ABCD1234/i })
     ).toBeInTheDocument();
   });
 
   it('el programa trae el temario del curso', async () => {
     renderizar();
     const programa = within(
-      await screen.findByRole('article', { name: /programa del curso/i })
+      await screen.findByRole('article', { name: /programa académico/i })
     );
 
     expect(programa.getAllByRole('listitem')).toHaveLength(2);
@@ -256,7 +256,7 @@ describe('las dos caras del certificado', () => {
   // Las dos hojas van juntas en el mismo bloque: es lo que se manda a imprimir
   it('las dos hojas salen dentro del bloque que se imprime', async () => {
     const { container } = renderizar();
-    await screen.findByRole('article', { name: /programa del curso/i });
+    await screen.findByRole('article', { name: /programa académico/i });
 
     const bloque = container.querySelector('.hojas-certificado');
     expect(bloque?.querySelectorAll('.lamina-certificado')).toHaveLength(2);
@@ -265,7 +265,7 @@ describe('las dos caras del certificado', () => {
   // En pantalla estorba tener que bajar: se mira una cara cada vez
   it('empieza mostrando el diploma y esconde el programa', async () => {
     const { container } = renderizar();
-    await screen.findByRole('article', { name: /programa del curso/i });
+    await screen.findByRole('article', { name: /programa académico/i });
 
     const [diploma, programa] = [...container.querySelectorAll('.hojas-certificado > *')];
     expect(diploma).not.toHaveClass('cara-oculta');
@@ -275,9 +275,9 @@ describe('las dos caras del certificado', () => {
   it('el selector cambia de cara', async () => {
     const usuario = userEvent.setup();
     const { container } = renderizar();
-    await screen.findByRole('article', { name: /programa del curso/i });
+    await screen.findByRole('article', { name: /programa académico/i });
 
-    await usuario.click(screen.getByRole('button', { name: 'Programa del curso' }));
+    await usuario.click(screen.getByRole('button', { name: 'Programa académico' }));
 
     const [diploma, programa] = [...container.querySelectorAll('.hojas-certificado > *')];
     expect(diploma).toHaveClass('cara-oculta');
@@ -288,12 +288,12 @@ describe('las dos caras del certificado', () => {
   it('las dos caras siguen en el documento aunque se esconda una', async () => {
     const usuario = userEvent.setup();
     renderizar();
-    await screen.findByRole('article', { name: /programa del curso/i });
+    await screen.findByRole('article', { name: /programa académico/i });
 
-    await usuario.click(screen.getByRole('button', { name: 'Programa del curso' }));
+    await usuario.click(screen.getByRole('button', { name: 'Programa académico' }));
 
     expect(screen.getByRole('article', { name: /^certificado HY-ABCD1234$/i })).toBeInTheDocument();
-    expect(screen.getByRole('article', { name: /programa del curso/i })).toBeInTheDocument();
+    expect(screen.getByRole('article', { name: /programa académico/i })).toBeInTheDocument();
   });
 });
 

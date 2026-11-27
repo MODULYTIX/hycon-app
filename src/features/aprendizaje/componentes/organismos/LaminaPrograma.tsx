@@ -20,14 +20,14 @@ export default function LaminaPrograma({ certificado, partes }: Props) {
 
   return (
     <article
-      aria-label={`Programa del curso ${certificado.codigo}`}
+      aria-label={`Programa académico ${certificado.codigo}`}
       className="lamina-certificado mx-auto w-full max-w-[980px] bg-certificado-papel p-3 ring-1 ring-g-20 sm:p-5"
     >
       <div className="relative flex min-h-[460px] flex-col border border-hy-30 px-6 py-9 sm:px-14 sm:py-12">
         <header className="flex items-center justify-between gap-6 border-b border-hy-30 pb-5">
           <div className="min-w-0">
             <h1 className="font-serif text-[20px] font-semibold tracking-tight text-hy-90 sm:text-[27px]">
-              Programa del curso
+              Programa Académico
             </h1>
             <p className="mt-1 text-[13px] text-g-60 sm:text-[15px]">{certificado.curso}</p>
           </div>
@@ -36,21 +36,18 @@ export default function LaminaPrograma({ certificado, partes }: Props) {
         </header>
 
         {ordenadas.length > 0 ? (
-          <ol className={`mt-7 space-y-3.5 ${aDosColumnas ? 'sm:columns-2 sm:gap-10' : ''}`}>
-            {ordenadas.map((parte, indice) => (
-              <li key={parte.uuid} className="flex gap-3.5 break-inside-avoid">
-                <span
-                  aria-hidden
-                  className="mt-[3px] w-[22px] shrink-0 text-right font-serif text-[13px] text-hy-60"
-                >
-                  {indice + 1}.
+          <ul className={`mt-7 space-y-3.5 ${aDosColumnas ? 'sm:columns-2 sm:gap-10' : ''}`}>
+            {ordenadas.map((parte) => (
+              <li key={parte.uuid} className="flex gap-3 break-inside-avoid">
+                <span aria-hidden className="mt-[2px] shrink-0 text-[14px] text-hy-60">
+                  -
                 </span>
                 <span className="text-[13.5px] leading-relaxed text-g-80 sm:text-[15px]">
                   {parte.titulo}
                 </span>
               </li>
             ))}
-          </ol>
+          </ul>
         ) : (
           <p className="mt-7 text-[13.5px] text-g-50">
             Este curso no tiene el temario desglosado.

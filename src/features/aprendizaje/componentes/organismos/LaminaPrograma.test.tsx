@@ -24,13 +24,13 @@ const PARTES = [
   parte(3, 'Indicadores y seguimiento'),
 ];
 
-const hoja = () => within(screen.getByRole('article', { name: /programa del curso/i }));
+const hoja = () => within(screen.getByRole('article', { name: /programa académico/i }));
 
 describe('LaminaPrograma', () => {
   it('encabeza con el programa y el nombre del curso', () => {
     render(<LaminaPrograma certificado={certificado} partes={PARTES} />);
 
-    expect(hoja().getByRole('heading', { level: 1 })).toHaveTextContent(/programa del curso/i);
+    expect(hoja().getByRole('heading', { level: 1 })).toHaveTextContent(/programa académico/i);
     expect(hoja().getAllByText('Mejora continua en operaciones').length).toBeGreaterThan(0);
   });
 
@@ -41,6 +41,15 @@ describe('LaminaPrograma', () => {
     expect(temas).toHaveLength(3);
     expect(temas[0]).toHaveTextContent('Que es la mejora continua');
     expect(temas[2]).toHaveTextContent('Indicadores y seguimiento');
+  });
+
+  // Los temas van con guion, no numerados: lo pidio asi el usuario
+  it('marca cada tema con un guion y no con un numero', () => {
+    render(<LaminaPrograma certificado={certificado} partes={PARTES} />);
+
+    const temas = hoja().getAllByRole('listitem');
+    expect(temas[0]).toHaveTextContent(/^-\s*Que es la mejora continua$/);
+    expect(hoja().getByRole('list').tagName).toBe('UL');
   });
 
   // El backend puede devolverlas en cualquier orden: manda la posicion
