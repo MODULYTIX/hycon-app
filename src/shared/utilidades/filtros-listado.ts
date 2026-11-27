@@ -7,6 +7,12 @@ export interface FiltrosListado {
   precioMax?: number;
   stock?: 'disponible' | 'agotado';
   duracionMax?: number;
+  marca?: string;
+  modelo?: string;
+  color?: string;
+  oferta?: 'si';
+  conAvance?: 'si';
+  partes?: number;
   desde?: string;
   hasta?: string;
 }

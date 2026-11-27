@@ -27,6 +27,13 @@ export const listarProductosApi = (
     { senal }
   ).then((r) => paginaDe(r.productos, r.paginacion));
 
+export type AtributosProductos = Record<'marca' | 'modelo' | 'color', string[]>;
+
+export const listarAtributosProductosApi = async (senal?: AbortSignal) => {
+  const resultado = await peticion<{ atributos: AtributosProductos }>(`${BASE}/filters`, { senal });
+  return resultado.atributos;
+};
+
 export const listarAgenciasApi = (senal?: AbortSignal) =>
   peticion<{ agencias: AgenciaEnvio[] }>('/api/v1/catalog/shipping-agencies', { senal }).then(
     (r) => r.agencias

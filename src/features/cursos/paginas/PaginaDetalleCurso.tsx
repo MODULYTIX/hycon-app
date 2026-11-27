@@ -1,3 +1,4 @@
+import ModalAcceso from '@/features/autenticacion/componentes/organismos/ModalAcceso';
 import { useEffect, useState } from 'react';
 import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
 import { Icon } from '@iconify/react';
@@ -43,6 +44,7 @@ const portadaInterior = (etiqueta: string) => (
 );
 
 export default function PaginaDetalleCurso() {
+  const [pideAcceso, setPideAcceso] = useState(false);
   const { uuid = '' } = useParams();
   const { usuario, cargando: restaurandoSesion } = useAutenticacion();
   const usuarioId = usuario?.userId;
@@ -110,7 +112,7 @@ export default function PaginaDetalleCurso() {
 
   if (cargando || restaurandoSesion || consultandoAcceso) {
     return (
-      <div role="status" aria-label="Cargando curso" className="mx-auto w-full max-w-[1120px] px-5 py-10 sm:px-7">
+      <div role="status" aria-label="Cargando curso" className="hy-contenedor py-10">
         <div className="esqueleto-onda mb-8 h-10 w-3/4 rounded-lg bg-g-10" />
         <div className="grid gap-8 min-[900px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div className="esqueleto-onda aspect-video rounded-2xl bg-g-10" />
@@ -125,7 +127,7 @@ export default function PaginaDetalleCurso() {
 
   if (error || !curso) {
     return (
-      <div className="mx-auto max-w-[720px] px-5 py-24 text-center">
+      <div className="hy-contenedor [--hy-ancho-contenedor:720px] py-24 text-center">
         <h1 className="text-2xl font-medium text-g-80">Curso no disponible</h1>
         <p role="alert" className="mt-3 text-g-50">{error || 'No se pudo encontrar este curso.'}</p>
         <Link to={RUTAS.cursos} className="mt-6 inline-block font-medium text-primary hover:underline">Volver a cursos</Link>
@@ -148,6 +150,10 @@ export default function PaginaDetalleCurso() {
   const fuenteMuestra = fuenteDeLeccion(muestra);
 
   const agregar = () => {
+    if (!usuario) {
+      setPideAcceso(true);
+      return;
+    }
     if (tieneAcceso || (usuarioId !== undefined && errorAcceso)) return;
     // Un curso es una sola inscripcion: si ya esta, no se suma otra
     const guardado = agregarAlCarrito({ tipo: 'curso', uuid: curso.uuid });
@@ -185,7 +191,8 @@ export default function PaginaDetalleCurso() {
   const hayAlgoQueVer = Boolean(fuenteMuestra || curso.youtubeId);
 
   return (
-    <article className="detalle-interior mx-auto w-full max-w-[1120px] px-5 pb-16 pt-6 sm:px-7">
+    <article className="detalle-interior hy-contenedor pb-16 pt-6">
+      {pideAcceso && <ModalAcceso abierto onCerrar={() => setPideAcceso(false)} />}
       <nav aria-label="Ruta" className="mb-4 flex items-center gap-1.5 text-[12.5px] text-g-50">
         <Link to={RUTAS.cursos} className="transition-colors hover:text-primary">Cursos</Link>
         <Icon icon="solar:alt-arrow-right-linear" width="13" height="13" aria-hidden />
@@ -257,7 +264,7 @@ export default function PaginaDetalleCurso() {
                     </p>
                     <button
                       type="button"
-                      onClick={agregar}
+                      disabled={restaurandoSesion} onClick={agregar}
                       className="mt-1 inline-flex h-10 items-center gap-2 rounded-xl bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro"
                     >
                       <Icon icon="solar:cart-large-2-linear" width="16" height="16" aria-hidden />
@@ -369,7 +376,7 @@ export default function PaginaDetalleCurso() {
 
               <button
                 type="button"
-                onClick={agregar}
+                disabled={restaurandoSesion} onClick={agregar}
                 className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-primary text-sm font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
               >
                 <Icon icon="solar:cart-large-2-linear" width="18" height="18" aria-hidden />

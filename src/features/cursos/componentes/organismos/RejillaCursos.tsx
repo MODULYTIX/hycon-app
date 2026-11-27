@@ -5,6 +5,7 @@ import AvisoErrorCatalogo from '@/shared/ui/moleculas/AvisoErrorCatalogo';
 import type { Curso } from '@/features/cursos/tipos/curso.tipos';
 
 interface Props {
+  vista: 'grilla' | 'lista';
   cursos: Curso[];
   onVerAvance: (curso: Curso) => void;
   cargando: boolean;
@@ -13,10 +14,10 @@ interface Props {
   onReintentar?: () => void;
 }
 
-const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
 export default function RejillaCursos({
   cursos,
+  vista,
   cargando,
   error,
   onVerAvance,
@@ -24,21 +25,21 @@ export default function RejillaCursos({
   onReintentar,
 }: Props) {
   if (cargando) {
-    return <EsqueletoRejillaCursos />;
+    return <EsqueletoRejillaCursos vista={vista} />;
   }
 
   if (error) {
     return (
       <div className="space-y-6">
         <AvisoErrorCatalogo error={error} onReintentar={onReintentar} />
-        <EsqueletoRejillaCursos cantidad={4} />
+        <EsqueletoRejillaCursos vista={vista} cantidad={4} />
       </div>
     );
   }
 
   if (cursos.length === 0) {
     return (
-      <div className="rounded-xl bg-white ring-1 ring-g-20">
+      <div className="bg-white border border-g-20">
         <EstadoVacio
           icono="solar:diploma-linear"
           titulo={filtrado ? "No encontramos cursos" : "Todavia no hay cursos publicados"}
@@ -49,7 +50,7 @@ export default function RejillaCursos({
   }
 
   return (
-    <ul aria-label="Catalogo de cursos" className={REJILLA}>
+    <ul aria-label="Catalogo de cursos" className="productos-rejilla" data-vista={vista}>
       {cursos.map((curso) => (
         <TarjetaCurso key={curso.uuid} curso={curso} onVerAvance={onVerAvance} />
       ))}

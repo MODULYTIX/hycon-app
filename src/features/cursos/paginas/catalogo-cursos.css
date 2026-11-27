@@ -1,0 +1,76 @@
+.cursos-filtros .productos-filtro-grupo:first-child { border-top: 0; }
+.cursos-duracion-filtro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--catalogo-tinta-secundaria);
+}
+.cursos-duracion-filtro .hy-input {
+  height: var(--catalogo-alto-barra);
+  border-radius: 0;
+  font-size: var(--catalogo-texto-auxiliar);
+}
+.catalogo-cursos .cursos-tarjeta > a { height: auto; flex: 1; }
+.cursos-duracion {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  background: var(--catalogo-tinta);
+  color: white;
+  font-size: var(--hy-texto-nota);
+}
+.cursos-descripcion {
+  margin-top: 8px;
+  color: var(--catalogo-tinta-secundaria);
+  font-size: var(--catalogo-texto-auxiliar);
+}
+.cursos-avance {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  color: var(--catalogo-verde);
+  font-size: var(--catalogo-texto-control);
+}
+.cursos-avance {
+  min-height: 40px;
+  border-top: 1px solid var(--catalogo-borde);
+  cursor: pointer;
+}
+.cursos-avance:hover { background: #edf3ee; }
+
+.catalogo-cursos .productos-rejilla[data-vista=lista] .home-producto-precios { justify-content: flex-start; }
+
+.catalogo-cursos .productos-rejilla[data-vista=lista] .cursos-tarjeta .home-producto-info {
+  padding-right: 48px;
+}
+.catalogo-cursos .productos-rejilla[data-vista=lista] .cursos-tarjeta:has(.cursos-avance) .productos-compra-rapida {
+  bottom: 48px;
+}
+@media (hover: hover) {
+  .catalogo-cursos .productos-rejilla[data-vista=grilla] {
+    & > .cursos-tarjeta:hover,
+    &:not(:has(> .productos-tarjeta:hover)) > .cursos-tarjeta:has(:focus-visible) {
+      .cursos-descripcion { color: #fff; }
+    }
+  }
+}
+@media (hover: none) {
+  .catalogo-cursos .productos-rejilla[data-vista=lista] .cursos-tarjeta .productos-vista-rapida { opacity: 1; }
+  .catalogo-cursos .productos-rejilla[data-vista=grilla] .cursos-tarjeta .productos-compra-rapida {
+    top: 52%;
+    transform: translateY(-50%);
+  }
+  .catalogo-cursos .productos-rejilla[data-vista=grilla] .cursos-tarjeta .productos-vista-rapida {
+    top: 52%;
+    right: 58px;
+    left: auto;
+    transform: translateY(-50%);
+    opacity: 1;
+  }
+}

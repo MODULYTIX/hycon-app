@@ -1,3 +1,6 @@
+import ModalAcceso from '@/features/autenticacion/componentes/organismos/ModalAcceso';
+import { useAutenticacion } from '@/features/autenticacion/hooks/useAutenticacion';
+import SelectorCantidad from '@/shared/ui/atomos/SelectorCantidad';
 import { useEffect, useState } from 'react';
 import { Icon } from '@iconify/react';
 import { Link, useParams } from 'react-router-dom';
@@ -9,6 +12,8 @@ import { esUuid } from '@/shared/utilidades/identificador';
 import { agregarAlCarrito } from '@/features/carrito/servicios/carrito.almacen';
 
 export default function PaginaDetalleProducto() {
+  const [pideAcceso, setPideAcceso] = useState(false);
+  const { usuario, cargando: restaurandoSesion } = useAutenticacion();
   const { uuid = '' } = useParams();
   const [producto, setProducto] = useState<ProductoDetalle | null>(null);
   const [cargando, setCargando] = useState(true);
@@ -56,7 +61,7 @@ export default function PaginaDetalleProducto() {
 
   if (cargando) {
     return (
-      <div aria-label="Cargando producto" className="mx-auto grid w-full max-w-[1120px] gap-10 px-5 py-12 min-[700px]:grid-cols-2">
+      <div aria-label="Cargando producto" className="hy-contenedor grid gap-10 py-12 min-[700px]:grid-cols-2">
         <div className="esqueleto-onda aspect-square max-h-[530px] rounded-2xl bg-g-10" />
         <div className="space-y-5">
           <div className="esqueleto-onda h-10 w-3/4 rounded-lg bg-g-10" />
@@ -69,7 +74,7 @@ export default function PaginaDetalleProducto() {
 
   if (error || !producto) {
     return (
-      <div className="mx-auto max-w-[720px] px-4 py-24 text-center">
+      <div className="hy-contenedor [--hy-ancho-contenedor:720px] py-24 text-center">
         <h1 className="text-3xl font-semibold text-g-90">Producto no disponible</h1>
         <p className="mt-3 text-g-50">{error || 'No se pudo encontrar este producto.'}</p>
         <Link to={RUTAS.productos} className="mt-6 inline-block font-semibold text-primary hover:underline">
@@ -103,6 +108,10 @@ export default function PaginaDetalleProducto() {
   const agencias = producto.shippingAgencies ?? [];
 
   const agregar = () => {
+    if (!usuario) {
+      setPideAcceso(true);
+      return;
+    }
     const guardado = agregarAlCarrito(
       { tipo: 'producto', uuid: producto.uuid, cantidad },
       producto.stock
@@ -116,20 +125,20 @@ export default function PaginaDetalleProducto() {
   };
 
   return (
-    <article className="mx-auto w-full max-w-[1180px] px-5 pb-14 pt-6 sm:px-8 sm:pb-20 sm:pt-9">
+    <article className="hy-contenedor pb-14 pt-6 sm:pb-20 sm:pt-9">
+      {pideAcceso && <ModalAcceso abierto onCerrar={() => setPideAcceso(false)} />}
       <Link to={RUTAS.productos} className="inline-flex items-center gap-2 text-xs text-g-50 transition-colors hover:text-primary">
         <Icon icon="solar:arrow-left-linear" width="15" height="15" aria-hidden />
         Volver a productos
       </Link>
       <header className="mb-7 mt-5 grid items-center gap-5 border-b border-g-20 pb-6 md:grid-cols-[minmax(0,1fr)_auto] md:gap-x-10">
         <h1 className="max-w-[720px] break-words text-[1.8rem] font-medium leading-[1.2] tracking-tight text-g-80 sm:text-[2.25rem]">{producto.name}</h1>
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 shrink-0 items-center overflow-hidden rounded-[2px] border border-g-30" role="group" aria-label="Cantidad">
-            <button type="button" aria-label="Reducir cantidad" disabled={cantidad <= 1 || sinStock} onClick={() => setCantidad((valor) => Math.max(1, valor - 1))} className="h-full w-10 text-lg text-g-80 hover:bg-g-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary disabled:opacity-35">−</button>
-            <span className="min-w-6 text-center text-sm tabular-nums" aria-live="polite">{cantidad}</span>
-            <button type="button" aria-label="Aumentar cantidad" disabled={cantidad >= producto.stock || sinStock} onClick={() => setCantidad((valor) => Math.min(producto.stock, valor + 1))} className="h-full w-10 text-lg text-g-80 hover:bg-g-10 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary disabled:opacity-35">+</button>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="grid gap-1">
+            <span className="text-sm font-medium text-g-80">Cantidad</span>
+            <SelectorCantidad cantidad={cantidad} maximo={producto.stock} onCambiar={setCantidad} />
           </div>
-          <button type="button" disabled={sinStock} onClick={agregar} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-[2px] bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
+          <button type="button" disabled={sinStock || restaurandoSesion} onClick={agregar} className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-[2px] bg-primary px-5 text-[13px] font-medium text-white transition-colors hover:bg-marca-oscuro focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary disabled:cursor-not-allowed disabled:bg-g-40">
             <Icon icon="solar:cart-large-2-linear" width="18" height="18" aria-hidden />
             {sinStock ? 'Sin stock' : 'Agregar al carrito'}
           </button>

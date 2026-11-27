@@ -1,16 +1,16 @@
-import EsqueletoTarjetaCurso from '@/features/cursos/componentes/moleculas/EsqueletoTarjetaCurso';
+import EsqueletoTarjetaProducto from '@/features/productos/componentes/moleculas/EsqueletoTarjetaProducto';
 
-const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
 interface Props {
+  vista: 'grilla' | 'lista';
   cantidad?: number;
 }
 
-export default function EsqueletoRejillaCursos({ cantidad = 8 }: Props) {
+export default function EsqueletoRejillaCursos({ cantidad = 8, vista }: Props) {
   return (
-    <ul aria-label="Cargando cursos" className={REJILLA}>
+    <ul aria-label="Cargando cursos" className="productos-rejilla" data-vista={vista}>
       {Array.from({ length: cantidad }).map((_, posicion) => (
-        <EsqueletoTarjetaCurso key={posicion} />
+        <EsqueletoTarjetaProducto key={posicion} />
       ))}
     </ul>
   );

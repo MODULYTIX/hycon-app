@@ -6,25 +6,23 @@ import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
 interface Props {
   productos: Producto[];
+  vista?: 'grilla' | 'lista';
   cargando: boolean;
   error: string | null;
   filtrado?: boolean;
   onReintentar?: () => void;
 }
 
-const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
-
 // Rejilla del catalogo publico
-export default function RejillaProductos({ productos, cargando, error, filtrado = false, onReintentar }: Props) {
+export default function RejillaProductos({ productos, vista = 'grilla', cargando, error, filtrado = false, onReintentar }: Props) {
   if (cargando) {
-    return <EsqueletoRejillaProductos />;
+    return <EsqueletoRejillaProductos vista={vista} />;
   }
 
   if (error) {
     return (
       <div className="space-y-6">
         <AvisoErrorCatalogo error={error} onReintentar={onReintentar} />
-        <EsqueletoRejillaProductos cantidad={4} />
       </div>
     );
   }
@@ -35,14 +33,14 @@ export default function RejillaProductos({ productos, cargando, error, filtrado 
         <EstadoVacio
           icono="solar:box-linear"
           titulo={filtrado ? "No encontramos productos" : "Todavia no hay productos publicados"}
-          descripcion={filtrado ? "Prueba otros filtros o pulsa Limpiar para ver todo el catálogo." : "Estamos preparando el catalogo. Vuelve pronto o escribenos por WhatsApp."}
+          descripcion={filtrado ? "Prueba otros filtros o pulsa Quitar filtros para ver todo el catálogo." : "Estamos preparando el catalogo. Vuelve pronto o escribenos por WhatsApp."}
         />
       </div>
     );
   }
 
   return (
-    <ul aria-label="Catalogo de productos" className={REJILLA}>
+    <ul aria-label="Catalogo de productos" className="productos-rejilla" data-vista={vista}>
       {productos.map((producto) => (
         <TarjetaProducto key={producto.uuid} producto={producto} />
       ))}

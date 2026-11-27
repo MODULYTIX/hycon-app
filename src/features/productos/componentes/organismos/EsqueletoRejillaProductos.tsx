@@ -1,14 +1,13 @@
 import EsqueletoTarjetaProducto from '@/features/productos/componentes/moleculas/EsqueletoTarjetaProducto';
 
-const REJILLA = 'grid gap-4 min-[460px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
-
 interface Props {
   cantidad?: number;
+  vista?: 'grilla' | 'lista';
 }
 
-export default function EsqueletoRejillaProductos({ cantidad = 8 }: Props) {
+export default function EsqueletoRejillaProductos({ cantidad = 6, vista = 'grilla' }: Props) {
   return (
-    <ul aria-label="Cargando productos" className={REJILLA}>
+    <ul aria-label="Cargando productos" className="productos-rejilla" data-vista={vista}>
       {Array.from({ length: cantidad }).map((_, posicion) => (
         <EsqueletoTarjetaProducto key={posicion} />
       ))}

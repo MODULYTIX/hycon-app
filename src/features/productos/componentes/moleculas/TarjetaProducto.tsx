@@ -1,97 +1,75 @@
+import { useRef, useState } from 'react';
+import ModalCompraRapida from '@/features/carrito/componentes/organismos/ModalCompraRapida';
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { rutaProductoDetalle } from '@/app/rutas/rutas';
 import { formatearPrecio } from '@/shared/utilidades/formato';
 import type { Producto } from '@/features/productos/tipos/producto.tipos';
 
-// Tarjeta del catalogo: la foto arriba y la ficha debajo, sin tapar el producto.
-export default function TarjetaProducto({ producto }: { producto: Producto }) {
-  const enOferta = producto.discountPrice !== null;
+export default function TarjetaProducto({ producto, variante = 'catalogo' }: {
+  producto: Producto;
+  variante?: 'catalogo' | 'inicio';
+}) {
+  const [compraAbierta, setCompraAbierta] = useState(false);
+  const botonCompra = useRef<HTMLButtonElement>(null);
+  const esCatalogo = variante === 'catalogo';
+  const precio = producto.discountPrice !== null && producto.discountPrice < producto.price
+    ? producto.discountPrice : producto.price;
+  const oferta = precio < producto.price;
   const sinStock = producto.stock === 0;
-  // Marca y modelo se leen juntos como una sola linea de referencia
   const referencia = [producto.brand, producto.model].filter(Boolean).join(' · ');
+  const categoria = /silla/i.test(producto.name) ? 'Sillas'
+    : /mesa|escritorio/i.test(producto.name) ? 'Escritorios'
+      : /soporte|laptop/i.test(producto.name) ? 'Accesorios' : undefined;
+  const subtitulo = esCatalogo ? referencia || categoria : categoria || 'Ergonomía';
 
   return (
-    <li className="tarjeta-catalogo group flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-g-20 transition-shadow duration-300 hover:ring-primary/40 hover:shadow-[0_14px_40px_rgba(28,58,57,0.10)]">
-      <Link
-        to={rutaProductoDetalle(producto.uuid)}
-        aria-label={`Ver detalles de ${producto.name}`}
-        className="flex flex-1 flex-col outline-offset-2 focus-visible:outline-2 focus-visible:outline-primary"
-      >
-        <div className="relative aspect-[4/3] max-h-[190px] overflow-hidden bg-g-5">
-          {producto.imageUrl ? (
-            <img
-              src={producto.imageUrl}
-              alt={producto.name}
-              draggable={false}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-            />
-          ) : (
-            <span aria-hidden className="flex h-full w-full items-center justify-center bg-hy-5 text-hy-30">
-              <Icon icon="solar:box-linear" width="48" height="48" />
-            </span>
-          )}
-
-          {enOferta && (
-            <span className="absolute left-3 top-3 rounded-md bg-secondary px-2 py-1 text-[length:var(--hy-texto-nota)] font-semibold tracking-[0.08em] text-g-90">
-              OFERTA
-            </span>
-          )}
-
-          {sinStock && (
-            <span className="absolute right-4 top-4 bg-g-90/85 px-3 py-1.5 text-[length:var(--hy-texto-nota)] font-medium tracking-wide text-white">
-              Sin stock
-            </span>
-          )}
+    <li className={esCatalogo ? 'home-producto productos-tarjeta' : 'home-producto'}>
+      <Link to={rutaProductoDetalle(producto.uuid)} aria-label={esCatalogo ? `Ver detalles de ${producto.name}` : `Ver ${producto.name}`}>
+        <div className="home-producto-titulo productos-tarjeta-titulo">
+          <h3>{producto.name}</h3>
+          {esCatalogo ? (
+            <>
+              <p className="productos-tarjeta-categoria">{categoria ?? 'Productos'}</p>
+              {subtitulo && <p className="productos-tarjeta-referencia">{subtitulo}</p>}
+            </>
+          ) : <p>{subtitulo}</p>}
         </div>
-
-        <div className="flex flex-1 flex-col gap-2.5 border-t border-g-20 p-4">
-          {referencia && (
-            <p className="text-[length:var(--hy-texto-nota)] font-medium uppercase tracking-[0.14em] text-primary">{referencia}</p>
-          )}
-
-          <h3 className="line-clamp-2 text-[length:var(--hy-titulo-menor)] font-semibold leading-snug tracking-tight text-g-90">
-            {producto.name}
-          </h3>
-
-          {producto.description && (
-            <p className="line-clamp-2 text-[length:var(--hy-texto-control)] leading-relaxed text-g-50">{producto.description}</p>
-          )}
-
-          <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-[length:var(--hy-texto-control)] text-g-50">
-            {producto.color && (
-              <span className="inline-flex items-center gap-1.5">
-                <Icon icon="solar:palette-linear" width="14" height="14" aria-hidden />
-                {producto.color}
-              </span>
-            )}
-            {!sinStock && <span>{producto.stock} disponibles</span>}
+        <div className="home-producto-imagen productos-tarjeta-foto">
+          {producto.imageUrl
+            ? <img src={producto.imageUrl} alt={producto.name} loading="lazy" />
+            : <Icon icon="solar:box-linear" width="54" aria-hidden />}
+          {oferta && <span className="home-producto-oferta">
+            <span className="sr-only">Oferta: </span>−{Math.round((1 - precio / producto.price) * 100)}%
+          </span>}
+          {esCatalogo && sinStock && <span className="productos-agotado">Sin stock</span>}
+        </div>
+        {esCatalogo && <span className="productos-vista-rapida" aria-hidden>
+          <Icon icon="solar:magnifer-linear" width="19" />
+        </span>}
+        <div className="home-producto-info">
+          <div className="home-producto-precios">
+            <strong>{formatearPrecio(precio)}</strong>
+            {oferta && <del>{formatearPrecio(producto.price)}</del>}
           </div>
-
-          <div className="flex items-end justify-between gap-3 border-t border-g-20 pt-3">
-            <div>
-              <p className="text-[length:var(--hy-titulo-seccion)] font-semibold leading-none text-primary">
-                {formatearPrecio(enOferta ? (producto.discountPrice as number) : producto.price)}
-              </p>
-              {enOferta && (
-                <p className="mt-1 text-[length:var(--hy-texto-control)] text-g-50 line-through">{formatearPrecio(producto.price)}</p>
-              )}
+          {esCatalogo && (
+            <div className="productos-tarjeta-stock flex flex-wrap justify-center gap-x-2">
+              {producto.color && <span>{producto.color}</span>}
+              {!sinStock && <span>{producto.stock} disponibles</span>}
             </div>
-
-            <span className="inline-flex items-center gap-1 text-[length:var(--hy-texto-control)] font-medium text-g-70 transition-colors group-hover:text-primary">
-              Ver detalle
-              <Icon
-                icon="solar:arrow-right-linear"
-                width="15"
-                height="15"
-                aria-hidden
-                className="transition-transform duration-300 group-hover:translate-x-0.5"
-              />
-            </span>
-          </div>
+          )}
+          <span className="home-producto-ver">{esCatalogo ? 'Ver detalle' : 'Ver producto'} <Icon icon="solar:arrow-right-linear" width="17" aria-hidden /></span>
         </div>
       </Link>
+      {esCatalogo && !sinStock && <button ref={botonCompra} type="button" className="productos-compra-rapida"
+        aria-label={`Agregar ${producto.name} al carrito`} aria-haspopup="dialog" title="Agregar al carrito"
+        onClick={() => setCompraAbierta(true)}>
+        <Icon icon="solar:cart-plus-linear" width="19" aria-hidden />
+      </button>}
+      {compraAbierta && <ModalCompraRapida articulo={{ ...producto, tipo: 'producto', imagen: producto.imageUrl }} precio={precio} onCerrar={() => {
+        setCompraAbierta(false);
+        botonCompra.current?.focus({ preventScroll: true });
+      }} />}
     </li>
   );
 }
