@@ -13,7 +13,7 @@ const escenas = [
   { imagen: ambiente, nombre: 'Comodidad para cada jornada', invertida: true },
 ];
 
-export default function Hero() {
+export default function Hero({ decorativo = false }: { decorativo?: boolean }) {
   const [actual, setActual] = useState(0);
   const [pausado, setPausado] = useState(false);
   const [interaccion, setInteraccion] = useState(false);
@@ -27,14 +27,14 @@ export default function Hero() {
     return () => media.removeEventListener('change', actualizar);
   }, []);
   useEffect(() => {
-    if (pausado || interaccion || movimientoReducido) return;
+    if (decorativo || pausado || interaccion || movimientoReducido) return;
     const temporizador = window.setInterval(() => {
       if (!document.hidden) setActual(indice => (indice + 1) % escenas.length);
     }, 7000);
     return () => window.clearInterval(temporizador);
-  }, [pausado, interaccion, movimientoReducido]);
+  }, [decorativo, pausado, interaccion, movimientoReducido]);
 
-  return <section className="home-hero" aria-labelledby="home-titulo"
+  return <section className="home-hero" aria-labelledby="home-titulo" aria-hidden={decorativo || undefined} inert={decorativo}
     onMouseEnter={() => setInteraccion(true)} onMouseLeave={() => setInteraccion(false)}
     onFocusCapture={() => setInteraccion(true)}
     onBlurCapture={evento => { if (!evento.currentTarget.contains(evento.relatedTarget)) setInteraccion(false); }}>
@@ -42,7 +42,7 @@ export default function Hero() {
       className={`home-hero-foto home-hero-escena ${escena.invertida ? 'home-hero-foto-invertida' : ''} ${actual === indice ? 'home-hero-escena-activa' : ''}`}
       src={escena.imagen} alt="" aria-hidden fetchPriority={indice === 0 ? 'high' : 'low'} />)}
     <div className="home-hero-sombra" />
-    <div className="home-hero-contenido home-contenedor">
+    <div className="home-hero-contenido hy-contenedor">
       <p className="home-hero-kicker">Hycon · Ergonomía para cada jornada</p>
       <h1 id="home-titulo">Tu espacio de trabajo, mejor pensado.</h1>
       <p>Descubre productos ergonómicos para trabajar con más comodidad, en la oficina o desde casa.</p>
