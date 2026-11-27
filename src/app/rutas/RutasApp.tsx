@@ -45,8 +45,6 @@ const CargandoPantalla = () => (
 export default function RutasApp() {
   return (
     <BrowserRouter>
-      <DesplazarAlInicio />
-
       {/* Ultimo recurso: cubre tambien un fallo del propio layout */}
       <LimiteDeError>
         <Suspense fallback={<CargandoPantalla />}>
@@ -74,7 +72,7 @@ export default function RutasApp() {
           </Route>
 
           {/* Layout sin navegacion principal para flujos especificos */}
-          <Route element={<PlantillaSinNavegacion />}>
+          <Route element={<><DesplazarAlInicio /><PlantillaSinNavegacion /></>}>
             <Route path={RUTAS.softwareErgonomico} element={<PaginaRegistroEmpresa />} />
             {/* El aula ocupa toda la pantalla: el menu principal estorba mientras se ve el curso */}
             <Route path={RUTAS.aulaCurso} element={<PaginaAulaCurso />} />
@@ -87,7 +85,7 @@ export default function RutasApp() {
             path={RUTAS.panel}
             element={
               <RutaSoloAdmin>
-                <PlantillaPanel />
+                <><DesplazarAlInicio /><PlantillaPanel /></>
               </RutaSoloAdmin>
             }
           >
