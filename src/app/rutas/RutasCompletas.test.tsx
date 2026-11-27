@@ -66,6 +66,17 @@ const publicacion = {
 const respuestaPara = (url: string): unknown => {
   // Sin sesion: lo mismo que contesta el backend a un visitante
   if (url.startsWith('/api/v1/auth')) throw new Error('No autenticado');
+  if (url.includes('/lms/certificados/')) {
+    return {
+      certificado: {
+        codigo: 'HY-ABCD1234',
+        nombre: 'Ana Quispe Flores',
+        curso: 'Curso de prueba',
+        duracionMinutos: 60,
+        emitidoEl: '2026-10-01T12:00:00.000Z',
+      },
+    };
+  }
   if (url.includes('/lecciones')) {
     return { temario: { cursoUuid: UUID, tieneAcceso: false, previewSegundos: 10, lecciones: [] } };
   }
@@ -111,6 +122,7 @@ describe('todas las rutas abren su pagina', () => {
     ['acerca de', RUTAS.acercaDe, /acerca de hycon/i],
     ['contactanos', RUTAS.contactanos, /^contáctanos$/i],
     ['carrito', RUTAS.carrito, /^carrito de compras$/i],
+    ['verificar un certificado', '/certificados/HY-ABCD1234', /ana quispe flores/i],
     ['perfil', RUTAS.perfil, /mi cuenta/i],
     ['historial de compras', RUTAS.historial, /mis compras/i],
     ['panel de cursos', RUTAS.panelCursos, /mis cursos/i],

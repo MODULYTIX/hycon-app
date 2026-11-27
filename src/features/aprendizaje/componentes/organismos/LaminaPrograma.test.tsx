@@ -52,6 +52,34 @@ describe('LaminaPrograma', () => {
     expect(hoja().getByRole('list').tagName).toBe('UL');
   });
 
+  // En la base muchos titulos ya traen su numero delante
+  it('quita el numero del titulo para no repetir la marca', () => {
+    render(
+      <LaminaPrograma
+        certificado={certificado}
+        partes={[
+          parte(1, '1. Que es la mejora continua'),
+          parte(2, '2) El ciclo PDCA'),
+          parte(3, '3 - Indicadores'),
+        ]}
+      />
+    );
+
+    const temas = hoja().getAllByRole('listitem');
+    expect(temas[0]).toHaveTextContent(/^-\s*Que es la mejora continua$/);
+    expect(temas[1]).toHaveTextContent(/^-\s*El ciclo PDCA$/);
+    expect(temas[2]).toHaveTextContent(/^-\s*Indicadores$/);
+  });
+
+  // Un titulo que empieza por un numero de verdad no se puede mutilar
+  it('respeta un titulo que empieza por una cifra con sentido', () => {
+    render(
+      <LaminaPrograma certificado={certificado} partes={[parte(1, '5 errores al levantar peso')]} />
+    );
+
+    expect(hoja().getAllByRole('listitem')[0]).toHaveTextContent(/5 errores al levantar peso/);
+  });
+
   // El backend puede devolverlas en cualquier orden: manda la posicion
   it('las ordena por su posicion, no por como lleguen', () => {
     render(

@@ -14,6 +14,10 @@ interface Props {
 // A partir de aqui una sola columna alargaria la hoja de mas
 const PARTES_POR_COLUMNA = 6;
 
+// Muchos titulos ya vienen numerados ("1. Que es la mejora continua"): con el
+// guion delante la marca saldria dos veces
+const sinNumeracion = (titulo: string) => titulo.replace(/^\s*\d+\s*[.)-]\s*/, '');
+
 export default function LaminaPrograma({ certificado, partes }: Props) {
   const ordenadas = [...partes].sort((una, otra) => una.posicion - otra.posicion);
   const aDosColumnas = ordenadas.length > PARTES_POR_COLUMNA;
@@ -43,7 +47,7 @@ export default function LaminaPrograma({ certificado, partes }: Props) {
                   -
                 </span>
                 <span className="text-[13.5px] leading-relaxed text-g-80 sm:text-[15px]">
-                  {parte.titulo}
+                  {sinNumeracion(parte.titulo)}
                 </span>
               </li>
             ))}

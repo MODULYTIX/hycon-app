@@ -28,6 +28,7 @@ import PaginaPerfil from '@/features/perfil/paginas/PaginaPerfil';
 import PaginaMisCursos from '@/features/aprendizaje/paginas/PaginaMisCursos';
 import PaginaAulaCurso from '@/features/aprendizaje/paginas/PaginaAulaCurso';
 import PaginaCertificado from '@/features/aprendizaje/paginas/PaginaCertificado';
+import PaginaVerificarCertificado from '@/features/aprendizaje/paginas/PaginaVerificarCertificado';
 import PaginaContacto from '@/features/contacto/paginas/PaginaContacto';
 const PaginaPanelProductos = lazy(() => import('@/features/administracion/paginas/PaginaPanelProductos'));
 const PaginaPanelCursos = lazy(() => import('@/features/administracion/paginas/PaginaPanelCursos'));
@@ -62,6 +63,9 @@ export default function RutasApp() {
             <Route path={RUTAS.contactanos} element={<PaginaContacto />} />
 
             <Route path={RUTAS.carrito} element={<PaginaCarrito />} />
+
+          {/* Publica: la abre quien escanea el QR de un certificado */}
+          <Route path={RUTAS.verificarCertificado} element={<PaginaVerificarCertificado />} />
 
             {/* Opciones del menu de cuenta que aun no tienen pantalla propia */}
             <Route path={RUTAS.perfil} element={<PaginaPerfil />} />

@@ -1,4 +1,5 @@
 import emblemaHycon from '@/assets/images/certificado/emblema-hycon.png';
+import QrCertificado from '@/features/aprendizaje/componentes/moleculas/QrCertificado';
 import { formatearDuracion, formatearFecha } from '@/shared/utilidades/formato';
 import type { Certificado } from '@/features/aprendizaje/tipos/aprendizaje.tipos';
 
@@ -157,10 +158,10 @@ export default function LaminaCertificado({ certificado }: { certificado: Certif
 
         <div className="relative mt-9 grid grid-cols-1 items-end gap-6 sm:mt-12 sm:grid-cols-3">
           <div className="order-2 mx-auto w-full max-w-[220px] sm:order-1">
-            <p className="border-t border-g-30 pt-2 text-[12.5px] font-medium text-g-70">
+            <p className="border-t border-g-30 pt-2 text-center text-[12.5px] font-medium text-g-70">
               {formatearFecha(certificado.emitidoEl)}
             </p>
-            <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-g-50">
+            <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.16em] text-g-50">
               Fecha de emisión
             </p>
           </div>
@@ -170,10 +171,14 @@ export default function LaminaCertificado({ certificado }: { certificado: Certif
           </div>
 
           <div className="order-3 mx-auto w-full max-w-[220px]">
-            <p className="border-t border-g-30 pt-2 font-mono text-[12.5px] font-medium text-g-70">
+            {/* Escanear el codigo lleva a comprobar que el certificado existe */}
+            <div className="mb-2 flex justify-center">
+              <QrCertificado codigo={certificado.codigo} lado={64} />
+            </div>
+            <p className="border-t border-g-30 pt-2 text-center font-mono text-[12.5px] font-medium text-g-70">
               {certificado.codigo}
             </p>
-            <p className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-g-50">
+            <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.16em] text-g-50">
               Código de verificación
             </p>
           </div>

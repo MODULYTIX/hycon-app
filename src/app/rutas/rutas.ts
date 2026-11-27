@@ -9,6 +9,8 @@ export const RUTAS = {
   // Donde se ve un curso ya comprado, con su temario al lado
   aulaCurso: '/cursos/:uuid/aula',
   certificadoCurso: '/cursos/:uuid/certificado',
+  // Publica: es la que abre quien escanea el QR del certificado
+  verificarCertificado: '/certificados/:codigo',
   publicaciones: '/publicaciones',
   publicacionDetalle: '/publicaciones/:slug',
   acercaDe: '/acerca-de',
@@ -30,6 +32,8 @@ export const rutaEmpresaErgo = (id: string) => `/software-ergonomico/empresas/${
 export const rutaCursoDetalle = (uuid: string) => `/cursos/${uuid}`;
 export const rutaAulaCurso = (uuid: string) => `/cursos/${uuid}/aula`;
 export const rutaCertificadoCurso = (uuid: string) => `/cursos/${uuid}/certificado`;
+export const rutaVerificarCertificado = (codigo: string) =>
+  `/certificados/${encodeURIComponent(codigo)}`;
 export const rutaPublicacionDetalle = (slug: string) => `/publicaciones/${slug}`;
 
 export interface EnlaceNavegacion {

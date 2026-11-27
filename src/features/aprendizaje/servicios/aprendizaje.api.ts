@@ -22,6 +22,13 @@ export const listarMisCursosApi = (
     { autenticada: true, senal }
   ).then((r) => paginaDe(r.cursos, r.paginacion));
 
+/** Comprueba un certificado por su codigo. Publica: no hace falta sesion. */
+export const verificarCertificadoApi = (codigo: string, senal?: AbortSignal) =>
+  peticion<{ certificado: Certificado }>(
+    `/api/v1/lms/certificados/${encodeURIComponent(codigo)}`,
+    { senal }
+  ).then((r) => r.certificado);
+
 const BASE_CURSO = (cursoUuid: string) => `/api/v1/lms/cursos/${cursoUuid}`;
 
 /** Partes vistas del curso y, si ya esta, el certificado. */
