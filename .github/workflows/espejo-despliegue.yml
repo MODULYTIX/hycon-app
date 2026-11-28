@@ -17,6 +17,9 @@ jobs:
         with:
           # El espejo necesita el historial entero, no el ultimo commit
           fetch-depth: 0
+          # Sin esto, checkout deja su propia credencial en la config de git y
+          # esa cabecera pisa el token del push: GitHub lo rechaza como el bot
+          persist-credentials: false
 
       - name: Empujar a la cuenta de despliegue
         env:
