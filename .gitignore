@@ -4,8 +4,9 @@ node_modules
 # Salida de la compilacion: se regenera con pnpm build y daba conflictos en cada pull
 dist
 
-# Copias personales del entorno. El .env del repositorio solo lleva la URL del
-# backend local, que es el valor por defecto; lo que cada uno cambie va aqui.
+# El entorno no se versiona. La plantilla es .env.example y, sin ningun .env,
+# el codigo ya apunta al backend local por defecto.
+.env
 .env.local
 .env.*.local
 
